@@ -77,18 +77,19 @@ $(document).ready(function () {
 
 <div id="login_left">
 
-<table class="left" summary="Login pass">
+<table class="left" summary="Login pass" >
 <!-- Login -->
-<tr>
+<tr<?php if($conf->file->main_authentication === 'oauth') { ?> style="display: none"<?php } ?>>
 <td valign="middle" class="loginfield"><strong><label for="username"><?php echo $langs->trans('Login'); ?></label></strong></td>
 <td valign="middle" class="nowrap">
 <span class="span-icon-user">
-<input type="text" id="username" name="username" class="flat input-icon-user" size="15" maxlength="40" value="<?php echo dol_escape_htmltag($login); ?>" tabindex="1" autofocus="autofocus" />
+<input type="text" id="username" name="username"<?php if($conf->file->main_authentication === 'oauth') { ?> value="oauth"<?php } ?> class="flat input-icon-user" size="15" maxlength="40" value="<?php echo dol_escape_htmltag($login); ?>" tabindex="1" autofocus="autofocus" />
 </span>
 </td>
 </tr>
 <!-- Password -->
-<tr><td valign="middle" class="loginfield nowrap"><strong><label for="password"><?php echo $langs->trans('Password'); ?></label></strong></td>
+<tr<?php if($conf->file->main_authentication === 'oauth') { ?> style="display: none"<?php } ?>>
+<td valign="middle" class="loginfield nowrap"><strong><label for="password"><?php echo $langs->trans('Password'); ?></label></strong></td>
 <td valign="middle" class="nowrap">
 <span class="span-icon-password">
 <input id="password" name="password" class="flat input-icon-password" type="password" size="15" maxlength="30" value="<?php echo dol_escape_htmltag($password); ?>" tabindex="2" autocomplete="off" />
@@ -190,7 +191,6 @@ if (isset($conf->file->main_authentication) && preg_match('/openid/',$conf->file
 
 	echo '</div>';
 }
-
 
 ?>
 
