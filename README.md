@@ -39,7 +39,28 @@ or
    
 - Follow instructions provided by installer...
 
+### Set up Authserver integration
 
+1. Create a new OAuth application in Authserver (Required scopes: `profile:username profile:realname profile:groups`)
+2. As an administrator, go to Home -> Setup -> Other setup and set following values
+    - `MAIN_AUTHENTICATION_OAUTH_AUTHORIZE_URL`: <authserver_root>/oauth/v2/auth
+    - `MAIN_AUTHENTICATION_OAUTH_TOKEN_URL`: <authserver_root>/oauth/v2/token
+    - `MAIN_AUTHENTICATION_OAUTH_USERINFO_URL`: <authserver_root>/api/user.json
+    - `MAIN_LOGOUT_GOTO_URL`: <authserver_root>/usr/kill-session
+    - `MAIN_AUTHENTICATION_OAUTH_CLIENT_ID`: OAuth application client ID
+    - `MAIN_AUTHENTICATION_OAUTH_CLIENT_SECRET`: OAuth application client secret
+    - `MAIN_AUTHENTICATION_OAUTH_REDIRECT_URL`: Dolibarr root URL
+3. Set `$dolibarr_main_authentication='oauth';` in `htdocs/conf/conf.php`
+
+Users will automatically be put in dolibarr groups corresponding to the authserver groups they are member of
+(dolibarr group name is prefixed with `dolibarr_` to give the authserver group name)
+
+The groups the user is member of will be synced every time they log in.
+
+Users are required to be member of the `dolibarr_user` authserver group to log in to dolibarr.
+
+Users in the `%sysops` authserver group are granted admin permissions in dolibarr. They are still required to be member
+of `dolibarr_user` or they will not be able to log in.
 
 ## UPGRADE
 
