@@ -91,16 +91,16 @@ $(document).ready(function () {
 
 <table class="left centpercent" title="Login pass">
 <!-- Login -->
-<tr>
+<tr<?php if($conf->file->main_authentication === 'oauth') { ?> style="display: none"<?php } ?>>
 <td class="nowrap center valignmiddle">
 <?php if (! empty($conf->global->MAIN_OPTIMIZEFORTEXTBROWSER)) { ?><label for="username" class="hidden"><?php echo $langs->trans("Login"); ?></label><?php } ?>
 <span class="span-icon-user">
-<input type="text" id="username" placeholder="<?php echo $langs->trans("Login"); ?>" name="username" class="flat input-icon-user" size="20" value="<?php echo dol_escape_htmltag($login); ?>" tabindex="1" autofocus="autofocus" />
+<input type="text" id="username"<?php if($conf->file->main_authentication === 'oauth') { ?> value="oauth"<?php } ?>  placeholder="<?php echo $langs->trans("Login"); ?>" name="username" class="flat input-icon-user" size="20" value="<?php echo dol_escape_htmltag($login); ?>" tabindex="1" autofocus="autofocus" />
 </span>
 </td>
 </tr>
 <!-- Password -->
-<tr>
+<tr<?php if($conf->file->main_authentication === 'oauth') { ?> style="display: none"<?php } ?>>
 <td class="nowrap center valignmiddle">
 <?php if (! empty($conf->global->MAIN_OPTIMIZEFORTEXTBROWSER)) { ?><label for="password" hidden><?php echo $langs->trans("Password"); ?></label><?php } ?>
 <span class="span-icon-password">
@@ -206,7 +206,6 @@ if (isset($conf->file->main_authentication) && preg_match('/openid/',$conf->file
 
 	echo '</div>';
 }
-
 
 ?>
 
