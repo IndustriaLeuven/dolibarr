@@ -1,0 +1,3 @@
+[submodule "htdocs/bridge"]
+	path = htdocs/bridge
+	url = git@github.com:IndustriaLeuven/dolibarr-bridge.git
