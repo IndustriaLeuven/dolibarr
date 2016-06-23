@@ -25,15 +25,20 @@ create table llx_user
 
   ref_ext			varchar(50),				-- reference into an external system (not used by dolibarr)
   ref_int			varchar(50),				-- reference into an internal system (deprecated)
+  
+  employee          tinyint        DEFAULT 1,   -- 1 if user is an employee
+  fk_establishment  integer        DEFAULT 0,
 
   datec             datetime,
   tms               timestamp,
   fk_user_creat     integer,
   fk_user_modif     integer,
   login             varchar(24) NOT NULL,
-  pass              varchar(32),
+  pass              varchar(128),
   pass_crypted      varchar(128),
-  pass_temp         varchar(32),			    -- temporary password when asked for forget password
+  pass_temp         varchar(128),			    -- temporary password when asked for forget password
+  api_key           varchar(128),				-- key to use REST API by this user
+  gender            varchar(10),
   civility          varchar(6),
   lastname          varchar(50),
   firstname         varchar(50),
@@ -52,7 +57,7 @@ create table llx_user
   admin             smallint DEFAULT 0,
   module_comm       smallint DEFAULT 1,
   module_compta     smallint DEFAULT 1,
-  fk_societe        integer,
+  fk_soc			integer,
   fk_socpeople      integer,
   fk_member         integer,
   fk_user           integer,               -- Hierarchic parent

@@ -32,7 +32,7 @@ use fkooman\OAuth\Client\Exception\CallbackException;
 use fkooman\OAuth\Client\SessionStorage;
 use Guzzle\Http\Client;
 
-require DOL_DOCUMENT_ROOT . '/../vendor/autoload.php';
+require DOL_DOCUMENT_ROOT . '/includes/autoload.php';
 require_once DOL_DOCUMENT_ROOT . '/user/class/usergroup.class.php';
 require_once DOL_DOCUMENT_ROOT . '/core/lib/usergroups.lib.php';
 

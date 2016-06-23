@@ -1,7 +1,7 @@
 <?php
 /* Copyright (C) 2012      Nicolas Villa aka Boyquotes http://informetic.fr
  * Copyright (C) 2013      Florian Henry <forian.henry@open-cocnept.pro>
- * Copyright (C) 2013      Laurent Destailleur <eldy@users.sourceforge.net>
+ * Copyright (C) 2013-2015 Laurent Destailleur <eldy@users.sourceforge.net>
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -119,6 +119,9 @@ if ($result<0)
 	exit;
 }
 
+
+// TODO Duplicate code. This sequence of code must be shared with code into cron_run_jobs.php script.
+
 // current date
 $now=dol_now();
 $nbofjobs=count($object->lines);
@@ -130,13 +133,11 @@ if (is_array($object->lines) && (count($object->lines)>0))
 	// Loop over job
 	foreach($object->lines as $line)
 	{
-		dol_syslog("cron_run_jobs.php fetch cronjobid: ".$line->id, LOG_WARNING);
+		dol_syslog("cron_run_jobs.php cronjobid: ".$line->id, LOG_WARNING);
 
 		//If date_next_jobs is less of current dat, execute the program, and store the execution time of the next execution in database
-		if ((($line->datenextrun <= $now) && $line->dateend < $now)
-				|| ((empty($line->datenextrun)) && (empty($line->dateend))))
+		if (($line->datenextrun < $now) && (empty($line->datestart) || $line->datestart <= $now) && (empty($line->dateend) || $line->dateend >= $now))
 		{
-
 			dol_syslog("cron_run_jobs.php:: torun line->datenextrun:".dol_print_date($line->datenextrun,'dayhourtext')." line->dateend:".dol_print_date($line->dateend,'dayhourtext')." now:".dol_print_date($now,'dayhourtext'));
 
 			$cronjob=new Cronjob($db);
@@ -149,7 +150,7 @@ if (is_array($object->lines) && (count($object->lines)>0))
 			}
 			// Execut job
 			$result=$cronjob->run_jobs($userlogin);
-			if ($result<0)
+			if ($result < 0)
 			{
 				echo "Error:".$cronjob->error;
 				dol_syslog("cron_run_jobs.php:: run_jobs Error".$cronjob->error, LOG_ERR);
@@ -161,7 +162,7 @@ if (is_array($object->lines) && (count($object->lines)>0))
 			}
 
 			// We re-program the next execution and stores the last execution time for this job
-			$result=$cronjob->reprogram_jobs($userlogin);
+			$result=$cronjob->reprogram_jobs($userlogin, $now);
 			if ($result<0)
 			{
 				echo "Error:".$cronjob->error;

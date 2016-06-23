@@ -53,7 +53,7 @@ $pageprev = $page - 1;
 $pagenext = $page + 1;
 if (! $sortorder) $sortorder="DESC";
 if (! $sortfield) $sortfield="p.rowid";
-$limit = $conf->liste_limit;
+$limit = GETPOST('limit')?GETPOST('limit','int'):$conf->liste_limit;
 
 $sql = "SELECT p.rowid, p.datep as dp, p.amount, p.statut";
 $sql.=", c.libelle as paiement_type, p.num_paiement";
@@ -88,7 +88,7 @@ if ($resql)
     print_liste_field_titre($langs->trans("Date"),$_SERVER["PHP_SELF"],"dp","","",'width="80" align="center"',$sortfield,$sortorder);
     print_liste_field_titre($langs->trans("Type"),$_SERVER["PHP_SELF"],"c.libelle","","","",$sortfield,$sortorder);
     print_liste_field_titre($langs->trans("AmountTTC"),$_SERVER["PHP_SELF"],"c.libelle","","",'align="right"',$sortfield,$sortorder);
-    print "<td>&nbsp;</td>";
+    print_liste_field_titre('');
     print "</tr>\n";
 
     while ($i < min($num,$limit))
@@ -118,6 +118,5 @@ if ($resql)
     print "</table>";
 }
 
-$db->close();
-
 llxFooter();
+$db->close();

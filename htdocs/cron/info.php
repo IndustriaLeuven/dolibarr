@@ -26,6 +26,8 @@ require_once DOL_DOCUMENT_ROOT."/cron/class/cronjob.class.php";
 require_once DOL_DOCUMENT_ROOT.'/core/lib/cron.lib.php';
 require_once DOL_DOCUMENT_ROOT.'/core/lib/functions2.lib.php';
 
+$langs->load("admin");
+$langs->load("cron");
 
 // Security check
 if (!$user->rights->cron->read) accessforbidden();
@@ -53,6 +55,5 @@ dol_print_object_info($object);
 print '</td></tr></table>';
 print '</div>';
 
-
-$db->close();
 llxFooter();
+$db->close();

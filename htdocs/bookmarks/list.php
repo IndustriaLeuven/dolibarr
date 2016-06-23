@@ -31,6 +31,7 @@ $langs->load("admin");
 if (! $user->rights->bookmark->lire) {
     restrictedArea($user, 'bookmarks');
 }
+$optioncss = GETPOST('optioncss','alpha');
 
 $sortfield = GETPOST("sortfield",'alpha');
 $sortorder = GETPOST("sortorder",'alpha');
@@ -59,7 +60,7 @@ if ($_GET["action"] == 'delete')
     }
     else
     {
-        setEventMessage($bookmark->error, 'errors');
+        setEventMessages($bookmark->error, $bookmark->errors, 'errors');
     }
 }
 
@@ -72,7 +73,7 @@ $userstatic=new User($db);
 
 llxHeader();
 
-print_fiche_titre($langs->trans("Bookmarks"));
+print load_fiche_titre($langs->trans("Bookmarks"));
 
 $sql = "SELECT b.fk_soc as rowid, b.dateb, b.rowid as bid, b.fk_user, b.url, b.target, b.title, b.favicon, b.position,";
 $sql.= " u.login, u.lastname, u.firstname";
@@ -88,22 +89,24 @@ if ($resql)
 {
     $num = $db->num_rows($resql);
     $i = 0;
+    $param = "";
+    if ($optioncss != '') $param ='&optioncss='.$optioncss;
 
     print "<table class=\"noborder\" width=\"100%\">";
 
     print "<tr class=\"liste_titre\">";
     //print "<td>&nbsp;</td>";
-    print_liste_field_titre($langs->trans("Ref"),$_SERVER["PHP_SELF"],"bid","","",'align="left"',$sortfield,$sortorder);
+    print_liste_field_titre($langs->trans("Ref"),$_SERVER["PHP_SELF"],"bid","", $param,'align="left"',$sortfield,$sortorder);
     print_liste_field_titre($langs->trans("Title"),'','');
     print "</td>";
     print_liste_field_titre($langs->trans("Link"),'','');
     print "</td>";
     print_liste_field_titre($langs->trans("Target"),'','','','','align="center"');
     print "</td>";
-    print_liste_field_titre($langs->trans("Owner"),$_SERVER["PHP_SELF"],"u.lastname","","",'align="center"',$sortfield,$sortorder);
-    print_liste_field_titre($langs->trans("Date"),$_SERVER["PHP_SELF"],"b.dateb","","",'align="center"',$sortfield,$sortorder);
-    print_liste_field_titre($langs->trans("Position"),$_SERVER["PHP_SELF"],"b.position","","",'align="right"',$sortfield,$sortorder);
-    print_liste_field_titre('','','');
+    print_liste_field_titre($langs->trans("Owner"),$_SERVER["PHP_SELF"],"u.lastname","", $param,'align="center"',$sortfield,$sortorder);
+    print_liste_field_titre($langs->trans("Date"),$_SERVER["PHP_SELF"],"b.dateb","", $param,'align="center"',$sortfield,$sortorder);
+    print_liste_field_titre($langs->trans("Position"),$_SERVER["PHP_SELF"],"b.position","", $param,'align="right"',$sortfield,$sortorder);
+    print_liste_field_titre('');
     print "</tr>\n";
 
     $var=True;
@@ -119,17 +122,17 @@ if ($resql)
         print "<a href=\"card.php?id=".$obj->bid."\">".img_object($langs->trans("ShowBookmark"),"bookmark").' '.$obj->bid."</a>";
         print '</td>';
 
-        $lieninterne=0;
+        $linkintern=0;
         $title=dol_trunc($obj->title,24);
-        $lien=dol_trunc($obj->url,24);
+        $link=dol_trunc($obj->url,24);
 
         // Title
         print "<td>";
         if ($obj->rowid)
         {
             // Lien interne societe
-            $lieninterne=1;
-            $lien="Dolibarr";
+            $linkintern=1;
+            $link="Dolibarr";
             if (! $obj->title)
             {
                 // For compatibility with old Dolibarr bookmarks
@@ -140,16 +143,16 @@ if ($resql)
             }
             $title=img_object($langs->trans("ShowCompany"),"company").' '.$obj->title;
         }
-        if ($lieninterne) print "<a href=\"".$obj->url."\">";
+        if ($linkintern) print "<a href=\"".$obj->url."\">";
         print $title;
-        if ($lieninterne) print "</a>";
+        if ($linkintern) print "</a>";
         print "</td>\n";
 
         // Url
         print "<td>";
-        if (! $lieninterne) print '<a href="'.$obj->url.'"'.($obj->target?' target="newlink"':'').'>';
-        print $lien;
-        if (! $lieninterne) print '</a>';
+        if (! $linkintern) print '<a href="'.$obj->url.'"'.($obj->target?' target="newlink"':'').'>';
+        print $link;
+        if (! $linkintern) print '</a>';
         print "</td>\n";
 
         // Target
@@ -215,7 +218,7 @@ if ($user->rights->bookmark->creer)
 
 print '</div>';
 
-
+llxFooter();
 $db->close();
 
-llxFooter();
+

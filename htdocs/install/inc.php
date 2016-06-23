@@ -77,15 +77,17 @@ $conffiletoshow = "htdocs/conf/conf.php";
 //$conffiletoshow = "/etc/dolibarr/conf.php";
 
 
-if (! defined('DONOTLOADCONF') && file_exists($conffile))
+// Load conf file if it is already defined
+if (! defined('DONOTLOADCONF') && file_exists($conffile) && filesize($conffile) > 8) // Test on filesize is to ensure that conf file is more that an empty template with just <?php in first line
 {
     $result=include_once $conffile;	// Load conf file
     if ($result)
     {
 		if (empty($dolibarr_main_db_type)) $dolibarr_main_db_type='mysqli';	// For backward compatibility
+		if (empty($dolibarr_main_db_port) && ($dolibarr_main_db_type=='mysqli' || $dolibarr_main_db_type=='mysql')) $dolibarr_main_db_port='3306'; // For backward compatibility
 
 		// Clean parameters
-    	$dolibarr_main_data_root        =isset($dolibarr_main_data_root)?trim($dolibarr_main_data_root):'';
+		$dolibarr_main_data_root        =isset($dolibarr_main_data_root)?trim($dolibarr_main_data_root):DOL_DOCUMENT_ROOT . '/../documents';
     	$dolibarr_main_url_root         =isset($dolibarr_main_url_root)?trim($dolibarr_main_url_root):'';
     	$dolibarr_main_url_root_alt     =isset($dolibarr_main_url_root_alt)?trim($dolibarr_main_url_root_alt):'';
     	$dolibarr_main_document_root    =isset($dolibarr_main_document_root)?trim($dolibarr_main_document_root):'';
@@ -125,14 +127,14 @@ if (! defined('DONOTLOADCONF') && file_exists($conffile))
         $includeconferror='ErrorBadFormatForConfFile';
     }
 }
-$conf->global->MAIN_LOGTOHTML = 1;
+$conf->global->MAIN_ENABLE_LOG_TO_HTML = 1;
 
 // Define prefix
 if (! isset($dolibarr_main_db_prefix) || ! $dolibarr_main_db_prefix) $dolibarr_main_db_prefix='llx_';
 define('MAIN_DB_PREFIX',(isset($dolibarr_main_db_prefix)?$dolibarr_main_db_prefix:''));
 
 define('DOL_CLASS_PATH', 'class/');                             // Filsystem path to class dir
-define('DOL_DATA_ROOT',(isset($dolibarr_main_data_root)?$dolibarr_main_data_root:''));
+define('DOL_DATA_ROOT',(isset($dolibarr_main_data_root)?$dolibarr_main_data_root:DOL_DOCUMENT_ROOT . '/../documents'));
 define('DOL_MAIN_URL_ROOT', (isset($dolibarr_main_url_root)?$dolibarr_main_url_root:''));           // URL relative root
 $uri=preg_replace('/^http(s?):\/\//i','',constant('DOL_MAIN_URL_ROOT'));  // $uri contains url without http*
 $suburi = strstr($uri, '/');       // $suburi contains url without domain
@@ -370,18 +372,19 @@ function pHeader($subtitle,$next,$action='set',$param='',$forcejqueryurl='')
     print '<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN">'."\n";
     print '<html>'."\n";
     print '<head>'."\n";
+    print '<meta name="viewport" content="width=device-width, initial-scale=1.0">'."\n";
     print '<meta http-equiv="content-type" content="text/html; charset='.$conf->file->character_set_client.'">'."\n";
     print '<link rel="stylesheet" type="text/css" href="default.css">'."\n";
 
     print '<!-- Includes CSS for JQuery -->'."\n";
     if ($jQueryUiCustomPath) print '<link rel="stylesheet" type="text/css" href="'.$jQueryUiCustomPath.'css/'.$jquerytheme.'/jquery-ui.min.css" />'."\n";  // JQuery
-    else print '<link rel="stylesheet" type="text/css" href="../includes/jquery/css/'.$jquerytheme.'/jquery-ui-latest.custom.css" />'."\n";    // JQuery
+    else print '<link rel="stylesheet" type="text/css" href="../includes/jquery/css/'.$jquerytheme.'/jquery-ui.min.css" />'."\n";    // JQuery
 
     print '<!-- Includes JS for JQuery -->'."\n";
     if ($jQueryCustomPath) print '<script type="text/javascript" src="'.$jQueryCustomPath.'jquery.min.js"></script>'."\n";
-    else print '<script type="text/javascript" src="../includes/jquery/js/jquery-latest.min.js"></script>'."\n";
+    else print '<script type="text/javascript" src="../includes/jquery/js/jquery.min.js"></script>'."\n";
     if ($jQueryUiCustomPath) print '<script type="text/javascript" src="'.$jQueryUiCustomPath.'jquery-ui.min.js"></script>'."\n";
-    else print '<script type="text/javascript" src="../includes/jquery/js/jquery-ui-latest.custom.min.js"></script>'."\n";
+    else print '<script type="text/javascript" src="../includes/jquery/js/jquery-ui.min.js"></script>'."\n";
 
     print '<title>'.$langs->trans("DolibarrSetup").'</title>'."\n";
     print '</head>'."\n";
@@ -411,10 +414,10 @@ function pHeader($subtitle,$next,$action='set',$param='',$forcejqueryurl='')
 /**
  * Print HTML footer of install pages
  *
- * @param 	string	$nonext				No button "Next step"
+ * @param 	integer	$nonext				1=No button "Next step", 2=Show button but disabled
  * @param	string	$setuplang			Language code
  * @param	string	$jscheckfunction	Add a javascript check function
- * @param	string	$withpleasewait		Add also please wait tags
+ * @param	integer	$withpleasewait		Add also please wait tags
  * @return	void
  */
 function pFooter($nonext=0,$setuplang='',$jscheckfunction='', $withpleasewait=0)
@@ -422,14 +425,15 @@ function pFooter($nonext=0,$setuplang='',$jscheckfunction='', $withpleasewait=0)
     global $conf,$langs;
 
     $langs->load("main");
+    $langs->load("other");
     $langs->load("admin");
 
     print '</td></tr></table>'."\n";
     print '</td></tr></table>'."\n";
 
-    if (! $nonext)
+    if (! $nonext || ($nonext == '2'))
     {
-        print '<div class="nextbutton" id="nextbutton"><input type="submit" value="'.$langs->trans("NextStep").' ->"';
+        print '<div class="nextbutton" id="nextbutton"><input type="submit" '.($nonext == '2' ? 'disabled="disabled" title="DisabledBecauseOfErrorAddParamignoreerrors"':'').'value="'.$langs->trans("NextStep").' ->"';
         if ($jscheckfunction) print ' onClick="return '.$jscheckfunction.'();"';
         print '></div>';
         if ($withpleasewait) print '<div style="visibility: hidden;" class="pleasewait" id="pleasewait"><br>'.$langs->trans("NextStepMightLastALongTime").'<br><br><div class="blinkwait">'.$langs->trans("PleaseBePatient").'</div></div>';

@@ -1,7 +1,7 @@
 <?php
 /* Copyright (C) 2012      Nicolas Villa aka Boyquotes http://informetic.fr
  * Copyright (C) 2013      Florian Henry <florian.henry@open-concpt.pro>
- * Copyright (C) 2013      Laurent Destailleur <eldy@users.sourceforge.net>
+ * Copyright (C) 2013-2015 Laurent Destailleur <eldy@users.sourceforge.net>
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -43,17 +43,22 @@ $action=GETPOST('action','alpha');
 $confirm=GETPOST('confirm','alpha');
 $cancel=GETPOST('cancel');
 
+
+/*
+ * Actions
+ */
+
 $object = new Cronjob($db);
 if (!empty($id))
 {
 	$result=$object->fetch($id);
 	if ($result < 0)
 	{
-		setEventMessage($object->error,'errors');
+		setEventMessages($object->error, $object->errors, 'errors');
 	}
 }
 
-if(!empty($cancel))
+if (!empty($cancel))
 {
 	if (!empty($id))
 	{
@@ -61,7 +66,7 @@ if(!empty($cancel))
 	}
 	else
 	{
-		Header("Location: ".DOL_URL_ROOT.'/cron/list.php?status=1');
+		Header("Location: ".DOL_URL_ROOT.'/cron/list.php?status=-2');
 		exit;
 	}
 }
@@ -73,12 +78,12 @@ if ($action == 'confirm_delete' && $confirm == "yes" && $user->rights->cron->del
 
 	if ($result < 0)
 	{
-		setEventMessage($object->error,'errors');
+		setEventMessages($object->error, $object->errors, 'errors');
 		$action='edit';
 	}
 	else
 	{
-		Header("Location: ".DOL_URL_ROOT.'/cron/list.php?status=1');
+		Header("Location: ".DOL_URL_ROOT.'/cron/list.php?status=-2');
 		exit;
 	}
 }
@@ -86,25 +91,27 @@ if ($action == 'confirm_delete' && $confirm == "yes" && $user->rights->cron->del
 // Execute jobs
 if ($action == 'confirm_execute' && $confirm == "yes" && $user->rights->cron->execute)
 {
+    $now = dol_now();   // Date we start
+    
 	$result=$object->run_jobs($user->login);
 
 	if ($result < 0)
 	{
-		setEventMessage($object->error,'errors');
+		setEventMessages($object->error, $object->errors, 'errors');
 		$action='';
 	}
 	else
 	{
-		$res = $object->reprogram_jobs($user->login);
+		$res = $object->reprogram_jobs($user->login, $now);
 		if ($res > 0)
 		{
-			if ($object->lastresult > 0) setEventMessage($langs->trans("JobFinished"),'warnings');
-			else setEventMessage($langs->trans("JobFinished"),'mesgs');
+			if ($object->lastresult > 0) setEventMessages($langs->trans("JobFinished"), null, 'warnings');
+			else setEventMessages($langs->trans("JobFinished"), null, 'mesgs');
 			$action='';
 		}
 		else
 		{
-			setEventMessage($object->error,'errors');
+			setEventMessages($object->error, $object->errors, 'errors');
 			$action='';
 		}
 	}
@@ -134,11 +141,11 @@ if ($action=='add')
 
 	// test du Resultat de la requete
 	if ($result < 0) {
-		setEventMessage($object->error,'errors');
+		setEventMessages($object->error, $object->errors, 'errors');
 		$action='create';
 	}
 	else {
-		setEventMessage($langs->trans('CronSaveSucess'),'mesgs');
+		setEventMessages($langs->trans('CronSaveSucess'), null, 'mesgs');
 		$action='';
 	}
 }
@@ -168,11 +175,11 @@ if ($action=='update')
 
 	// test du Resultat de la requete
 	if ($result < 0) {
-		setEventMessage($object->error,'errors');
+		setEventMessages($object->error, $object->errors, 'errors');
 		$action='edit';
 	}
 	else {
-		setEventMessage($langs->trans('CronSaveSucess'),'mesgs');
+		setEventMessages($langs->trans('CronSaveSucess'), null, 'mesgs');
 		$action='';
 	}
 }
@@ -186,11 +193,11 @@ if ($action=='activate')
 
 	// test du Resultat de la requete
 	if ($result < 0) {
-		setEventMessage($object->error,'errors');
+		setEventMessages($object->error, $object->errors, 'errors');
 		$action='edit';
 	}
 	else {
-		setEventMessage($langs->trans('CronSaveSucess'),'mesgs');
+		setEventMessages($langs->trans('CronSaveSucess'), null, 'mesgs');
 		$action='';
 	}
 }
@@ -204,11 +211,11 @@ if ($action=='inactive')
 
 	// test du Resultat de la requete
 	if ($result < 0) {
-		setEventMessage($object->error,'errors');
+		setEventMessages($object->error, $object->errors, 'errors');
 		$action='edit';
 	}
 	else {
-		setEventMessage($langs->trans('CronSaveSucess'),'mesgs');
+		setEventMessages($langs->trans('CronSaveSucess'), null, 'mesgs');
 		$action='';
 	}
 }
@@ -227,11 +234,10 @@ llxHeader('',$langs->trans("CronAdd"));
 if ($action=='edit' || empty($action) || $action=='delete' || $action=='execute')
 {
 	$head=cron_prepare_head($object);
-	print dol_get_fiche_head($head, 'card', $langs->trans("CronTask"), 0, 'cron');
 }
 elseif ($action=='create')
 {
-	print_fiche_titre($langs->trans("CronTask"),'','setup');
+	print load_fiche_titre($langs->trans("CronTask"),'','title_setup');
 }
 
 if ($conf->use_javascript_ajax)
@@ -278,7 +284,7 @@ if ($action == 'execute'){
 
 if (empty($object->status) && $action != 'create')
 {
-	setEventMessage($langs->trans("CronTaskInactive"), 'warnings');
+	setEventMessages($langs->trans("CronTaskInactive"), null, 'warnings');
 }
 
 if (($action=="create") || ($action=="edit"))
@@ -291,6 +297,8 @@ if (($action=="create") || ($action=="edit"))
 	} else {
 		print '<input type="hidden" name="action" value="add">'."\n";
 	}
+
+	dol_fiche_head('');
 
 	print '<table class="border" width="100%">';
 
@@ -311,7 +319,7 @@ if (($action=="create") || ($action=="edit"))
 	print "</tr>\n";
 
 	print "<tr><td>";
-	print $langs->trans('CronHourStart')."</td><td>";
+	print $langs->trans('CronDtStart')."</td><td>";
 	if(!empty($object->datestart))
 	{
 		$form->select_date($object->datestart,'datestart',1,1,'',"cronform");
@@ -357,7 +365,7 @@ if (($action=="create") || ($action=="edit"))
 	{
 		if (! empty($object->unitfrequency) && ($object->frequency/$object->unitfrequency) == $i)
 		{
-			print "<option value='".$i."' selected='selected'>".$i."</option>";
+			print "<option value='".$i."' selected>".$i."</option>";
 		}
 		else
 		{
@@ -367,7 +375,7 @@ if (($action=="create") || ($action=="edit"))
 	$input = "<input type=\"radio\" name=\"unitfrequency\" value=\"60\" id=\"frequency_minute\" ";
 	if($object->unitfrequency=="60")
 	{
-		$input .= ' checked="checked" />';
+		$input .= ' checked />';
 	}
 	else{
 		$input .= ' />';
@@ -377,7 +385,7 @@ if (($action=="create") || ($action=="edit"))
 
 	$input = "<input type=\"radio\" name=\"unitfrequency\" value=\"3600\" id=\"frequency_heures\" ";
 	if($object->unitfrequency=="3600"){
-		$input .= ' checked="checked" />';
+		$input .= ' checked />';
 	}
 	else{
 		$input .= ' />';
@@ -387,7 +395,7 @@ if (($action=="create") || ($action=="edit"))
 
 	$input = "<input type=\"radio\" name=\"unitfrequency\" value=\"86400\" id=\"frequency_jours\" ";
 	if($object->unitfrequency=="86400"){
-		$input .= ' checked="checked" />';
+		$input .= ' checked />';
 	}
 	else{
 		$input .= ' />';
@@ -397,7 +405,7 @@ if (($action=="create") || ($action=="edit"))
 
 	$input = "<input type=\"radio\" name=\"unitfrequency\" value=\"604800\" id=\"frequency_semaine\" ";
 	if($object->unitfrequency=="604800"){
-		$input .= ' checked="checked" />';
+		$input .= ' checked />';
 	}
 	else{
 		$input .= ' />';
@@ -474,18 +482,24 @@ if (($action=="create") || ($action=="edit"))
 
 	print '</table>';
 
-	print '<div align="center"><br>';
+	dol_fiche_end();
+
+	print '<div align="center">';
 	print '<input type="submit" name="save" class="button" value="'.$langs->trans("Save").'">';
+	print '&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;';
 	print '<input type="submit" name="cancel" class="button" value="'.$langs->trans("Cancel").'">';
-	print "</center>";
+	print "</div>";
 
 	print "</form>\n";
 
-}else {
-
+}
+else
+{
 	/*
-	 * view Template
+	 * view card
 	 */
+
+	dol_fiche_head($head, 'card', $langs->trans("CronTask"), 0, 'cron');
 
 	// box add_jobs_box
 	print '<table class="border" width="100%">';
@@ -506,15 +520,22 @@ if (($action=="create") || ($action=="edit"))
 	print "</td></tr>";
 
 	print "<tr><td>";
-	print $langs->trans('CronHourStart')."</td><td>";
-	if(!empty($object->datestart)) {print dol_print_date($object->datestart,'dayhourtext');} else {print $langs->trans('CronNone');}
+	print $langs->trans('CronDtStart')."</td><td>";
+	if(!empty($object->datestart)) {print dol_print_date($object->datestart,'dayhourtext');}
 	print "</td></tr>";
 
 	print "<tr><td>";
 	print $langs->trans('CronDtEnd')."</td><td>";
-	if(!empty($object->dateend)) {print dol_print_date($object->dateend,'dayhourtext');} else {print $langs->trans('CronNone');}
+	if(!empty($object->dateend)) {print dol_print_date($object->dateend,'dayhourtext');}
 	print "</td></tr>";
 
+	print '<tr><td>';
+	print $langs->trans('CronDtNextLaunch');
+	print ' ('.$langs->trans('CronFrom').')';
+	print "</td><td>";
+	if(!empty($object->datenextrun)) {print dol_print_date($object->datenextrun,'dayhoursec');} else {print $langs->trans('CronNone');}
+	print "</td></tr>";
+	
 	print "<tr><td>";
 	print $langs->trans('CronPriority')."</td>";
 	print "<td>".$object->priority;
@@ -571,18 +592,25 @@ if (($action=="create") || ($action=="edit"))
 	print "</td></tr>";
 
 	print '<tr><td>';
-	print $langs->trans('CronDtLastLaunch')."</td><td>";
-	if(!empty($object->datelastrun)) {print dol_print_date($object->datelastrun,'dayhourtext');} else {print $langs->trans('CronNone');}
+	print $langs->trans('Active')."</td><td>";
+	print yn($object->status);
 	print "</td></tr>";
 
-	print '<tr><td>';
-	print $langs->trans('CronDtNextLaunch')."</td><td>";
-	if(!empty($object->datenextrun)) {print dol_print_date($object->datenextrun,'dayhourtext');} else {print $langs->trans('CronNone');}
+	print '</table>';
+
+	print '<br>';
+
+	
+	print '<table class="border" width="100%">';
+
+	print '<tr><td width="30%">';
+	print $langs->trans('CronDtLastLaunch')."</td><td>";
+	if(!empty($object->datelastrun)) {print dol_print_date($object->datelastrun,'dayhoursec');} else {print $langs->trans('CronNone');}
 	print "</td></tr>";
 
 	print '<tr><td>';
 	print $langs->trans('CronDtLastResult')."</td><td>";
-	if(!empty($object->datelastresult)) {print dol_print_date($object->datelastresult,'dayhourtext');} else {print $langs->trans('CronNone');}
+	if(!empty($object->datelastresult)) {print dol_print_date($object->datelastresult,'dayhoursec');} else {print $langs->trans('CronNone');}
 	print "</td></tr>";
 
 	print '<tr><td>';
@@ -596,7 +624,6 @@ if (($action=="create") || ($action=="edit"))
 	print "</td></tr>";
 
 	print '</table>';
-
 
 	dol_fiche_end();
 
@@ -632,7 +659,9 @@ if (($action=="create") || ($action=="edit"))
 	else {
 		print '<a class="butAction" href="'.$_SERVER['PHP_SELF'].'?action=execute&id='.$object->id.'">'.$langs->trans("CronExecute").'</a>';
 	}
-	print '<br><br></div>';
+	print '</div>';
+
+	print '<br>';
 }
 
 

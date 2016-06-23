@@ -40,6 +40,7 @@ $sref = GETPOST('sref');
 $sRefSupplier = GETPOST('srefsupplier');
 $snom = GETPOST('snom');
 $type = GETPOST('type');
+$optioncss = GETPOST('optioncss','alpha');
 
 $sortfield = GETPOST('sortfield');
 $sortorder = GETPOST('sortorder');
@@ -48,7 +49,7 @@ if ($page < 0) {
     $page = 0 ;
 }
 
-$limit = $conf->liste_limit;
+$limit = GETPOST('limit')?GETPOST('limit','int'):$conf->liste_limit;
 $offset = $limit * $page ;
 
 if (! $sortfield) $sortfield = 'p.ref';
@@ -86,7 +87,7 @@ if ($fourn_id)
 	$supplier->fetch($fourn_id);
 }
 
-$sql = "SELECT p.rowid, p.label, p.ref, p.fk_product_type,";
+$sql = "SELECT p.rowid, p.label, p.ref, p.fk_product_type, p.entity,";
 $sql.= " ppf.fk_soc, ppf.ref_fourn, ppf.price as price, ppf.quantity as qty, ppf.unitprice,";
 $sql.= " s.rowid as socid, s.nom as name";
 $sql.= " FROM ".MAIN_DB_PREFIX."product as p";
@@ -108,7 +109,7 @@ if ($sref)
 }
 if ($snom)
 {
-	$sql .= natural_search('s.nom', $snom);
+	$sql .= natural_search('p.label', $snom);
 }
 if($catid)
 {
@@ -125,7 +126,7 @@ if (empty($conf->global->MAIN_DISABLE_FULL_SCANLIST))
     $result = $db->query($sql);
     $nbtotalofrecords = $db->num_rows($result);
 }
-$sql .= " ORDER BY ".$sortfield." ".$sortorder;
+$sql .= $db->order($sortfield,$sortorder);
 $sql .= $db->plimit($limit + 1, $offset);
 
 dol_syslog("fourn/product/list.php:", LOG_DEBUG);
@@ -150,6 +151,7 @@ if ($resql)
 
 
 	$param="&tobuy=".$tobuy."&sref=".$sref."&snom=".$snom."&fourn_id=".$fourn_id.(isset($type)?"&amp;type=".$type:"").(empty($sRefSupplier)?"":"&amp;srefsupplier=".$sRefSupplier);
+	if ($optioncss != '') $param.='&optioncss='.$optioncss;
 	print_barre_liste($texte, $page, $_SERVER["PHP_SELF"], $param, $sortfield, $sortorder, '', $num, $nbtotalofrecords);
 
 
@@ -163,6 +165,7 @@ if ($resql)
 	}
 
 	print '<form action="'.$_SERVER["PHP_SELF"].'" method="post">';
+    if ($optioncss != '') print '<input type="hidden" name="optioncss" value="'.$optioncss.'">';
 	print '<input type="hidden" name="token" value="'.$_SESSION['newtoken'].'">';
 	if ($fourn_id > 0) print '<input type="hidden" name="fourn_id" value="'.$fourn_id.'">';
 	print '<input type="hidden" name="sortfield" value="'.$sortfield.'">';
@@ -212,6 +215,7 @@ if ($resql)
 		$productstatic->id=$objp->rowid;
 		$productstatic->ref=$objp->ref;
 		$productstatic->type=$objp->fk_product_type;
+		$productstatic->entity=$objp->entity;
 		print $productstatic->getNomUrl(1,'supplier');
 		print '</td>';
 
@@ -225,11 +229,11 @@ if ($resql)
 		if ($companystatic->id > 0) print $companystatic->getNomUrl(1,'supplier');
 		print '</td>';
 
-		print '<td align="right">'.price($objp->price).'</td>';
+		print '<td align="right">'.(isset($objp->price) ? price($objp->price) : '').'</td>';
 
 		print '<td align="right">'.$objp->qty.'</td>';
 
-		print '<td align="right">'.price($objp->unitprice).'</td>';
+		print '<td align="right">'.(isset($objp->unitprice) ? price($objp->unitprice) : '').'</td>';
 
 		print "</tr>\n";
 		$i++;
@@ -245,7 +249,5 @@ else
 	dol_print_error($db);
 }
 
-
-$db->close();
-
 llxFooter();
+$db->close();

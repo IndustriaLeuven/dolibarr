@@ -209,9 +209,15 @@ class doc_generic_odt extends ModeleThirdPartyDoc
 				$newfiletmp=preg_replace('/modele_/i','',$newfiletmp);
 				// Get extension (ods or odt)
 				$newfileformat=substr($newfile, strrpos($newfile, '.')+1);
+				if ( ! empty($conf->global->MAIN_DOC_USE_OBJECT_THIRDPARTY_NAME))
+				{
+				    $newfiletmp = dol_sanitizeFileName(dol_string_nospecial($object->name)).'-'.$newfiletmp;
+				}
 				if ( ! empty($conf->global->MAIN_DOC_USE_TIMING))
 				{
-					$filename=$newfiletmp.'.'.dol_print_date(dol_now(),'%Y%m%d%H%M%S').'.'.$newfileformat;
+				    $format=$conf->global->MAIN_DOC_USE_TIMING;
+				    if ($format == '1') $format='%Y%m%d%H%M%S';
+					$filename=$newfiletmp.'-'.dol_print_date(dol_now(),$format).'.'.$newfileformat;
 				}
 				else
 				{
@@ -408,8 +414,18 @@ class doc_generic_odt extends ModeleThirdPartyDoc
 					}
 				}
 				else {
-					try {
-					$odfHandler->saveToDisk($file);
+				    try {
+					   $odfHandler->creator = $user->getFullName($outputlangs);
+					   $odfHandler->title = $object->builddoc_filename;
+					   $odfHandler->subject = $object->builddoc_filename;
+					   
+					   if (! empty($conf->global->ODT_ADD_DOLIBARR_ID))
+					   {
+    					  $odfHandler->userdefined['dol_id'] = $object->id;
+	   		  		      $odfHandler->userdefined['dol_element'] = $object->element;
+					   }
+					   
+					   $odfHandler->saveToDisk($file);
 					}catch (Exception $e){
 						$this->error=$e->getMessage();
 						return -1;

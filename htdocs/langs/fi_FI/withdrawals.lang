@@ -48,7 +48,6 @@ RefusedReason=Hylkäämisen syy
 RefusedInvoicing=Laskutus hylkääminen
 NoInvoiceRefused=Älä lataa hylkäämisestä
 InvoiceRefused=Invoice refused (Charge the rejection to customer)
-Status=Tila
 StatusUnknown=Tuntematon
 StatusWaiting=Odotus
 StatusTrans=Toimitettu
@@ -84,6 +83,11 @@ WithdrawalFile=Withdrawal file
 SetToStatusSent=Set to status "File Sent"
 ThisWillAlsoAddPaymentOnInvoice=This will also apply payments to invoices and will classify them as "Paid"
 StatisticsByLineStatus=Statistics by status of lines
+RUM=RUM
+RUMWillBeGenerated=RUM number will be generated once bank account information are saved
+WithdrawMode=Withdraw mode (FRST or RECUR)
+WithdrawRequestAmount=Withdraw request amount:
+WithdrawRequestErrorNilAmount=Unable to create withdraw request for nil amount.
 
 ### Notifications
 InfoCreditSubject=Maksaminen kestotilaus %s pankin

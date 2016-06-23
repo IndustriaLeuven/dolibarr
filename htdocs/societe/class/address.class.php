@@ -54,9 +54,10 @@ class Address
 	public $lines;
 
 	/**
-	 *  Constructor
+	 * Constructor
 	 *
-	 *  @param	DoliDB		$db     Database handler
+	 * @param DoliDB $db Database handler
+	 * @deprecated
 	 */
 	function __construct($db)
 	{
@@ -428,12 +429,13 @@ class Address
 		global $langs;
 
 		$result='';
+        $label = $langs->trans("ShowAddress").': '.$this->label;
 
-		$lien = '<a href="'.DOL_URL_ROOT.'/comm/address.php?id='.$this->id.'&socid='.$this->socid.'">';
-		$lienfin='</a>';
+        $link = '<a href="'.DOL_URL_ROOT.'/comm/address.php?id='.$this->id.'&socid='.$this->socid.'" title="'.dol_escape_htmltag($label, 1).'" class="classfortooltip">';
+		$linkend='</a>';
 
-		if ($withpicto) $result.=($lien.img_object($langs->trans("ShowAddress").': '.$this->label,'address').$lienfin.' ');
-		$result.=$lien.$this->label.$lienfin;
+        if ($withpicto) $result.=($link.img_object($langs->trans("ShowAddress").': '.$this->label, 'address', 'class="classfortooltip"').$linkend.' ');
+		$result.=$link.$this->label.$linkend;
 		return $result;
 	}
 

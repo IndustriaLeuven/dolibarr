@@ -96,7 +96,7 @@ class FormResource
     		}
 
     		// Construct $out and $outarray
-    		$out.= '<select id="'.$htmlname.'" class="flat" name="'.$htmlname.'">'."\n";
+    		$out.= '<select id="'.$htmlname.'" class="flat minwidth200" name="'.$htmlname.'">'."\n";
     		if ($showempty) $out.= '<option value="-1"></option>'."\n";
     		$num = count($resourcestat->lines);
 
@@ -111,7 +111,7 @@ class FormResource
 
     				if ($selected > 0 && $selected == $resourcestat->lines[$i]->id)
     				{
-    					$out.= '<option value="'.$resourcestat->lines[$i]->id.'" selected="selected">'.$label.'</option>';
+    					$out.= '<option value="'.$resourcestat->lines[$i]->id.'" selected>'.$label.'</option>';
     				}
     				else
     				{
@@ -183,8 +183,8 @@ class FormResource
     			if ($format == 2) print '<option value="'.$arraytypes['code'].'"';
     			if ($format == 3) print '<option value="'.$id.'"';
     			// Si selected est text, on compare avec code, sinon avec id
-    			if (preg_match('/[a-z]/i', $selected) && $selected == $arraytypes['code']) print ' selected="selected"';
-    			elseif ($selected == $id) print ' selected="selected"';
+    			if (preg_match('/[a-z]/i', $selected) && $selected == $arraytypes['code']) print ' selected';
+    			elseif ($selected == $id) print ' selected';
     			print '>';
     			if ($format == 0) $value=($maxlength?dol_trunc($arraytypes['label'],$maxlength):$arraytypes['label']);
     			if ($format == 1) $value=$arraytypes['code'];

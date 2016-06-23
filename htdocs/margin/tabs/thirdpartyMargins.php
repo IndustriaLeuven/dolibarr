@@ -49,6 +49,21 @@ $pagenext = $page + 1;
 if (! $sortorder) $sortorder="DESC";
 if (! $sortfield) $sortfield="f.datef";
 
+$object = new Societe($db);
+
+// Initialize technical object to manage hooks of thirdparties. Note that conf->hooks_modules contains array array
+$hookmanager->initHooks(array('thirdpartymargins','globalcard'));
+
+
+/*
+ * Actions
+ */
+
+$parameters=array('id'=>$socid);
+$reshook=$hookmanager->executeHooks('doActions',$parameters,$object,$action);    // Note that $action and $object may have been modified by some hooks
+if ($reshook < 0) setEventMessages($hookmanager->error, $hookmanager->errors, 'errors');
+
+
 
 /*
  * View
@@ -62,49 +77,49 @@ llxHeader('',$langs->trans("ThirdParty").' - '.$langs->trans("Margins"),$help_ur
 
 if ($socid > 0)
 {
-    $societe = new Societe($db);
-    $societe->fetch($socid);
+    $object = new Societe($db);
+    $object->fetch($socid);
 
     /*
      * Affichage onglets
      */
 
-    $head = societe_prepare_head($societe);
+    $head = societe_prepare_head($object);
 
     dol_fiche_head($head, 'margin', $langs->trans("ThirdParty"),0,'company');
 
-    print '<table class="border" width="100%">';
+    dol_banner_tab($object, 'socid', '', ($user->societe_id?0:1), 'rowid', 'nom');
+    
+    print '<div class="fichecenter">';
+    
+    print '<div class="underbanner clearboth"></div>';
+    print '<table class="border tableforfield" width="100%">';
+    
+    // Alias names (commercial, trademark or alias names)
+    print '<tr><td class="titlefield">'.$langs->trans('AliasNames').'</td><td>';
+    print $object->name_alias;
+    print "</td></tr>";
 
-    print '<tr><td width="20%">'.$langs->trans('ThirdPartyName').'</td>';
-    print '<td colspan="3">';
-    print $form->showrefnav($societe,'socid','',($user->societe_id?0:1),'rowid','nom');
-    print '</td></tr>';
-
-    if (! empty($conf->global->SOCIETE_USEPREFIX))  // Old not used prefix field
+    if ($object->client)
     {
-        print '<tr><td>'.$langs->trans('Prefix').'</td><td colspan="3">'.$societe->prefix_comm.'</td></tr>';
-    }
-
-    if ($societe->client)
-    {
-        print '<tr><td>';
+        print '<tr><td class="titlefield">';
         print $langs->trans('CustomerCode').'</td><td colspan="3">';
-        print $societe->code_client;
-        if ($societe->check_codeclient() <> 0) print ' <font class="error">('.$langs->trans("WrongCustomerCode").')</font>';
+        print $object->code_client;
+        if ($object->check_codeclient() <> 0) print ' <font class="error">('.$langs->trans("WrongCustomerCode").')</font>';
         print '</td></tr>';
     }
 
-    if ($societe->fournisseur)
+    if ($object->fournisseur)
     {
-        print '<tr><td>';
+        print '<tr><td class="titlefield">';
         print $langs->trans('SupplierCode').'</td><td colspan="3">';
-        print $societe->code_fournisseur;
-        if ($societe->check_codefournisseur() <> 0) print ' <font class="error">('.$langs->trans("WrongSupplierCode").')</font>';
+        print $object->code_fournisseur;
+        if ($object->check_codefournisseur() <> 0) print ' <font class="error">('.$langs->trans("WrongSupplierCode").')</font>';
         print '</td></tr>';
     }
 
     // Total Margin
-    print '<tr><td>'.$langs->trans("TotalMargin").'</td><td colspan="3">';
+    print '<tr><td class="titlefield">'.$langs->trans("TotalMargin").'</td><td colspan="3">';
     print '<span id="totalMargin"></span>'; // set by jquery (see below)
     print '</td></tr>';
 
@@ -123,9 +138,14 @@ if ($socid > 0)
     }
 
     print "</table>";
+    
     print '</div>';
+    print '<div style="clear:both"></div>';
 
-
+    dol_fiche_end();
+    
+    print '<br>';
+    
     $sql = "SELECT distinct s.nom, s.rowid as socid, s.code_client,";
     $sql.= " f.rowid as facid, f.facnumber, f.total as total_ht,";
     $sql.= " f.datef, f.paye, f.fk_statut as statut, f.type,";
@@ -153,7 +173,7 @@ if ($socid > 0)
     {
     	$num = $db->num_rows($result);
 
-    	print_barre_liste($langs->trans("MarginDetails"),$page,$_SERVER["PHP_SELF"],"&amp;socid=".$societe->id,$sortfield,$sortorder,'',0,0,'');
+    	print_barre_liste($langs->trans("MarginDetails"),$page,$_SERVER["PHP_SELF"],"&amp;socid=".$object->id,$sortfield,$sortorder,'',0,0,'');
 
     	$i = 0;
     	print "<table class=\"noborder\" width=\"100%\">";
@@ -246,17 +266,19 @@ if ($socid > 0)
 }
 else
 {
-	dol_print_error();
+	dol_print_error('', 'Parameter socid not defined');
 }
 
 
+print '
+    <script type="text/javascript">
+    $(document).ready(function() {
+        $("#totalMargin").html("'. price($totalMargin, null, null, null, null, $rounding).'");
+        $("#marginRate").html("'.(($marginRate === '')?'n/a':price($marginRate, null, null, null, null, $rounding)."%").'");
+        $("#markRate").html("'.(($markRate === '')?'n/a':price($markRate, null, null, null, null, $rounding)."%").'");
+    });
+    </script>
+';
+
 llxFooter();
 $db->close();
-?>
-<script type="text/javascript">
-$(document).ready(function() {
-	$("#totalMargin").html("<?php echo price($totalMargin, null, null, null, null, $rounding); ?>");
-	$("#marginRate").html("<?php echo (($marginRate === '')?'n/a':price($marginRate, null, null, null, null, $rounding)."%"); ?>");
-	$("#markRate").html("<?php echo (($markRate === '')?'n/a':price($markRate, null, null, null, null, $rounding)."%"); ?>");
-});
-</script>

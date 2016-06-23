@@ -3,6 +3,7 @@
  * Copyright (C) 2004-2011 Laurent Destailleur  <eldy@users.sourceforge.net>
  * Copyright (C) 2005-2012 Regis Houssin        <regis.houssin@capnetworks.com>
  * Copyright (C) 2012      Marcos García        <marcosgdf@gmail.com>
+ * Copyright (C) 2015      Jean-François Ferry	<jfefe@aternatik.fr>
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -27,9 +28,12 @@
 require '../../../main.inc.php';
 require_once DOL_DOCUMENT_ROOT.'/comm/propal/class/propalestats.class.php';
 require_once DOL_DOCUMENT_ROOT.'/core/class/dolgraph.class.php';
+require_once DOL_DOCUMENT_ROOT.'/core/class/html.formpropal.class.php';
 
 $WIDTH=DolGraph::getDefaultGraphSizeForStats('width');
 $HEIGHT=DolGraph::getDefaultGraphSizeForStats('height');
+
+$object_statut=GETPOST('propal_statut');
 
 $userid=GETPOST('userid','int');
 $socid=GETPOST('socid','int');
@@ -54,19 +58,23 @@ $mode=GETPOST('mode');
  */
 
 $form=new Form($db);
+$formpropal=new FormPropal($db);
 
 $langs->load('propal');
 $langs->load('other');
+$langs->load("companies");
 
-llxHeader();
+llxHeader('', $langs->trans("ProposalsStatistics"));
 
-print_fiche_titre($langs->trans("ProposalsStatistics"));
+print load_fiche_titre($langs->trans("ProposalsStatistics"),'','title_commercial.png');
 
 $dir=$conf->propal->dir_temp;
 
 dol_mkdir($dir);
 
+
 $stats = new PropaleStats($db, $socid, ($userid>0?$userid:0));
+if ($object_statut != '' && $object_statut >= 0) $stats->where .= ' AND p.fk_statut IN ('.$object_statut.')';
 
 // Build graphic number of object
 $data = $stats->getNbByMonthWithPrevYear($endyear,$startyear);
@@ -112,7 +120,7 @@ if (! $mesg)
 }
 
 // Build graphic amount of object
-$data = $stats->getAmountByMonthWithPrevYear($endyear,$startyear);
+$data = $stats->getAmountByMonthWithPrevYear($endyear,$startyear,0);
 // $data = array(array('Lib',val1,val2,val3),...)
 
 if (!$user->rights->societe->client->voir || $user->societe_id)
@@ -153,7 +161,7 @@ if (! $mesg)
     $px2->draw($filenameamount,$fileurlamount);
 }
 
-$data = $stats->getAverageByMonthWithPrevYear($endyear, $startyear);
+$data = $stats->getAverageByMonthWithPrevYear($endyear, $startyear, $filter);
 
 $fileurl_avg='';
 if (!$user->rights->societe->client->voir || $user->societe_id)
@@ -227,16 +235,20 @@ print '<div class="fichecenter"><div class="fichethirdleft">';
 	// Show filter box
 	print '<form name="stats" method="POST" action="'.$_SERVER["PHP_SELF"].'">';
 	print '<input type="hidden" name="mode" value="'.$mode.'">';
-	print '<table class="border" width="100%">';
+	print '<table class="noborder" width="100%">';
 	print '<tr class="liste_titre"><td class="liste_titre" colspan="2">'.$langs->trans("Filter").'</td></tr>';
 	// Company
 	print '<tr><td align="left">'.$langs->trans("ThirdParty").'</td><td align="left">';
 	$filter='s.client in (1,2,3)';
-	print $form->select_company($socid,'socid',$filter,1);
+	print $form->select_company($socid,'socid',$filter,1,0,0,array(),0,'','style="width: 95%"');
 	print '</td></tr>';
 	// User
 	print '<tr><td align="left">'.$langs->trans("CreatedBy").'</td><td align="left">';
-	print $form->select_dolusers($userid,'userid',1);
+	print $form->select_dolusers($userid, 'userid', 1, '', 0, '', '', 0, 0, 0, '', 0, '', 'maxwidth300');
+	print '</td></tr>';
+	// Status
+	print '<tr><td align="left">'.$langs->trans("Status").'</td><td align="left">';
+	$formpropal->selectProposalStatus($object_statut,0,1);
 	print '</td></tr>';
 	// Year
 	print '<tr><td align="left">'.$langs->trans("Year").'</td><td align="left">';
@@ -251,33 +263,44 @@ print '<div class="fichecenter"><div class="fichethirdleft">';
 	print '<br><br>';
 //}
 
-print '<table class="border" width="100%">';
-print '<tr height="24">';
+print '<table class="noborder" width="100%">';
+print '<tr class="liste_titre" height="24">';
 print '<td align="center">'.$langs->trans("Year").'</td>';
 print '<td align="center">'.$langs->trans("NbOfProposals").'</td>';
+print '<td align="center">%</td>';
 print '<td align="center">'.$langs->trans("AmountTotal").'</td>';
+print '<td align="center">%</td>';
 print '<td align="center">'.$langs->trans("AmountAverage").'</td>';
+print '<td align="center">%</td>';
 print '</tr>';
 
 $oldyear=0;
+$var=true;
 foreach ($data as $val)
 {
     $year = $val['year'];
     while (! empty($year) && $oldyear > $year+1)
     {	// If we have empty year
         $oldyear--;
-        print '<tr height="24">';
+        $var=!$var;
+        print '<tr '.$bc[$var].' height="24">';
         print '<td align="center"><a href="'.$_SERVER["PHP_SELF"].'?year='.$oldyear.'&amp;mode='.$mode.($socid>0?'&socid='.$socid:'').($userid>0?'&userid='.$userid:'').'">'.$oldyear.'</a></td>';
         print '<td align="right">0</td>';
+        print '<td align="right"></td>';
         print '<td align="right">0</td>';
+        print '<td align="right"></td>';
         print '<td align="right">0</td>';
+        print '<td align="right"></td>';
         print '</tr>';
     }
-    print '<tr height="24">';
+    print '<tr '.$bc[$var].' height="24">';
     print '<td align="center"><a href="'.$_SERVER["PHP_SELF"].'?year='.$year.($socid>0?'&socid='.$socid:'').($userid>0?'&userid='.$userid:'').'">'.$year.'</a></td>';
     print '<td align="right">'.$val['nb'].'</td>';
+	print '<td align="right" style="'.(($val['nb_diff'] >= 0) ? 'color: green;':'color: red;').'">'.round($val['nb_diff']).'</td>';
     print '<td align="right">'.price(price2num($val['total'],'MT'),1).'</td>';
+	print '<td align="right" style="'.(($val['total_diff'] >= 0) ? 'color: green;':'color: red;').'">'.round($val['total_diff']).'</td>';
     print '<td align="right">'.price(price2num($val['avg'],'MT'),1).'</td>';
+	print '<td align="right" style="'.(($val['avg_diff'] >= 0) ? 'color: green;':'color: red;').'">'.round($val['avg_diff']).'</td>';
     print '</tr>';
     $oldyear=$year;
 }

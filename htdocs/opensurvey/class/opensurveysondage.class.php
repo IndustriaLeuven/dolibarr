@@ -34,16 +34,16 @@ require_once(DOL_DOCUMENT_ROOT."/core/class/commonobject.class.php");
  */
 class Opensurveysondage extends CommonObject
 {
-	var $db;							//!< To store db handler
-	var $error;							//!< To return error code (or message)
-	var $errors=array();				//!< To return several error codes (or messages)
 	var $element='opensurvey_sondage';			//!< Id that identify managed objects
 	var $table_element='opensurvey_sondage';	//!< Name of table without prefix where object is stored
 
-    var $id;
-
 	var $id_sondage;
+	/**
+	 * @deprecated
+	 * @see description
+	 */
 	var $commentaires;
+	public $description;
 
 	var $mail_admin;
 	var $nom_admin;

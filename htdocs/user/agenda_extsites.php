@@ -33,8 +33,6 @@ require_once DOL_DOCUMENT_ROOT.'/core/lib/functions2.lib.php';
 require_once DOL_DOCUMENT_ROOT.'/core/lib/usergroups.lib.php';
 require_once DOL_DOCUMENT_ROOT.'/user/class/user.class.php';
 
-if (!$user->admin) accessforbidden();
-
 $langs->load("agenda");
 $langs->load("admin");
 $langs->load("other");
@@ -51,62 +49,87 @@ $colorlist=array('BECEDD','DDBECE','BFDDBE','F598B4','F68654','CBF654','A4A4A5')
 
 // Security check
 $id = GETPOST('id','int');
-$fuser = new User($db);
-$fuser->fetch($id);
+$object = new User($db);
+$object->fetch($id);
 
+// Security check
+$socid=0;
+if ($user->societe_id > 0) $socid = $user->societe_id;
+$feature2 = (($socid && $user->rights->user->self->creer)?'':'user');
+if ($user->id == $id)	// A user can always read its own card
+{
+	$feature2='';
+}
+$result = restrictedArea($user, 'user', $id, 'user&user', $feature2);
+
+// If user is not user that read and no permission to read other users, we stop
+if (($object->id != $user->id) && (! $user->rights->user->user->lire))
+  accessforbidden();
+
+// Initialize technical object to manage hooks of thirdparties. Note that conf->hooks_modules contains array array
+$hookmanager->initHooks(array('usercard','globalcard'));
 
 /*
  * Actions
  */
-if ($actionsave)
-{
-    $db->begin();
 
-	$i=1; $errorsaved=0;
-	$error=0;
-	$tabparam=array();
+$parameters=array('id'=>$socid);
+$reshook=$hookmanager->executeHooks('doActions',$parameters,$object,$action);    // Note that $action and $object may have been modified by some hooks
+if ($reshook < 0) setEventMessages($hookmanager->error, $hookmanager->errors, 'errors');
 
-	// Save agendas
-	while ($i <= $MAXAGENDA)
-	{
-		$name=trim(GETPOST('AGENDA_EXT_NAME_'.$id.'_'.$i,'alpha'));
-		$src=trim(GETPOST('AGENDA_EXT_SRC_'.$id.'_'.$i,'alpha'));
-		$color=trim(GETPOST('AGENDA_EXT_COLOR_'.$id.'_'.$i,'alpha'));
-		if ($color=='-1') $color='';
-		$enabled=trim(GETPOST('AGENDA_EXT_ENABLED_'.$id.'_'.$i,'alpha'));
+if (empty($reshook)) {
+	if ($actionsave) {
+		$db->begin();
 
-		if (! empty($src) && ! dol_is_url($src))
-		{
-			setEventMessage($langs->trans("ErrorParamMustBeAnUrl"),'errors');
-			$error++;
-			$errorsaved++;
-			break;
-		}
+		$i = 1;
+		$errorsaved = 0;
+		$error = 0;
+		$tabparam = array();
 
-		$tabparam['AGENDA_EXT_NAME_'.$id.'_'.$i]=$name;
-		$tabparam['AGENDA_EXT_SRC_'.$id.'_'.$i]=$src;
-		$tabparam['AGENDA_EXT_COLOR_'.$id.'_'.$i]=$color;
-		$tabparam['AGENDA_EXT_ENABLED_'.$id.'_'.$i]=$enabled;
+		// Save agendas
+		while ($i <= $MAXAGENDA) {
+			$name = trim(GETPOST('AGENDA_EXT_NAME_'.$id.'_'.$i, 'alpha'));
+			$src = trim(GETPOST('AGENDA_EXT_SRC_'.$id.'_'.$i, 'alpha'));
+			$offsettz = trim(GETPOST('AGENDA_EXT_OFFSETTZ_'.$id.'_'.$i, 'alpha'));
+			$color = trim(GETPOST('AGENDA_EXT_COLOR_'.$id.'_'.$i, 'alpha'));
+			if ($color == '-1') {
+				$color = '';
+			}
+			$enabled = trim(GETPOST('AGENDA_EXT_ENABLED_'.$id.'_'.$i, 'alpha'));
 
-		$i++;
-	}
+			if (!empty($src) && !dol_is_url($src)) {
+				setEventMessages($langs->trans("ErrorParamMustBeAnUrl"), null, 'errors');
+				$error ++;
+				$errorsaved ++;
+				break;
+			}
 
 	if (! $error)
 	{
-		$result=dol_set_user_param($db, $conf, $fuser, $tabparam);
+		$result=dol_set_user_param($db, $conf, $object, $tabparam);
 		if (! $result > 0) $error++;
 	}
 
-    if (! $error)
-    {
-        $db->commit();
-        setEventMessage($langs->trans("SetupSaved"));
-    }
-    else
-    {
-        $db->rollback();
-        if (empty($errorsaved))	setEventMessage($langs->trans("Error"),'errors');
-    }
+			$i ++;
+		}
+
+		if (!$error) {
+			$result = dol_set_user_param($db, $conf, $fuser, $tabparam);
+			if (!$result > 0) {
+				$error ++;
+			}
+		}
+
+		if (!$error) {
+			$db->commit();
+			setEventMessages($langs->trans("SetupSaved"), null, 'mesgs');
+		} else {
+			$db->rollback();
+			if (empty($errorsaved)) {
+				setEventMessages($langs->trans("Error"), null, 'errors');
+			}
+		}
+	}
 }
 
 /*
@@ -126,9 +149,17 @@ llxHeader('',$langs->trans("UserSetup"),'','',0,0,$arrayofjs,$arrayofcss);
 print '<form name="extsitesconfig" action="'.$_SERVER["PHP_SELF"].'" method="post">';
 print '<input type="hidden" name="id" value="'.$id.'">';
 
-$head=user_prepare_head($fuser);
+$head=user_prepare_head($object);
 
 dol_fiche_head($head, 'extsites', $langs->trans("User"), 0, 'user');
+
+$linkback = '<a href="'.DOL_URL_ROOT.'/user/index.php">'.$langs->trans("BackToList").'</a>';
+
+dol_banner_tab($object,'id',$linkback,$user->rights->user->user->lire || $user->admin);
+
+print '<div class="underbanner clearboth"></div>';
+
+print '<br>';
 
 print $langs->trans("AgendaExtSitesDesc")."<br>\n";
 print "<br>\n";
@@ -143,6 +174,7 @@ print "<tr class=\"liste_titre\">";
 print "<td>".$langs->trans("Parameter")."</td>";
 print "<td>".$langs->trans("Name")."</td>";
 print "<td>".$langs->trans("ExtSiteUrlAgenda")." (".$langs->trans("Example").': http://yoursite/agenda/agenda.ics)</td>';
+print "<td>".$form->textwithpicto($langs->trans("FixTZ"), $langs->trans("FillFixTZOnlyIfRequired"), 1).'</td>';
 print '<td align="right">'.$langs->trans("Color").'</td>';
 print "</tr>";
 
@@ -153,6 +185,7 @@ while ($i <= $MAXAGENDA)
 	$key=$i;
 	$name='AGENDA_EXT_NAME_'.$id.'_'.$key;
 	$src='AGENDA_EXT_SRC_'.$id.'_'.$key;
+	$offsettz='AGENDA_EXT_OFFSETTZ_'.$id.'_'.$key;
 	$color='AGENDA_EXT_COLOR_'.$id.'_'.$key;
 
 	$var=!$var;
@@ -160,13 +193,15 @@ while ($i <= $MAXAGENDA)
 	// Nb
 	print '<td width="180" class="nowrap">'.$langs->trans("AgendaExtNb",$key)."</td>";
 	// Name
-	print '<td><input type="text" class="flat hideifnotset" name="AGENDA_EXT_NAME_'.$id.'_'.$key.'" value="'. (GETPOST('AGENDA_EXT_NAME_'.$id.'_'.$key)?GETPOST('AGENDA_EXT_NAME_'.$id.'_'.$key):$fuser->conf->$name) . '" size="28"></td>';
+	print '<td><input type="text" class="flat hideifnotset" name="AGENDA_EXT_NAME_'.$id.'_'.$key.'" value="'. (GETPOST('AGENDA_EXT_NAME_'.$id.'_'.$key)?GETPOST('AGENDA_EXT_NAME_'.$id.'_'.$key):$object->conf->$name) . '" size="28"></td>';
 	// URL
-	print '<td><input type="url" class="flat hideifnotset" name="AGENDA_EXT_SRC_'.$id.'_'.$key.'" value="'. (GETPOST('AGENDA_EXT_SRC_'.$id.'_'.$key)?GETPOST('AGENDA_EXT_SRC_'.$id.'_'.$key):$fuser->conf->$src) . '" size="60"></td>';
+	print '<td><input type="url" class="flat hideifnotset" name="AGENDA_EXT_SRC_'.$id.'_'.$key.'" value="'. (GETPOST('AGENDA_EXT_SRC_'.$id.'_'.$key)?GETPOST('AGENDA_EXT_SRC_'.$id.'_'.$key):$object->conf->$src) . '" size="60"></td>';
+	// Offset TZ
+	print '<td><input type="text" class="flat hideifnotset" name="AGENDA_EXT_OFFSETTZ_'.$id.'_'.$key.'" value="'. (GETPOST('AGENDA_EXT_OFFSETTZ_'.$id.'_'.$key)?GETPOST('AGENDA_EXT_OFFSETTZ_'.$id.'_'.$key):$object->conf->$offsettz) . '" size="2"></td>';
 	// Color (Possible colors are limited by Google)
 	print '<td class="nowrap" align="right">';
 	//print $formadmin->selectColor($conf->global->$color, "google_agenda_color".$key, $colorlist);
-	print $formother->selectColor((GETPOST("AGENDA_EXT_COLOR_".$id.'_'.$key)?GETPOST("AGENDA_EXT_COLOR_".$id.'_'.$key):$fuser->conf->$color), "AGENDA_EXT_COLOR_".$id.'_'.$key, 'extsitesconfig', 1, '', 'hideifnotset');
+	print $formother->selectColor((GETPOST("AGENDA_EXT_COLOR_".$id.'_'.$key)?GETPOST("AGENDA_EXT_COLOR_".$id.'_'.$key):$object->conf->$color), "AGENDA_EXT_COLOR_".$id.'_'.$key, 'extsitesconfig', 1, '', 'hideifnotset');
 	print '</td>';
 	print "</tr>";
 	$i++;
@@ -174,9 +209,10 @@ while ($i <= $MAXAGENDA)
 
 print '</table>';
 
+
 dol_fiche_end();
 
-print '<div align="center">';
+print '<div class="center">';
 print "<input type=\"submit\" id=\"save\" name=\"save\" class=\"button hideifnotset\" value=\"".$langs->trans("Save")."\">";
 print "</div>";
 

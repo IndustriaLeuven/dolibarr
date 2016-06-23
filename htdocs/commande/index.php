@@ -26,11 +26,13 @@
 require '../main.inc.php';
 require_once DOL_DOCUMENT_ROOT.'/core/class/html.formfile.class.php';
 require_once DOL_DOCUMENT_ROOT .'/core/class/notify.class.php';
+require_once DOL_DOCUMENT_ROOT.'/societe/class/client.class.php';
 require_once DOL_DOCUMENT_ROOT .'/commande/class/commande.class.php';
 
 if (!$user->rights->commande->lire) accessforbidden();
 
 $langs->load("orders");
+$langs->load("bills");
 
 // Security check
 $socid=GETPOST('socid','int');
@@ -47,13 +49,14 @@ if ($user->societe_id > 0)
  */
 
 $commandestatic=new Commande($db);
+$companystatic=new Societe($db);
 $form = new Form($db);
 $formfile = new FormFile($db);
 $help_url="EN:Module_Customers_Orders|FR:Module_Commandes_Clients|ES:Módulo_Pedidos_de_clientes";
 
 llxHeader("",$langs->trans("Orders"),$help_url);
 
-print_fiche_titre($langs->trans("OrdersArea"));
+print load_fiche_titre($langs->trans("OrdersArea"));
 
 //print '<table width="100%" class="notopnoleftnoright">';
 //print '<tr><td valign="top" width="30%" class="notopnoleft">';
@@ -62,15 +65,13 @@ print '<div class="fichecenter"><div class="fichethirdleft">';
 
 // Search customer orders
 $var=false;
-print '<table class="noborder nohover" width="100%">';
 print '<form method="post" action="'.DOL_URL_ROOT.'/commande/list.php">';
 print '<input type="hidden" name="token" value="'.$_SESSION['newtoken'].'">';
-print '<tr class="liste_titre"><td colspan="3">'.$langs->trans("SearchOrder").'</td></tr>';
+print '<table class="noborder nohover" width="100%">';
+print '<tr class="liste_titre"><td colspan="3">'.$langs->trans("Search").'</td></tr>';
 print '<tr '.$bc[$var].'><td>';
-print $langs->trans("Ref").':</td><td><input type="text" class="flat" name="sref" size=18></td><td rowspan="2"><input type="submit" value="'.$langs->trans("Search").'" class="button"></td></tr>';
-print '<tr '.$bc[$var].'><td class="nowrap">'.$langs->trans("Other").':</td><td><input type="text" class="flat" name="sall" size="18"></td>';
-print '</tr>';
-print "</form></table><br>\n";
+print $langs->trans("CustomerOrder").':</td><td><input type="text" class="flat" name="sall" size=18></td><td><input type="submit" value="'.$langs->trans("Search").'" class="button"></td></tr>';
+print "</table></form><br>\n";
 
 
 /*
@@ -82,7 +83,7 @@ $sql.= " FROM ".MAIN_DB_PREFIX."societe as s";
 $sql.= ", ".MAIN_DB_PREFIX."commande as c";
 if (! $user->rights->societe->client->voir && ! $socid) $sql.= ", ".MAIN_DB_PREFIX."societe_commerciaux as sc";
 $sql.= " WHERE c.fk_soc = s.rowid";
-$sql.= " AND c.entity = ".$conf->entity;
+$sql.= " AND c.entity IN (".getEntity('societe', 1).")";
 if ($user->societe_id) $sql.=' AND c.fk_soc = '.$user->societe_id;
 if (! $user->rights->societe->client->voir && ! $socid) $sql.= " AND s.rowid = sc.fk_soc AND sc.fk_user = " .$user->id;
 $sql.= " GROUP BY c.fk_statut, c.facture";
@@ -115,7 +116,7 @@ if ($resql)
         $i++;
     }
     $db->free($resql);
-    print '<table class="noborder" width="100%">';
+    print '<table class="noborder nohover" width="100%">';
     print '<tr class="liste_titre"><td colspan="2">'.$langs->trans("Statistics").' - '.$langs->trans("CustomersOrders").'</td></tr>'."\n";
     $listofstatus=array(0,1,2,3,3,-1);
     $bool=false;
@@ -167,11 +168,14 @@ else
 if (! empty($conf->commande->enabled))
 {
 	$sql = "SELECT c.rowid, c.ref, s.nom as name, s.rowid as socid";
+    $sql.= ", s.client";
+    $sql.= ", s.code_client";
+    $sql.= ", s.canvas";
 	$sql.= " FROM ".MAIN_DB_PREFIX."commande as c";
 	$sql.= ", ".MAIN_DB_PREFIX."societe as s";
 	if (!$user->rights->societe->client->voir && !$socid) $sql.= ", ".MAIN_DB_PREFIX."societe_commerciaux as sc";
 	$sql.= " WHERE c.fk_soc = s.rowid";
-	$sql.= " AND c.entity = ".$conf->entity;
+	$sql.= " AND c.entity IN (".getEntity('commande', 1).")";
 	$sql.= " AND c.fk_statut = 0";
 	if ($socid) $sql.= " AND c.fk_soc = ".$socid;
 	if (!$user->rights->societe->client->voir && !$socid) $sql.= " AND s.rowid = sc.fk_soc AND sc.fk_user = " .$user->id;
@@ -192,10 +196,23 @@ if (! empty($conf->commande->enabled))
 			{
 				$var=!$var;
 				$obj = $db->fetch_object($resql);
+
+                $commandestatic->id=$obj->rowid;
+                $commandestatic->ref=$obj->ref;
+
+				$companystatic->id=$obj->socid;
+				$companystatic->name=$obj->name;
+				$companystatic->client=$obj->client;
+				$companystatic->code_client=$obj->code_client;
+				$companystatic->canvas=$obj->canvas;
+
 				print "<tr ".$bc[$var].">";
 				print '<td class="nowrap">';
-				print "<a href=\"card.php?id=".$obj->rowid."\">".img_object($langs->trans("ShowOrder"),"order").' '.$obj->ref."</a></td>";
-				print '<td><a href="'.DOL_URL_ROOT.'/comm/card.php?socid='.$obj->socid.'">'.img_object($langs->trans("ShowCompany"),"company").' '.dol_trunc($obj->name,24).'</a></td></tr>';
+				print $commandestatic->getNomUrl(1);
+                print "</td>";
+                print '<td class="nowrap">';
+				print $companystatic->getNomUrl(1,'company',16);
+                print '</td></tr>';
 				$i++;
 			}
 		}
@@ -216,11 +233,14 @@ $max=5;
 
 $sql = "SELECT c.rowid, c.ref, c.fk_statut, c.facture, c.date_cloture as datec, c.tms as datem,";
 $sql.= " s.nom as name, s.rowid as socid";
+$sql.= ", s.client";
+$sql.= ", s.code_client";
+$sql.= ", s.canvas";
 $sql.= " FROM ".MAIN_DB_PREFIX."commande as c,";
 $sql.= " ".MAIN_DB_PREFIX."societe as s";
 if (!$user->rights->societe->client->voir && !$socid) $sql.= ", ".MAIN_DB_PREFIX."societe_commerciaux as sc";
 $sql.= " WHERE c.fk_soc = s.rowid";
-$sql.= " AND c.entity = ".$conf->entity;
+$sql.= " AND c.entity IN (".getEntity('commande', 1).")";
 //$sql.= " AND c.fk_statut > 2";
 if ($socid) $sql .= " AND c.fk_soc = ".$socid;
 if (!$user->rights->societe->client->voir && !$socid) $sql.= " AND s.rowid = sc.fk_soc AND sc.fk_user = " .$user->id;
@@ -250,6 +270,12 @@ if ($resql)
 			$commandestatic->id=$obj->rowid;
 			$commandestatic->ref=$obj->ref;
 
+			$companystatic->id=$obj->socid;
+			$companystatic->name=$obj->name;
+			$companystatic->client=$obj->client;
+			$companystatic->code_client=$obj->code_client;
+			$companystatic->canvas=$obj->canvas;
+
 			print '<table class="nobordernopadding"><tr class="nocellnopadd">';
 			print '<td width="96" class="nobordernopadding nowrap">';
 			print $commandestatic->getNomUrl(1);
@@ -268,7 +294,9 @@ if ($resql)
 
 			print '</td>';
 
-			print '<td><a href="'.DOL_URL_ROOT.'/comm/card.php?socid='.$obj->socid.'">'.img_object($langs->trans("ShowCompany"),"company").' '.$obj->name.'</a></td>';
+			print '<td class="nowrap">';
+            print $companystatic->getNomUrl(1,'company',16);
+            print '</td>';
 			print '<td>'.dol_print_date($db->jdate($obj->datem),'day').'</td>';
 			print '<td align="right">'.$commandestatic->LibStatut($obj->fk_statut,$obj->facture,5).'</td>';
 			print '</tr>';
@@ -286,11 +314,14 @@ else dol_print_error($db);
 if (! empty($conf->commande->enabled))
 {
 	$sql = "SELECT c.rowid, c.ref, c.fk_statut, c.facture, s.nom as name, s.rowid as socid";
+    $sql.= ", s.client";
+    $sql.= ", s.code_client";
+    $sql.= ", s.canvas";
 	$sql.=" FROM ".MAIN_DB_PREFIX."commande as c";
 	$sql.= ", ".MAIN_DB_PREFIX."societe as s";
 	if (!$user->rights->societe->client->voir && !$socid) $sql.= ", ".MAIN_DB_PREFIX."societe_commerciaux as sc";
 	$sql.= " WHERE c.fk_soc = s.rowid";
-	$sql.= " AND c.entity = ".$conf->entity;
+	$sql.= " AND c.entity IN (".getEntity('commande', 1).")";
 	$sql.= " AND c.fk_statut = 1";
 	if ($socid) $sql.= " AND c.fk_soc = ".$socid;
 	if (!$user->rights->societe->client->voir && !$socid) $sql.= " AND s.rowid = sc.fk_soc AND sc.fk_user = " .$user->id;
@@ -303,7 +334,7 @@ if (! empty($conf->commande->enabled))
 
 		print '<table class="noborder" width="100%">';
 		print '<tr class="liste_titre">';
-		print '<td colspan="3">'.$langs->trans("OrdersToProcess").' <a href="'.DOL_URL_ROOT.'/commande/list.php?viewstatut=1">('.$num.')</a></td></tr>';
+		print '<td colspan="3">'.$langs->trans("OrdersToProcess").' <a href="'.DOL_URL_ROOT.'/commande/list.php?viewstatut=1"><span class="badge">'.$num.'</span></a></td></tr>';
 
 		if ($num)
 		{
@@ -318,6 +349,12 @@ if (! empty($conf->commande->enabled))
 
 				$commandestatic->id=$obj->rowid;
 				$commandestatic->ref=$obj->ref;
+
+				$companystatic->id=$obj->socid;
+				$companystatic->name=$obj->name;
+				$companystatic->client=$obj->client;
+				$companystatic->code_client=$obj->code_client;
+				$companystatic->canvas=$obj->canvas;
 
 				print '<table class="nobordernopadding"><tr class="nocellnopadd">';
 				print '<td width="96" class="nobordernopadding nowrap">';
@@ -337,7 +374,9 @@ if (! empty($conf->commande->enabled))
 
 				print '</td>';
 
-				print '<td><a href="'.DOL_URL_ROOT.'/comm/card.php?socid='.$obj->socid.'">'.img_object($langs->trans("ShowCompany"),"company").' '.dol_trunc($obj->name,24).'</a></td>';
+				print '<td class="nowrap">';
+                print $companystatic->getNomUrl(1,'company',24);
+                print '</td>';
 
 				print '<td align="right">'.$commandestatic->LibStatut($obj->fk_statut,$obj->facture,5).'</td>';
 
@@ -357,11 +396,14 @@ if (! empty($conf->commande->enabled))
 if (! empty($conf->commande->enabled))
 {
 	$sql = "SELECT c.rowid, c.ref, c.fk_statut, c.facture, s.nom as name, s.rowid as socid";
+    $sql.= ", s.client";
+    $sql.= ", s.code_client";
+    $sql.= ", s.canvas";
 	$sql.= " FROM ".MAIN_DB_PREFIX."commande as c";
 	$sql.= ", ".MAIN_DB_PREFIX."societe as s";
 	if (!$user->rights->societe->client->voir && !$socid) $sql.= ", ".MAIN_DB_PREFIX."societe_commerciaux as sc";
 	$sql.= " WHERE c.fk_soc = s.rowid";
-	$sql.= " AND c.entity = ".$conf->entity;
+	$sql.= " AND c.entity IN (".getEntity('commande', 1).")";
 	$sql.= " AND c.fk_statut = 2 ";
 	if ($socid) $sql.= " AND c.fk_soc = ".$socid;
 	if (!$user->rights->societe->client->voir && !$socid) $sql.= " AND s.rowid = sc.fk_soc AND sc.fk_user = " .$user->id;
@@ -374,7 +416,7 @@ if (! empty($conf->commande->enabled))
 
 		print '<table class="noborder" width="100%">';
 		print '<tr class="liste_titre">';
-		print '<td colspan="3">'.$langs->trans("OnProcessOrders").' <a href="'.DOL_URL_ROOT.'/commande/list.php?viewstatut=2">('.$num.')</a></td></tr>';
+		print '<td colspan="3">'.$langs->trans("OnProcessOrders").' <a href="'.DOL_URL_ROOT.'/commande/list.php?viewstatut=2"><span class="badge">'.$num.'</span></a></td></tr>';
 
 		if ($num)
 		{
@@ -389,6 +431,12 @@ if (! empty($conf->commande->enabled))
 
 				$commandestatic->id=$obj->rowid;
 				$commandestatic->ref=$obj->ref;
+
+				$companystatic->id=$obj->socid;
+				$companystatic->name=$obj->name;
+				$companystatic->client=$obj->client;
+				$companystatic->code_client=$obj->code_client;
+				$companystatic->canvas=$obj->canvas;
 
 				print '<table class="nobordernopadding"><tr class="nocellnopadd">';
 				print '<td width="96" class="nobordernopadding nowrap">';
@@ -408,7 +456,9 @@ if (! empty($conf->commande->enabled))
 
 				print '</td>';
 
-				print '<td><a href="'.DOL_URL_ROOT.'/comm/card.php?socid='.$obj->socid.'">'.img_object($langs->trans("ShowCompany"),"company").' '.$obj->name.'</a></td>';
+				print '<td>';
+				print $companystatic->getNomUrl(1,'company');
+				print '</td>';
 
 				print '<td align="right">'.$commandestatic->LibStatut($obj->fk_statut,$obj->facture,5).'</td>';
 

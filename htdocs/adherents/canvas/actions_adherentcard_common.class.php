@@ -55,6 +55,8 @@ abstract class ActionsAdherentCardCommon
 	 */
 	private function getInstanceDao()
 	{
+		dol_syslog(__METHOD__ . " is deprecated", LOG_WARNING);
+
 		if (! is_object($this->object))
 		{
 			$modelclassfile = dol_buildpath('/'.$this->dirmodule.'/canvas/'.$this->canvas.'/dao_'.$this->targetmodule.'_'.$this->canvas.'.class.php');
@@ -96,7 +98,8 @@ abstract class ActionsAdherentCardCommon
     }
 
     /**
-     *  Load data control
+     *  doActions of a canvas is not the doActions of the hook
+     *  @deprecated Use the doActions of hooks instead of this.
      *
 	 *  @param	string	$action    Type of action
 	 *  @param	int		$id			Id of object
@@ -209,7 +212,7 @@ abstract class ActionsAdherentCardCommon
             {
                 $this->object->fetch($_POST["adherentid"]);
 
-                $this->object->oldcopy=dol_clone($this->object);
+				$this->object->oldcopy = clone $this->object;
 
                 $this->assign_post();
 
@@ -432,4 +435,3 @@ abstract class ActionsAdherentCardCommon
     }
 
 }
-

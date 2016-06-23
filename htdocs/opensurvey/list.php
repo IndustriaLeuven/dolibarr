@@ -1,5 +1,5 @@
 <?php
-/* Copyright (C) 2013-2014 Laurent Destailleur <eldy@users.sourceforge.net>
+/* Copyright (C) 2013-2015 Laurent Destailleur <eldy@users.sourceforge.net>
  * Copyright (C) 2014      Marcos García       <marcosgdf@gmail.com>
  *
  * This program is free software; you can redistribute it and/or modify
@@ -38,9 +38,10 @@ $status=GETPOST('status');
 
 $sortfield = GETPOST("sortfield",'alpha');
 $sortorder = GETPOST("sortorder",'alpha');
+$limit = GETPOST('limit')?GETPOST('limit','int'):$conf->liste_limit;
 $page = GETPOST("page",'int');
 if ($page == -1) { $page = 0; }
-$offset = $conf->liste_limit * $page;
+$offset = $limit * $page;
 $pageprev = $page - 1;
 $pagenext = $page + 1;
 if (! $sortfield) $sortfield="p.date_fin";
@@ -48,8 +49,6 @@ if (! $sortorder) $sortorder="DESC";
 if ($page < 0) {
 	$page = 0;
 }
-$limit = $conf->liste_limit;
-$offset = $limit * $page;
 
 $langs->load("opensurvey");
 
@@ -79,7 +78,7 @@ $fieldtosortuser=empty($conf->global->MAIN_FIRSTNAME_NAME_POSITION)?'firstname':
 
 print '<div class="corps">'."\n";
 
-print_fiche_titre($langs->trans("OpenSurveyArea"));
+print load_fiche_titre($langs->trans("OpenSurveyArea"));
 
 // List of surveys into database
 
@@ -93,15 +92,17 @@ print '<table class="liste">'."\n";
 print '<tr class="liste_titre">';
 print_liste_field_titre($langs->trans("Ref"), $_SERVER["PHP_SELF"], "p.id_sondage",$param,"","",$sortfield,$sortorder);
 print_liste_field_titre($langs->trans("Title"), $_SERVER["PHP_SELF"], "p.titre",$param,"","",$sortfield,$sortorder);
-print '<td>'. $langs->trans("Type") .'</td>';
+print_liste_field_titre($langs->trans("Type"));
 print_liste_field_titre($langs->trans("Author"), $_SERVER["PHP_SELF"], "u.".$fieldtosortuser,$param,"","",$sortfield,$sortorder);
+print_liste_field_titre($langs->trans("NbOfVoters"));
 print_liste_field_titre($langs->trans("ExpireDate"), $_SERVER["PHP_SELF"], "p.date_fin",$param,"",'align="center"',$sortfield,$sortorder);
-print '<td align="center">'. $langs->trans("NbOfVoters") .'</td>';
+print_liste_field_titre('');
 print '</tr>'."\n";
 
 print '<tr class="liste_titre">';
 print '<td></td>';
 print '<td><input type="text" name="surveytitle" value="'.dol_escape_htmltag($surveytitle).'"></td>';
+print '<td></td>';
 print '<td></td>';
 print '<td></td>';
 $arraystatus=array(''=>'&nbsp;','expired'=>$langs->trans("Expired"),'opened'=>$langs->trans("Opened"));
@@ -174,11 +175,13 @@ while ($i < min($num,$limit))
 
 	print '</td>';
 
+	print'<td align="center">'.$nbuser.'</td>'."\n";
+
 	print '<td align="center">'.dol_print_date($db->jdate($obj->date_fin),'day');
 	if ($db->jdate($obj->date_fin) < time()) { print ' ('.$langs->trans("Expired").')'; }
 	print '</td>';
 
-	print'<td align="center">'.$nbuser.'</td>'."\n";
+	print'<td align="center"></td>'."\n";
 
 	print '</tr>'."\n";
 	$i++;

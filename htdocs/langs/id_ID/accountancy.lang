@@ -1,10 +1,16 @@
 # Dolibarr language file - en_US - Accounting Expert
-CHARSET=UTF-8
+ACCOUNTING_EXPORT_SEPARATORCSV=Column separator for export file
+ACCOUNTING_EXPORT_DATE=Date format for export file
+ACCOUNTING_EXPORT_PIECE=Export the number of piece
+ACCOUNTING_EXPORT_GLOBAL_ACCOUNT=Export with global account
+ACCOUNTING_EXPORT_LABEL=Export the label
+ACCOUNTING_EXPORT_AMOUNT=Export the amount
+ACCOUNTING_EXPORT_DEVISE=Export the devise
+Selectformat=Select the format for the file
+ACCOUNTING_EXPORT_PREFIX_SPEC=Specify the prefix for the file name
 
 Accounting=Akuntansi
 Globalparameters=Parameter Global
-Chartofaccounts=Tabel Akun
-Fiscalyear=Tahun Pajak
 Menuaccount=Akun akuntansi
 Menuthirdpartyaccount=Akun Pihak Ketiga
 MenuTools=Alat
@@ -18,44 +24,39 @@ Modelcsv=Model Ekspor
 OptionsDeactivatedForThisExportModel=For this export model, options are deactivated
 Selectmodelcsv=Pilih satu model Ekspor
 Modelcsv_normal=Ekspor Klasik
-Modelcsv_CEGID=Export towards CEGID Expert
+Modelcsv_CEGID=Ekspor terhadap CEGID Ahli
 BackToChartofaccounts=Akun pembalik
-Back=Kembali
 
 Definechartofaccounts=Menetapkan bagan akun
 Selectchartofaccounts=Pilih bagan akun
-Validate=Validasi
 Addanaccount=Tambahkan sebuah akun akuntansi
 AccountAccounting=Akun akuntansi
+AccountAccountingSuggest=Accounting account suggest
 Ventilation=Perincian
-ToDispatch=Untuk Pengiriman
-Dispatched=Dikirim
 
+MenuAccountancy=Accountancy
 CustomersVentilation=Perincian pelanggan
 SuppliersVentilation=Perincian pemasok
 TradeMargin=Margin Perdagangan
 Reports=Laporan
 ByCustomerInvoice=Berdasarkan invoice langganan
-ByMonth=Bulanan
 NewAccount=Akun akuntansi baru
-Update=Membarui
-List=Daftar
 Create=Buat
+CreateMvts=Create movement
 UpdateAccount=Modifikasi akun akuntansi
-UpdateMvts=Modification of a movement
+UpdateMvts=Modifikasi gerakan
 WriteBookKeeping=Mencatat akun di buku besar
 Bookkeeping=Buku besar
-AccountBalanceByMonth=Saldo per bulan
+AccountBalance=Account balance
 
 AccountingVentilation=Perincian Akunting
 AccountingVentilationSupplier=Perincian Akunting Pemasok
 AccountingVentilationCustomer=Perincian Akunting Pelanggan
-Line=Baris
 
-CAHTF=Total purchase supplier HT
-InvoiceLines=Lines of invoice to be ventilated
-InvoiceLinesDone=Ventilated lines of invoice
-IntoAccount=In the accounting account
+CAHTF=Total purchase supplier before tax
+InvoiceLines=\nBaris faktur untuk ventilasi
+InvoiceLinesDone=Baris berventilasi faktur
+IntoAccount=Ventilate in the accounting account
 
 Ventilate=Ventilate
 VentilationAuto=Perincian Otomatis
@@ -76,14 +77,15 @@ ACCOUNTING_LIST_SORT_VENTILATION_DONE=Begin the sorting of the breakdown pages "
 
 AccountLength=Length of the accounting accounts shown in Dolibarr
 AccountLengthDesc=Function allowing to feign a length of accounting account by replacing spaces by the zero figure. This function touches only the display, it does not modify the accounting accounts registered in Dolibarr. For the export, this function is necessary to be compatible with certain software.
+ACCOUNTING_LENGTH_DESCRIPTION=Length for displaying product & services description in listings (Best = 50)
+ACCOUNTING_LENGTH_DESCRIPTION_ACCOUNT=Length for displaying product & services account description form in listings (Best = 50)
 ACCOUNTING_LENGTH_GACCOUNT=Panjang akun umum
 ACCOUNTING_LENGTH_AACCOUNT=Panjang akun pihak ketiga
 
 ACCOUNTING_SELL_JOURNAL=Jurnal Penjualan
 ACCOUNTING_PURCHASE_JOURNAL=Jurnal Pembelian
-ACCOUNTING_BANK_JOURNAL=Jurnal Bank
-ACCOUNTING_CASH_JOURNAL=Jurnal Kas
 ACCOUNTING_MISCELLANEOUS_JOURNAL=Jurnal lain-lain
+ACCOUNTING_EXPENSEREPORT_JOURNAL=Expense report journal
 ACCOUNTING_SOCIAL_JOURNAL=Jurnal Sosial
 
 ACCOUNTING_ACCOUNT_TRANSFER_CASH=Akun transfer
@@ -100,22 +102,16 @@ Docref=Referensi
 Numerocompte=Akun
 Code_tiers=Pihak ketiga
 Labelcompte=Label Akun
-Debit=Debet
-Credit=Kredit
-Amount=Jumlah
 Sens=Sen
 Codejournal=Jurnal
+NumPiece=Piece number
 
 DelBookKeeping=Hapus catatan buku besar
 
-SellsJournal=Jurnal Penjualan
-PurchasesJournal=Jurnal Pembelian
 DescSellsJournal=Jurnal Penjualan
 DescPurchasesJournal=Jurnal Pembelian
-BankJournal=Jurnal Bank
-DescBankJournal=Jurnal Bank termasuk semua tipe pembayaran kecuali tunai
-CashJournal=Jurnal Tunai
-DescCashJournal=Jurnal Tunai termasuk tipe pembayaran tunai
+FinanceJournal=Finance journal
+DescFinanceJournal=Finance journal including all the types of payments by bank account
 
 CashPayment=Pembayaran Tunai
 
@@ -138,12 +134,9 @@ Pcgversion=Version of the plan
 Pcgtype=Class of account
 Pcgsubtype=Under class of account
 Accountparent=Root of the account
-Active=Statement
-
-NewFiscalYear=Tahun Pajak Baru
 
 DescVentilCustomer=Consult here the annual breakdown accounting of your invoices customers
-TotalVente=Total turnover HT
+TotalVente=Total turnover before tax
 TotalMarge=Total margin penjualan
 DescVentilDoneCustomer=Consult here the list of the lines of invoices customers and their accounting account
 DescVentilTodoCustomer=Ventilate your lines of customer invoice with an accounting account
@@ -155,6 +148,32 @@ DescVentilDoneSupplier=Consult here the list of the lines of invoices supplier a
 
 ValidateHistory=Validasi Otomatis
 
-ErrorAccountancyCodeIsAlreadyUse=Error, you cannot delete this accounting account because it is used
-
+ErrorAccountancyCodeIsAlreadyUse=Kesalahan, Anda tidak dapat menghapus akun akuntansi ini karena digunakan
+MvtNotCorrectlyBalanced=Mouvement not correctly balanced. Credit = %s. Debit = %s
 FicheVentilation=Breakdown card
+GeneralLedgerIsWritten=Operations are written in the general ledger
+
+MvtNotCorrectlyBalanced=Mouvement not correctly balanced. Credit = %s. Debit = %s
+
+##Export Journal Feature
+ExportFormat=Format of Export
+Prefixname=Prefix of export File
+Separate=Export separator
+Textframe=Frame of text value
+Headercol=Colname in header of file
+Fieldname=Name of Field
+Headername=Name in header
+Type=Type of fields
+Param=Additionnal parameters
+EnabledProduct=In Product
+EnabledTiers=In third party
+EnabledVat=In VAT
+
+## Tools - Init accounting account on product / service
+InitAccountancy=Init accountancy
+InitAccountancyDesc=This page can be used to initialize an accounting account on products and services that does not have accountancy account defined for sales and purchases. Check before that setup of module accountancy is complete.
+Options=Options
+OptionModeProductSell=Mode sales
+OptionModeProductBuy=Mode purchases
+OptionModeProductSellDesc=Show all products with no accounting account defined for sales.
+OptionModeProductBuyDesc=Show all products with no accounting account defined for purchases.

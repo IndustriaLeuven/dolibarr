@@ -59,12 +59,12 @@ if ($action == 'update')
     if ($i >= 2)
     {
         $db->commit();
-	    setEventMessage($langs->trans("SetupSaved"));
+	    setEventMessages($langs->trans("SetupSaved"), null, 'mesgs');
     }
     else
     {
         $db->rollback();
-	    setEventMessage($db->lasterror(), 'errors');
+	    setEventMessages($db->lasterror(), null, 'errors');
     }
 }
 
@@ -76,7 +76,7 @@ if ($action == 'update')
 llxHeader();
 
 $linkback='<a href="'.DOL_URL_ROOT.'/admin/modules.php">'.$langs->trans("BackToModuleList").'</a>';
-print_fiche_titre($langs->trans("ExternalSiteSetup"),$linkback,'setup');
+print load_fiche_titre($langs->trans("ExternalSiteSetup"),$linkback,'title_setup');
 print '<br>';
 
 print $langs->trans("Module100Desc")."<br>\n";
@@ -114,9 +114,9 @@ print "</tr>";
 print "</table>";
 
 
-print '<br><center>';
-print "<input type=\"submit\" name=\"save\" class=\"button\" value=\"".$langs->trans("Save")."\">";
-print "</center>";
+print '<br><div class="center">';
+print '<input type="submit" name="save" class="button" value="'.$langs->trans("Save").'">';
+print '</div>';
 
 print "</form>\n";
 

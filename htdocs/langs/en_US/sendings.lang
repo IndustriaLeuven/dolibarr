@@ -2,9 +2,11 @@
 RefSending=Ref. shipment
 Sending=Shipment
 Sendings=Shipments
+AllSendings=All Shipments
 Shipment=Shipment
 Shipments=Shipments
-Receivings=Receipts
+ShowSending=Show Shipments
+Receivings=Delivery Receipts
 SendingsArea=Shipments area
 ListOfSendings=List of shipments
 SendingMethod=Shipping method
@@ -24,8 +26,8 @@ QtyToShip=Qty to ship
 QtyReceived=Qty received
 KeepToShip=Remain to ship
 OtherSendingsForSameOrder=Other shipments for this order
-DateSending=Date sending order
-DateSendingShort=Date sending order
+DateSending=Shipping date
+DateSendingShort=Shipping date
 SendingsForSameOrder=Shipments for this order
 SendingsAndReceivingForSameOrder=Shipments and receivings for this order
 SendingsToValidate=Shipments to validate
@@ -65,8 +67,9 @@ SendingRunning=Product from ordered customer orders
 SuppliersReceiptRunning=Product from ordered supplier orders
 ProductQtyInCustomersOrdersRunning=Product quantity into opened customers orders
 ProductQtyInSuppliersOrdersRunning=Product quantity into opened suppliers orders
-ProductQtyInShipmentAlreadySent=Product quantity from opended customer order already sent
+ProductQtyInShipmentAlreadySent=Product quantity from opened customer order already sent
 ProductQtyInSuppliersShipmentAlreadyRecevied=Product quantity from opened supplier order already received
+NoProductToShipFoundIntoStock=No product to ship found into warehouse <b>%s</b>. Correct stock or go back to choose another warehouse. 
 
 # Sending methods
 SendingMethodCATCH=Catch by customer

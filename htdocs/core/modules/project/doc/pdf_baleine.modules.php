@@ -79,7 +79,7 @@ class pdf_baleine extends ModelePDFProjects
 		$this->posxref=$this->marge_gauche+1;
 		$this->posxlabel=$this->marge_gauche+25;
 		$this->posxworkload=$this->marge_gauche+100;
-		$this->posxprogress=$this->marge_gauche+140;
+		$this->posxprogress=$this->marge_gauche+130;
 		$this->posxdatestart=$this->marge_gauche+150;
 		$this->posxdateend=$this->marge_gauche+170;
 	}
@@ -94,7 +94,7 @@ class pdf_baleine extends ModelePDFProjects
 	 */
 	function write_file($object,$outputlangs)
 	{
-		global $user,$langs,$conf;
+		global $conf, $hookmanager, $langs, $user;
 
 		if (! is_object($outputlangs)) $outputlangs=$langs;
 		// For backward compatibility with FPDF, force output charset to ISO, because FPDF expect text to be encoded in ISO
@@ -154,6 +154,11 @@ class pdf_baleine extends ModelePDFProjects
 				$task = new Task($this->db);
 				$tasksarray = $task->getTasksArray(0,0,$object->id);
 
+                if (! $object->id > 0)  // Special case when used with object = specimen, we may return all lines 
+                {
+                    $tasksarray=array_slice($tasksarray, 0, min(5, count($tasksarray)));
+                }
+                
 				$object->lines=$tasksarray;
 				$nblignes=count($object->lines);
 
@@ -230,11 +235,11 @@ class pdf_baleine extends ModelePDFProjects
 					$pdf->MultiCell($this->posxprogress-$this->posxworkload, 3, $planned_workload, 0, 'R');
 					$pdf->SetXY($this->posxprogress, $curY);
 					$pdf->MultiCell($this->posxdatestart-$this->posxprogress, 3, $progress, 0, 'R');
+
 					$pdf->SetXY($this->posxdatestart, $curY);
 					$pdf->MultiCell($this->posxdateend-$this->posxdatestart, 3, $datestart, 0, 'C');
 					$pdf->SetXY($this->posxdateend, $curY);
 					$pdf->MultiCell($this->page_largeur-$this->marge_droite-$this->posxdateend, 3, $dateend, 0, 'C');
-
 
 					$pageposafter=$pdf->getPage();
 
@@ -245,7 +250,7 @@ class pdf_baleine extends ModelePDFProjects
 					if (! empty($conf->global->MAIN_PDF_DASH_BETWEEN_LINES) && $i < ($nblignes - 1))
 					{
 						$pdf->setPage($pageposafter);
-						$pdf->SetLineStyle(array('dash'=>'1,1','color'=>array(210,210,210)));
+						$pdf->SetLineStyle(array('dash'=>'1,1','color'=>array(80,80,80)));
 						//$pdf->SetDrawColor(190,190,200);
 						$pdf->line($this->marge_gauche, $nexY+1, $this->page_largeur - $this->marge_droite, $nexY+1);
 						$pdf->SetLineStyle(array('dash'=>0));
@@ -390,7 +395,7 @@ class pdf_baleine extends ModelePDFProjects
 	 *  Show top header of page.
 	 *
 	 *  @param	PDF			$pdf     		Object PDF
-	 *  @param  Object		$object     	Object to show
+	 *  @param  Project		$object     	Object to show
 	 *  @param  int	    	$showaddress    0=no, 1=yes
 	 *  @param  Translate	$outputlangs	Object lang for output
 	 *  @return	void
@@ -476,10 +481,10 @@ class pdf_baleine extends ModelePDFProjects
 	 *   	Show footer of page. Need this->emetteur object
      *
 	 *   	@param	PDF			$pdf     			PDF
-	 * 		@param	Object		$object				Object to show
+	 * 		@param	Project		$object				Object to show
 	 *      @param	Translate	$outputlangs		Object lang for output
 	 *      @param	int			$hidefreetext		1=Hide free text
-	 *      @return	void
+	 *      @return	integer
 	 */
 	function _pagefoot(&$pdf,$object,$outputlangs,$hidefreetext=0)
 	{

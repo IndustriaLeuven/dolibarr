@@ -2,7 +2,7 @@
 /* Copyright (C) 2001-2005 Rodolphe Quiedeville <rodolphe@quiedeville.org>
  * Copyright (C) 2004-2012 Laurent Destailleur  <eldy@users.sourceforge.net>
  * Copyright (C) 2005-2011 Regis Houssin        <regis.houssin@capnetworks.com>
- * Copyright (C) 2012-2103 Juanjo Menent		<jmenent@2byte.es>
+ * Copyright (C) 2012-2105 Juanjo Menent		<jmenent@2byte.es>
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -51,7 +51,7 @@ if ($action == 'update')
 {
 	dolibarr_set_const($db, "MAIN_PDF_FORMAT",    $_POST["MAIN_PDF_FORMAT"],'chaine',0,'',$conf->entity);
 
-	
+
     dolibarr_set_const($db, "MAIN_PROFID1_IN_ADDRESS",    $_POST["MAIN_PROFID1_IN_ADDRESS"],'chaine',0,'',$conf->entity);
 	dolibarr_set_const($db, "MAIN_PROFID2_IN_ADDRESS",    $_POST["MAIN_PROFID2_IN_ADDRESS"],'chaine',0,'',$conf->entity);
 	dolibarr_set_const($db, "MAIN_PROFID3_IN_ADDRESS",    $_POST["MAIN_PROFID3_IN_ADDRESS"],'chaine',0,'',$conf->entity);
@@ -62,7 +62,8 @@ if ($action == 'update')
 	dolibarr_set_const($db, "MAIN_GENERATE_DOCUMENTS_HIDE_DETAILS", $_POST["MAIN_GENERATE_DOCUMENTS_HIDE_DETAILS"],'chaine',0,'',$conf->entity);
 	dolibarr_set_const($db, "MAIN_GENERATE_DOCUMENTS_HIDE_DESC",    $_POST["MAIN_GENERATE_DOCUMENTS_HIDE_DESC"],'chaine',0,'',$conf->entity);
 	dolibarr_set_const($db, "MAIN_GENERATE_DOCUMENTS_HIDE_REF",     $_POST["MAIN_GENERATE_DOCUMENTS_HIDE_REF"],'chaine',0,'',$conf->entity);
-
+	dolibarr_set_const($db, "MAIN_PDF_USE_ISO_LOCATION",     $_POST["MAIN_PDF_USE_ISO_LOCATION"],'chaine',0,'',$conf->entity);
+	
 	header("Location: ".$_SERVER["PHP_SELF"]."?mainmenu=home&leftmenu=setup");
 	exit;
 }
@@ -93,7 +94,7 @@ $form=new Form($db);
 $formother=new FormOther($db);
 $formadmin=new FormAdmin($db);
 
-print_fiche_titre($langs->trans("PDF"),'','setup');
+print load_fiche_titre($langs->trans("PDF"),'','title_setup');
 
 print $langs->trans("PDFDesc")."<br>\n";
 print "<br>\n";
@@ -110,7 +111,7 @@ if ($action == 'edit')	// Edit
 
 
     // Misc options
-    print_fiche_titre($langs->trans("DictionaryPaperFormat"),'','').'<br>';
+    print load_fiche_titre($langs->trans("DictionaryPaperFormat"),'','').'<br>';
 	$var=true;
     print '<table summary="more" class="noborder" width="100%">';
     print '<tr class="liste_titre"><td>'.$langs->trans("Parameter").'</td><td width="200px">'.$langs->trans("Value").'</td></tr>';
@@ -130,10 +131,16 @@ if ($action == 'edit')	// Edit
 
 
     // Addresses
-    print_fiche_titre($langs->trans("PDFAddressForging"),'','').'<br>';
+    print load_fiche_titre($langs->trans("PDFAddressForging"),'','').'<br>';
 	$var=true;
     print '<table summary="more" class="noborder" width="100%">';
     print '<tr class="liste_titre"><td>'.$langs->trans("Parameter").'</td><td width="200px">'.$langs->trans("Value").'</td></tr>';
+
+    // Hide VAT Intra on address
+    $var=!$var;
+    print '<tr '.$bc[$var].'><td>'.$langs->trans("ShowVATIntaInAddress").'</td><td>';
+    print $form->selectyesno('MAIN_TVAINTRA_NOT_IN_ADDRESS',(! empty($conf->global->MAIN_TVAINTRA_NOT_IN_ADDRESS))?$conf->global->MAIN_TVAINTRA_NOT_IN_ADDRESS:0,1);
+    print '</td></tr>';
 
     // Show prof id 1 in address into pdf
     $var=!$var;
@@ -212,7 +219,7 @@ if ($action == 'edit')	// Edit
     print '<br>';
 
     // Other
-    print_fiche_titre($langs->trans("Other"),'','').'<br>';
+    print load_fiche_titre($langs->trans("Other"),'','').'<br>';
 	$var=true;
     print '<table summary="more" class="noborder" width="100%">';
     print '<tr class="liste_titre"><td>'.$langs->trans("Parameter").'</td><td width="200px">'.$langs->trans("Value").'</td></tr>';
@@ -221,12 +228,6 @@ if ($action == 'edit')	// Edit
     $var=!$var;
     print '<tr '.$bc[$var].'><td>'.$langs->trans("HideAnyVATInformationOnPDF").'</td><td>';
 	print $form->selectyesno('MAIN_GENERATE_DOCUMENTS_WITHOUT_VAT',(! empty($conf->global->MAIN_GENERATE_DOCUMENTS_WITHOUT_VAT))?$conf->global->MAIN_GENERATE_DOCUMENTS_WITHOUT_VAT:0,1);
-    print '</td></tr>';
-    
-    // Hide Tva Intra on adress
-    $var=!$var;
-    print '<tr '.$bc[$var].'><td>'.$langs->trans("ShowVATIntaInAddress").'</td><td>';
-    print $form->selectyesno('MAIN_TVAINTRA_NOT_IN_ADDRESS',(! empty($conf->global->MAIN_TVAINTRA_NOT_IN_ADDRESS))?$conf->global->MAIN_TVAINTRA_NOT_IN_ADDRESS:0,1);
     print '</td></tr>';
 
     //Desc
@@ -247,12 +248,18 @@ if ($action == 'edit')	// Edit
     print $form->selectyesno('MAIN_GENERATE_DOCUMENTS_HIDE_DETAILS',(! empty($conf->global->MAIN_GENERATE_DOCUMENTS_HIDE_DETAILS))?$conf->global->MAIN_GENERATE_DOCUMENTS_HIDE_DETAILS:0,1);
     print '</td></tr>';
 
+ 	// Place customer adress to the ISO location
+    $var=!$var;
+    print '<tr '.$bc[$var].'><td>'.$langs->trans("PlaceCustomerAddressToIsoLocation").'</td><td>';
+	print $form->selectyesno('MAIN_PDF_USE_ISO_LOCATION',(! empty($conf->global->MAIN_PDF_USE_ISO_LOCATION))?$conf->global->MAIN_PDF_USE_ISO_LOCATION:0,1);
+    print '</td></tr>';
+
 
 	print '</table>';
 
-    print '<br><center>';
+    print '<br><div class="center">';
     print '<input class="button" type="submit" value="'.$langs->trans("Save").'">';
-    print '</center>';
+    print '</div>';
 
     print '</form>';
     print '<br>';
@@ -262,7 +269,7 @@ else	// Show
     $var=true;
 
     // Misc options
-    print_fiche_titre($langs->trans("DictionaryPaperFormat"),'','').'<br>';
+    print load_fiche_titre($langs->trans("DictionaryPaperFormat"),'','').'<br>';
 	$var=true;
     print '<table summary="more" class="noborder" width="100%">';
     print '<tr class="liste_titre"><td>'.$langs->trans("Parameter").'</td><td width="200px">'.$langs->trans("Value").'</td></tr>';
@@ -299,9 +306,15 @@ else	// Show
 
 	print '<br>';
 
-	print_fiche_titre($langs->trans("PDFAddressForging"),'','').'<br>';
+	print load_fiche_titre($langs->trans("PDFAddressForging"),'','').'<br>';
     print '<table class="noborder" width="100%">';
     print '<tr class="liste_titre"><td>'.$langs->trans("Parameter").'</td><td width="200px">'.$langs->trans("Value").'</td></tr>';
+
+	// Hide Intra VAT on address
+	$var=!$var;
+	print '<tr '.$bc[$var].'><td>'.$langs->trans("ShowVATIntaInAddress").'</td><td colspan="2">';
+	print yn($conf->global->MAIN_TVAINTRA_NOT_IN_ADDRESS,1);
+	print '</td></tr>';
 
     // Show prof id 1 in address into pdf
     $var=!$var;
@@ -380,19 +393,12 @@ else	// Show
     print '<br>';
 
     // Other
-    print_fiche_titre($langs->trans("Other"),'','').'<br>';
+    print load_fiche_titre($langs->trans("Other"),'','').'<br>';
 	$var=true;
     print '<table summary="more" class="noborder" width="100%">';
     print '<tr class="liste_titre"><td>'.$langs->trans("Parameter").'</td><td width="200px" colspan="2">'.$langs->trans("Value").'</td></tr>';
 
-    
-    // Hide any PDF informations
-    $var=!$var;
-    print '<tr '.$bc[$var].'><td>'.$langs->trans("HideAnyVATInformationOnPDF").'</td><td colspan="2">';
-    print yn($conf->global->MAIN_GENERATE_DOCUMENTS_WITHOUT_VAT,1);
-    print '</td></tr>';
 
-    
 	// Encrypt and protect PDF
 	$var=!$var;
 	print "<tr ".$bc[$var].">";
@@ -408,25 +414,25 @@ else	// Show
 	}
 	print '</td>';
 	print '<td align="center" width="140">';
-	if ($conf->global->PDF_SECURITY_ENCRYPTION == 0)
+	if (empty($conf->global->PDF_SECURITY_ENCRYPTION))
 	{
 		print '<a href="'.$_SERVER["PHP_SELF"].'?action=activate_pdfsecurity">'.$langs->trans("Activate").'</a>';
 	}
-	if($conf->global->PDF_SECURITY_ENCRYPTION == 1)
+	else
 	{
 		print '<a href="'.$_SERVER["PHP_SELF"].'?action=disable_pdfsecurity">'.$langs->trans("Disable").'</a>';
 	}
 	print "</td>";
-	
+
 	print "</td>";
 	print '</tr>';
-	
-	// Hide Tva Intra on adress
-	$var=!$var;
-	print '<tr '.$bc[$var].'><td>'.$langs->trans("ShowVATIntaInAddress").'</td><td colspan="2">';
-	print yn($conf->global->MAIN_TVAINTRA_NOT_IN_ADDRESS,1);
-	print '</td></tr>';
-	
+
+    // Hide any PDF informations
+    $var=!$var;
+    print '<tr '.$bc[$var].'><td>'.$langs->trans("HideAnyVATInformationOnPDF").'</td><td colspan="2">';
+    print yn($conf->global->MAIN_GENERATE_DOCUMENTS_WITHOUT_VAT,1);
+    print '</td></tr>';
+
 	//Desc
 	$var=!$var;
 	print '<tr '.$bc[$var].'><td>'.$langs->trans("HideDescOnPDF").'</td><td colspan="2">';
@@ -445,6 +451,10 @@ else	// Show
 	print yn($conf->global->MAIN_GENERATE_DOCUMENTS_HIDE_DETAILS,1);
 	print '</td></tr>';
 
+	$var=!$var;
+    print '<tr '.$bc[$var].'><td>'.$langs->trans("PlaceCustomerAddressToIsoLocation").'</td><td colspan="2">';
+	print yn($conf->global->MAIN_PDF_USE_ISO_LOCATION,1);
+	print '</td></tr>';
 
 	print '</table>';
 
@@ -453,7 +463,7 @@ else	// Show
 	 *  Library
 	 */
 	print '<br>';
-	print_titre($langs->trans("Library"));
+	print load_fiche_titre($langs->trans("Library"));
 
 	print '<table class="noborder" width="100%">'."\n";
 
@@ -499,6 +509,13 @@ else	// Show
 		if ($i) print ' + ';
 		print 'FPDI';
 		print ' ('.@constant('FPDI_PATH').')';
+		$i++;
+	}
+	if (class_exists('TCPDI'))
+	{
+		if ($i) print ' + ';
+		print 'TCPDI';
+		print ' ('.@constant('TCPDI_PATH').')';
 		$i++;
 	}
 	print '<!-- $conf->global->MAIN_USE_FPDF = '.$conf->global->MAIN_USE_FPDF.' -->';

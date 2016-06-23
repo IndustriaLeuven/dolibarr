@@ -16,7 +16,7 @@
  */
 
 /**
- *  \defgroup   geoip      Module GeoIP
+ *  \defgroup   geoip      Module geoipmaxmind
  *  \brief      Module to make geoip conversions
  *	\file       htdocs/core/modules/modGeoIPMaxmind.class.php
  *	\ingroup    geoip
@@ -27,7 +27,7 @@ include_once DOL_DOCUMENT_ROOT .'/core/modules/DolibarrModules.class.php';
 
 
 /**
- *	Classe de description et activation du module Import
+ *	Class to describe and enable module Import
  */
 class modGeoIPMaxmind extends DolibarrModules
 {
@@ -66,7 +66,7 @@ class modGeoIPMaxmind extends DolibarrModules
 		// Config pages
 		$this->config_page_url = array("geoipmaxmind.php");
 
-		// D�pendances
+		// Dependencies
 		$this->depends = array();
 		$this->requiredby = array();
 		$this->phpmin = array(4,2,0);
@@ -74,7 +74,7 @@ class modGeoIPMaxmind extends DolibarrModules
 		$this->need_dolibarr_version = array(2,7,-1);	// Minimum version of Dolibarr required by module
 		$this->need_javascript_ajax = 1;
 
-		// Constantes
+		// Constants
 		$this->const = array();
 
 		// Boxes
@@ -85,35 +85,4 @@ class modGeoIPMaxmind extends DolibarrModules
 		$this->rights_class = 'geoipmaxmind';
 		$r=0;
 	}
-
-	/**
-	 *		Function called when module is enabled.
-	 *		The init function add constants, boxes, permissions and menus (defined in constructor) into Dolibarr database.
-	 *		It also creates data directories
-	 *
-     *      @param      string	$options    Options when enabling module ('', 'noboxes')
-	 *      @return     int             	1 if OK, 0 if KO
-	 */
-	function init($options='')
-	{
-		$sql = array();
-
-		return $this->_init($sql,$options);
-	}
-
-    /**
-	 *		Function called when module is disabled.
-	 *      Remove from database constants, boxes and permissions from Dolibarr database.
-	 *		Data directories are not deleted
-	 *
-     *      @param      string	$options    Options when enabling module ('', 'noboxes')
-	 *      @return     int             	1 if OK, 0 if KO
-     */
-    function remove($options='')
-    {
-		$sql = array();
-
-		return $this->_remove($sql,$options);
-    }
-
 }

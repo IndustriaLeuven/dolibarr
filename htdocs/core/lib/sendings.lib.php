@@ -50,9 +50,12 @@ function shipping_prepare_head($object)
 	{
 		// delivery link
 		$object->fetchObjectLinked($object->id,$object->element);
-		if (! empty($object->linkedObjectsIds['delivery'][0]))		// If there is a delivery
+		if (count($object->linkedObjectsIds['delivery']) >  0)		// If there is a delivery
 		{
-			$head[$h][0] = DOL_URL_ROOT."/livraison/card.php?id=".$object->linkedObjectsIds['delivery'][0];
+		    // Take first one element of array 
+		    $tmp = reset($object->linkedObjectsIds['delivery']);
+		    
+			$head[$h][0] = DOL_URL_ROOT."/livraison/card.php?id=".$tmp;
 			$head[$h][1] = $langs->trans("DeliveryCard");
 			$head[$h][2] = 'delivery';
 			$h++;
@@ -167,7 +170,7 @@ function show_list_sending_receive($origin,$origin_id,$filter='')
 	$sql.= ", ".MAIN_DB_PREFIX.$origin."det as obj";
 	//if ($conf->livraison_bon->enabled) $sql .= " LEFT JOIN ".MAIN_DB_PREFIX."livraison as l ON l.fk_expedition = e.rowid LEFT JOIN ".MAIN_DB_PREFIX."livraisondet as ld ON ld.fk_livraison = l.rowid  AND obj.rowid = ld.fk_origin_line";
 	$sql.= " LEFT JOIN ".MAIN_DB_PREFIX."product as p ON obj.fk_product = p.rowid";
-	$sql.= " WHERE e.entity = ".$conf->entity;
+	$sql.= " WHERE e.entity IN (".getEntity('expedition', 1).")";
 	$sql.= " AND obj.fk_".$origin." = ".$origin_id;
 	$sql.= " AND obj.rowid = ed.fk_origin_line";
 	$sql.= " AND ed.fk_expedition = e.rowid";
@@ -184,8 +187,8 @@ function show_list_sending_receive($origin,$origin_id,$filter='')
 
 		if ($num)
 		{
-			if ($filter) print_titre($langs->trans("OtherSendingsForSameOrder"));
-			else print_titre($langs->trans("SendingsAndReceivingForSameOrder"));
+			if ($filter) print load_fiche_titre($langs->trans("OtherSendingsForSameOrder"));
+			else print load_fiche_titre($langs->trans("SendingsAndReceivingForSameOrder"));
 
 			print '<table class="liste" width="100%">';
 			print '<tr class="liste_titre">';
@@ -302,7 +305,8 @@ function show_list_sending_receive($origin,$origin_id,$filter='')
 					$expedition->id=$objp->sendingid;
 					$expedition->fetchObjectLinked($expedition->id,$expedition->element);
 					//var_dump($expedition->linkedObjects);
-					$receiving=(! empty($expedition->linkedObjects['delivery'][0])?$expedition->linkedObjects['delivery'][0]:'');
+					$receiving='';
+					if (count($expedition->linkedObjects['delivery']) > 0) $receiving=reset($expedition->linkedObjects['delivery']);   // Take first link
 
 					if (! empty($receiving))
 					{

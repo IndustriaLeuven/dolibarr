@@ -41,11 +41,12 @@
  * @param 	int		$socid			Third party id
  * @param	string	$action			Action string
  * @param	array	$showextcals	Array with list of external calendars (used to show links to select calendar), or -1 to show no legend
- * @param	string	$actioncode		Preselected value of actioncode for filter on type
+ * @param	string|array	$actioncode		Preselected value(s) of actioncode for filter on type
  * @param	int		$usergroupid	Id of group to filter on users
+ *  @param	string	$excludetype	A type to exclude ('systemauto', 'system', '')
  * @return	void
  */
-function print_actions_filter($form, $canedit, $status, $year, $month, $day, $showbirthday, $filtera, $filtert, $filterd, $pid, $socid, $action, $showextcals=array(), $actioncode='', $usergroupid='')
+function print_actions_filter($form, $canedit, $status, $year, $month, $day, $showbirthday, $filtera, $filtert, $filterd, $pid, $socid, $action, $showextcals=array(), $actioncode='', $usergroupid='', $excludetype='')
 {
 	global $conf, $user, $langs, $db, $hookmanager;
 	global $begin_h, $end_h, $begin_d, $end_d;
@@ -53,7 +54,7 @@ function print_actions_filter($form, $canedit, $status, $year, $month, $day, $sh
 	$langs->load("companies");
 
 	// Filters
-	print '<form name="listactionsfilter" class="listactionsfilter" action="' . $_SERVER["PHP_SELF"] . '" method="POST">';
+	print '<form name="listactionsfilter" class="listactionsfilter" action="' . $_SERVER["PHP_SELF"] . '" method="get">';
 	print '<input type="hidden" name="token" value="' . $_SESSION ['newtoken'] . '">';
 	print '<input type="hidden" name="year" value="' . $year . '">';
 	print '<input type="hidden" name="month" value="' . $month . '">';
@@ -64,17 +65,17 @@ function print_actions_filter($form, $canedit, $status, $year, $month, $day, $sh
 	print '<div class="fichecenter">';
 
 	if (! empty($conf->browser->phone)) print '<div class="fichehalfleft">';
-	else print '<table class="nobordernopadding" width="100%"><tr><td class="nowrap">';
+	else print '<table class="nobordernopadding" width="100%"><tr><td class="nowrap borderright">';
 
 	print '<table class="nobordernopadding">';
 
 	if ($canedit)
 	{
 		print '<tr>';
-		print '<td class="nowrap">';
+		print '<td class="nowrap" style="padding-bottom: 2px; padding-right: 4px;">';
 		print $langs->trans("ActionsToDoBy").' &nbsp; ';
-		print '</td><td class="nowrap maxwidthonsmartphone">';
-		print $form->select_dolusers($filtert, 'usertodo', 1, '', ! $canedit);
+		print '</td><td class="nowrap maxwidthonsmartphone" style="padding-bottom: 2px; padding-right: 4px;">';
+		print $form->select_dolusers($filtert, 'usertodo', 1, '', ! $canedit, '', '', 0, 0, 0, '', 0, '', 'maxwidth300');
 		if (empty($conf->dol_optimize_smallscreen)) print ' &nbsp; '.$langs->trans("or") . ' '.$langs->trans("Group").' &nbsp; ';
 		print $form->select_dolgroups($usergroupid, 'usergroup', 1, '', ! $canedit);
 		print '</td></tr>';
@@ -82,17 +83,24 @@ function print_actions_filter($form, $canedit, $status, $year, $month, $day, $sh
 		include_once DOL_DOCUMENT_ROOT . '/core/class/html.formactions.class.php';
 		$formactions=new FormActions($db);
 
+		// Type
 		print '<tr>';
-		print '<td class="nowrap">';
+		print '<td class="nowrap" style="padding-bottom: 2px; padding-right: 4px;">';
 		print $langs->trans("Type");
-		print ' &nbsp;</td><td class="nowrap maxwidthonsmartphone">';
-		print $formactions->select_type_actions($actioncode, "actioncode", '', (empty($conf->global->AGENDA_USE_EVENT_TYPE) ? 1 : 0));
+		print ' &nbsp;</td><td class="nowrap maxwidthonsmartphone" style="padding-bottom: 2px; padding-right: 4px;">';
+		$multiselect=0;
+		if (! empty($conf->global->MAIN_ENABLE_MULTISELECT_TYPE))     // We use an option here because it adds bugs when used on agenda page "peruser" and "list"
+		{
+            $multiselect=(!empty($conf->global->AGENDA_USE_EVENT_TYPE));
+		}
+        print $formactions->select_type_actions($actioncode, "actioncode", $excludetype, (empty($conf->global->AGENDA_USE_EVENT_TYPE)?1:0), 0, $multiselect);
 		print '</td></tr>';
 
+		// Status
 		print '<tr>';
-		print '<td class="nowrap">';
+		print '<td class="nowrap" style="padding-bottom: 2px; padding-right: 4px;">';
 		print $langs->trans("Status");
-		print ' &nbsp;</td><td class="nowrap maxwidthonsmartphone">';
+		print ' &nbsp;</td><td class="nowrap maxwidthonsmartphone" style="padding-bottom: 2px; padding-right: 4px;">';
 		$formactions->form_select_status_action('formaction',$status,1,'status',1,2);
 		print '</td></tr>';
 	}
@@ -100,10 +108,10 @@ function print_actions_filter($form, $canedit, $status, $year, $month, $day, $sh
 	if (! empty($conf->societe->enabled) && $user->rights->societe->lire)
 	{
 		print '<tr>';
-		print '<td class="nowrap">';
+		print '<td class="nowrap" style="padding-bottom: 2px; padding-right: 4px;">';
 		print $langs->trans("ThirdParty").' &nbsp; ';
-		print '</td><td class="nowrap maxwidthonsmartphone">';
-		print $form->select_thirdparty($socid, 'socid');
+		print '</td><td class="nowrap maxwidthonsmartphone" style="padding-bottom: 2px;">';
+		print $form->select_company($socid, 'socid', '', 1);
 		print '</td></tr>';
 	}
 
@@ -113,10 +121,10 @@ function print_actions_filter($form, $canedit, $status, $year, $month, $day, $sh
 		$formproject=new FormProjets($db);
 
 		print '<tr>';
-		print '<td class="nowrap">';
+		print '<td class="nowrap" style="padding-bottom: 2px;">';
 		print $langs->trans("Project").' &nbsp; ';
-		print '</td><td class="nowrap maxwidthonsmartphone">';
-		$formproject->select_projects($socid?$socid:-1, $pid, 'projectid');
+		print '</td><td class="nowrap maxwidthonsmartphone" style="padding-bottom: 2px;">';
+		$formproject->select_projects($socid?$socid:-1, $pid, 'projectid', 0);
 		print '</td></tr>';
 	}
 
@@ -124,21 +132,27 @@ function print_actions_filter($form, $canedit, $status, $year, $month, $day, $sh
 	{
 		// Filter on hours
 		print '<tr>';
-		print '<td class="nowrap">'.$langs->trans("WorkingTimeRange").'</td>';
+		print '<td class="nowrap" style="padding-bottom: 2px; padding-right: 4px;">'.$langs->trans("VisibleTimeRange").'</td>';
 		print "<td class='nowrap maxwidthonsmartphone'>";
+		print '<div class="ui-grid-a"><div class="ui-block-a">';
 		print '<input type="number" class="short" name="begin_h" value="'.$begin_h.'" min="0" max="23">';
 		if (empty($conf->dol_use_jmobile)) print ' - ';
+		else print '</div><div class="ui-block-b">';
 		print '<input type="number" class="short" name="end_h" value="'.$end_h.'" min="1" max="24">';
 		if (empty($conf->dol_use_jmobile)) print ' '.$langs->trans("H");
+		print '</div></div>';
 		print '</td></tr>';
 
 		// Filter on days
 		print '<tr>';
-		print '<td class="nowrap">'.$langs->trans("WorkingDaysRange").'</td>';
+		print '<td class="nowrap">'.$langs->trans("VisibleDaysRange").'</td>';
 		print "<td class='nowrap maxwidthonsmartphone'>";
+		print '<div class="ui-grid-a"><div class="ui-block-a">';
 		print '<input type="number" class="short" name="begin_d" value="'.$begin_d.'" min="1" max="7">';
 		if (empty($conf->dol_use_jmobile)) print ' - ';
+		else print '</div><div class="ui-block-b">';
 		print '<input type="number" class="short" name="end_d" value="'.$end_d.'" min="1" max="7">';
+		print '</div></div>';
 		print '</td></tr>';
 	}
 
@@ -420,6 +434,15 @@ function actions_prepare_head($object)
 	$head[$h][1] = $langs->trans("CardAction");
 	$head[$h][2] = 'card';
 	$h++;
+
+    // Tab to link resources
+	if ($conf->resource->enabled)
+	{
+		$head[$h][0] = DOL_URL_ROOT.'/resource/element_resource.php?element=action&element_id='.$object->id;
+		$head[$h][1] = $langs->trans("Resources");
+		$head[$h][2] = 'resources';
+		$h++;
+	}
 
     // Attached files
     require_once DOL_DOCUMENT_ROOT.'/core/lib/files.lib.php';

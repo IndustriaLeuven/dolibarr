@@ -61,7 +61,7 @@ if ($action == "save")
 	}
 
 	$db->commit();
-	setEventMessage($langs->trans("SetupSaved"));
+	setEventMessages($langs->trans("SetupSaved"), null, 'mesgs');
 }
 
 
@@ -70,10 +70,11 @@ if ($action == "save")
  * View
  */
 
-llxHeader('',$langs->trans("Audit"));
+$wikihelp='EN:Setup_Security|FR:Paramétrage_Sécurité|ES:Configuración_Seguridad';
+llxHeader('',$langs->trans("Audit"),$wikihelp);
 
 //$linkback='<a href="'.DOL_URL_ROOT.'/admin/modules.php">'.$langs->trans("BackToModuleList").'</a>';
-print_fiche_titre($langs->trans("SecuritySetup"),'','setup');
+print load_fiche_titre($langs->trans("SecuritySetup"),'','title_setup');
 
 print $langs->trans("LogEventDesc")."<br>\n";
 print "<br>\n";
@@ -104,7 +105,7 @@ foreach ($eventstolog as $key => $arr)
 		print '<td>';
 		$key='MAIN_LOGEVENTS_'.$arr['id'];
 		$value=$conf->global->$key;
-		print '<input '.$bc[$var].' type="checkbox" name="'.$key.'" value="1"'.($value?' checked="checked"':'').'>';
+		print '<input '.$bc[$var].' type="checkbox" name="'.$key.'" value="1"'.($value?' checked':'').'>';
 		print '</td></tr>'."\n";
 	}
 }

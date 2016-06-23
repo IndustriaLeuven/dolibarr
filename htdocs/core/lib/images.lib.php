@@ -301,7 +301,7 @@ function dol_imageResizeOrCrop($file, $mode, $newWidth, $newHeight, $src_x=0, $s
  *    	@param     string	$extName        	Extension to differenciate thumb file name ('_small', '_mini')
  *    	@param     int		$quality        	Quality of compression (0=worst, 100=best)
  *      @param     string	$outdir           	Directory where to store thumb
- *      @param     int		$targetformat     	New format of target (1,2,3,... or 0 to keep old format)
+ *      @param     int		$targetformat     	New format of target (IMAGETYPE_GIF, IMAGETYPE_JPG, IMAGETYPE_PNG, IMAGETYPE_BMP, IMAGETYPE_WBMP ... or 0 to keep old format)
  *    	@return    string						Full path of thumb or '' if it fails
  */
 function vignette($file, $maxWidth = 160, $maxHeight = 120, $extName='_small', $quality=50, $outdir='thumbs', $targetformat=0)
@@ -473,6 +473,7 @@ function vignette($file, $maxWidth = 160, $maxHeight = 120, $extName='_small', $
 	}
 
 	// Initialisation des variables selon l'extension de l'image
+	// $targetformat is 0 by default, in such case, we keep original extension
 	switch($targetformat)
 	{
 		case IMAGETYPE_GIF:	    // 1
@@ -483,7 +484,7 @@ function vignette($file, $maxWidth = 160, $maxHeight = 120, $extName='_small', $
             break;
 		case IMAGETYPE_JPEG:    // 2
             $trans_colour = imagecolorallocatealpha($imgThumb, 255, 255, 255, 0);
-            $extImgTarget = (preg_match('/\.jpeg$/',$file)?'.jpeg':'.jpg');
+            $extImgTarget = (preg_match('/\.jpeg$/i',$file)?'.jpeg':'.jpg');
             $newquality=$quality;
             break;
 		case IMAGETYPE_PNG:	    // 3
@@ -512,7 +513,9 @@ function vignette($file, $maxWidth = 160, $maxHeight = 120, $extName='_small', $
 
 	$fileName = preg_replace('/(\.gif|\.jpeg|\.jpg|\.png|\.bmp)$/i','',$file);	// On enleve extension quelquesoit la casse
 	$fileName = basename($fileName);
-	$imgThumbName = $dirthumb.'/'.$fileName.$extName.$extImgTarget; // Chemin complet du fichier de la vignette
+	//$imgThumbName = $dirthumb.'/'.getImageFileNameForSize(basename($file), $extName, $extImgTarget);   // Full path of thumb file
+	$imgThumbName = getImageFileNameForSize($file, $extName, $extImgTarget);   // Full path of thumb file
+
 
 	// Check if permission are ok
 	//$fp = fopen($imgThumbName, "w");
@@ -547,161 +550,3 @@ function vignette($file, $maxWidth = 160, $maxHeight = 120, $extName='_small', $
 
 	return $imgThumbName;
 }
-
-
-/**
- *	This function returns the html for the moneymeter.
- *
- *	@param	int		$actualValue	amount of actual money
- *	@param	int		$pendingValue	amount of money of pending memberships
- *	@param	int		$intentValue	amount of intended money (that's without the amount of actual money)
- *	@return string					thermometer htmlLegenda
- */
-function moneyMeter($actualValue=0, $pendingValue=0, $intentValue=0)
-{
-	global $langs;
-
-	// variables
-	$height="200";
-	$maximumValue=125000;
-
-	$imageDir = "http://eucd.info/images/therm/";
-
-	$imageTop = $imageDir . "therm_top.png";
-	$imageMiddleActual = $imageDir . "therm_actual.png";
-	$imageMiddlePending = $imageDir . "therm_pending.png";
-	$imageMiddleIntent = $imageDir . "therm_intent.png";
-	$imageMiddleGoal = $imageDir . "therm_goal.png";
-	$imageIndex = $imageDir . "therm_index.png";
-	$imageBottom =  $imageDir . "therm_bottom.png";
-	$imageColorActual = $imageDir . "therm_color_actual.png";
-	$imageColorPending = $imageDir . "therm_color_pending.png";
-	$imageColorIntent = $imageDir . "therm_color_intent.png";
-
-	$formThermTop = '
-        <!-- Thermometer Begin -->
-        <table cellpadding="0" cellspacing="4" border="0">
-        <tr><td>
-        <table cellpadding="0" cellspacing="0" border="0">
-          <tr>
-            <td colspan="2"><img src="' . $imageTop . '" width="58" height="6" border="0"></td>
-          </tr>
-          <tr>
-            <td>
-              <table cellpadding="0" cellspacing="0" border="0">';
-
-	$formSection = '
-          <tr><td><img src="{image}" width="26" height="{height}" border="0"></td></tr>';
-
-	$formThermbottom = '
-              </table>
-            </td>
-            <td><img src="' . $imageIndex . '" width="32" height="200" border="0"></td>
-          </tr>
-          <tr>
-            <td colspan="2"><img src="' . $imageBottom . '" width="58" height="32" border="0"></td>
-          </tr>
-        </table>
-        </td>
-      </tr></table>';
-
-	// legenda
-
-	$legendaActual = "&euro; " . round($actualValue);
-	$legendaPending = "&euro; " . round($pendingValue);
-	$legendaIntent = "&euro; " . round($intentValue);
-	$legendaTotal = "&euro; " . round($actualValue + $pendingValue + $intentValue);
-	$formLegenda = '
-
-        <table cellpadding="0" cellspacing="0" border="0">
-          <tr><td><img src="' . $imageColorActual . '" width="9" height="9">&nbsp;</td><td><font size="1" face="Verdana, Arial, Helvetica, sans-serif"><b>'.$langs->trans("Paid").':<br>' . $legendaActual . '</b></font></td></tr>
-          <tr><td><img src="' . $imageColorPending . '" width="9" height="9">&nbsp;</td><td><font size="1" face="Verdana, Arial, Helvetica, sans-serif">'.$langs->trans("Waiting").':<br>' . $legendaPending . '</font></td></tr>
-          <tr><td><img src="' . $imageColorIntent . '" width="9" height="9">&nbsp;</td><td><font size="1" face="Verdana, Arial, Helvetica, sans-serif">'.$langs->trans("Promesses").':<br>' . $legendaIntent . '</font></td></tr>
-          <tr><td>&nbsp;</td><td><font size="1" face="Verdana, Arial, Helvetica, sans-serif">Total:<br>' . $legendaTotal . '</font></td></tr>
-        </table>
-
-        <!-- Thermometer End -->';
-
-	// check and edit some values
-
-	$error = 0;
-	if ( $maximumValue <= 0 || $height <= 0 || $actualValue < 0 || $pendingValue < 0 || $intentValue < 0)
-	{
-		return "The money meter could not be processed<br>\n";
-	}
-	if ( $actualValue > $maximumValue )
-	{
-		$actualValue = $maximumValue;
-		$pendingValue = 0;
-		$intentValue = 0;
-	}
-	else
-	{
-		if ( ($actualValue + $pendingValue) > $maximumValue )
-		{
-	  $pendingValue = $maximumValue - $actualValue;
-	  $intentValue = 0;
-		}
-		else
-		{
-	  if ( ($actualValue + $pendingValue + $intentValue) > $maximumValue )
-	  {
-	  	$intentValue = $maximumValue - $actualValue - $pendingValue;
-	  }
-		}
-	}
-
-	// start writing the html (from bottom to top)
-
-	// bottom
-	$thermometer = $formThermbottom;
-
-	// actual
-	$sectionHeight = round(($actualValue / $maximumValue) * $height);
-	$totalHeight = $sectionHeight;
-	if ( $sectionHeight > 0 )
-	{
-		$section = $formSection;
-		$section = str_replace("{image}", $imageMiddleActual, $section);
-		$section = str_replace("{height}", $sectionHeight, $section);
-		$thermometer = $section . $thermometer;
-	}
-
-	// pending
-	$sectionHeight = round(($pendingValue / $maximumValue) * $height);
-	$totalHeight += $sectionHeight;
-	if ( $sectionHeight > 0 )
-	{
-		$section = $formSection;
-		$section = str_replace("{image}", $imageMiddlePending, $section);
-		$section = str_replace("{height}", $sectionHeight, $section);
-		$thermometer = $section . $thermometer;
-	}
-
-	// intent
-	$sectionHeight = round(($intentValue / $maximumValue) * $height);
-	$totalHeight += $sectionHeight;
-	if ( $sectionHeight > 0 )
-	{
-		$section = $formSection;
-		$section = str_replace("{image}", $imageMiddleIntent, $section);
-		$section = str_replace("{height}", $sectionHeight, $section);
-		$thermometer = $section . $thermometer;
-	}
-
-	// goal
-	$sectionHeight = $height- $totalHeight;
-	if ( $sectionHeight > 0 )
-	{
-		$section = $formSection;
-		$section = str_replace("{image}", $imageMiddleGoal, $section);
-		$section = str_replace("{height}", $sectionHeight, $section);
-		$thermometer = $section . $thermometer;
-	}
-
-	// top
-	$thermometer = $formThermTop . $thermometer;
-
-	return $thermometer . $formLegenda;
-}
-

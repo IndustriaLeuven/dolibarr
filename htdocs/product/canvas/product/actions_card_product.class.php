@@ -68,7 +68,7 @@ class ActionsCardProduct
 	 *    Assign custom values for canvas (for example into this->tpl to be used by templates)
 	 *
 	 *    @param	string	$action    Type of action
-	 *    @param	string	$id			Id of object
+	 *    @param	integer	$id			Id of object
 	 *    @param	string	$ref		Ref of object
 	 *    @return	void
 	 */
@@ -116,7 +116,7 @@ class ActionsCardProduct
 			// Price
 			$this->tpl['price'] = $this->price;
 			$this->tpl['price_min'] = $this->price_min;
-			$this->tpl['price_base_type'] = $form->load_PriceBaseType($this->price_base_type, "price_base_type");
+			$this->tpl['price_base_type'] = $form->selectPriceBaseType($this->price_base_type, "price_base_type");
 
 			// VAT
 			$this->tpl['tva_tx'] = $form->load_tva("tva_tx",-1,$mysoc,'');
@@ -138,12 +138,12 @@ class ActionsCardProduct
 
 		if ($action == 'view')
 		{
-            $head = product_prepare_head($this->object,$user);
+            $head = product_prepare_head($this->object);
 
             $this->tpl['showrefnav'] = $form->showrefnav($this->object,'ref','',1,'ref');
 
     		$titre=$langs->trans("CardProduct".$this->object->type);
-    		$picto=($this->object->type==1?'service':'product');
+    		$picto=($this->object->type==Product::TYPE_SERVICE?'service':'product');
     		$this->tpl['showhead']=dol_get_fiche_head($head, 'card', $titre, 0, $picto);
             $this->tpl['showend']=dol_get_fiche_end();
 
@@ -341,7 +341,7 @@ class ActionsCardProduct
 		$sql = 'SELECT DISTINCT ';
 
 		// Fields requiered
-		$sql.= 'p.rowid, p.price_base_type, p.fk_product_type, p.seuil_stock_alerte';
+		$sql.= 'p.rowid, p.price_base_type, p.fk_product_type, p.seuil_stock_alerte, p.entity';
 
 		// Fields not requiered
 		foreach($this->field_list as $field)
@@ -417,6 +417,7 @@ class ActionsCardProduct
 							$this->id 		= $obj->rowid;
 							$this->ref 		= $obj->$alias;
 							$this->type 	= $obj->fk_product_type;
+							$this->entity	= $obj->entity;
 							$datas[$alias] 	= $this->getNomUrl(1,'',24);
 						}
 						else if ($alias == 'stock')

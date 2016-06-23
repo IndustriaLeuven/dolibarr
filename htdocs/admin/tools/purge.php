@@ -49,13 +49,13 @@ if (! empty($conf->syslog->enabled))
 if ($action=='purge' && ! preg_match('/^confirm/i',$choice) && ($choice != 'allfiles' || $confirm == 'yes') )
 {
 	$filesarray=array();
-
+	
 	if ($choice=='tempfiles')
 	{
 		// Delete temporary files
 		if ($dolibarr_main_data_root)
 		{
-			$filesarray=dol_dir_list($dolibarr_main_data_root,"directories",1,'\/temp$');
+			$filesarray=dol_dir_list($dolibarr_main_data_root,"directories",1,'^temp$');
 		}
 	}
 
@@ -76,7 +76,6 @@ if ($action=='purge' && ! preg_match('/^confirm/i',$choice) && ($choice != 'allf
 	$count=0;
 	if (count($filesarray))
 	{
-
 		foreach($filesarray as $key => $value)
 		{
 			//print "x ".$filesarray[$key]['fullname']."<br>\n";
@@ -89,7 +88,7 @@ if ($action=='purge' && ! preg_match('/^confirm/i',$choice) && ($choice != 'allf
 				// If (file that is not logfile) or (if logfile with option logfile)
 				if ($filesarray[$key]['fullname'] != $filelog || $choice=='logfile')
 				{
-					$count+=dol_delete_file($filesarray[$key]['fullname']);
+					$count+=(dol_delete_file($filesarray[$key]['fullname'])?1:0);
 				}
 			}
 		}
@@ -105,7 +104,7 @@ if ($action=='purge' && ! preg_match('/^confirm/i',$choice) && ($choice != 'allf
 
 	if ($count) $mesg=$langs->trans("PurgeNDirectoriesDeleted", $count);
 	else $mesg=$langs->trans("PurgeNothingToDelete");
-	setEventMessage($mesg);
+	setEventMessages($mesg, null, 'mesgs');
 }
 
 
@@ -117,7 +116,7 @@ llxHeader();
 
 $form=new Form($db);
 
-print_fiche_titre($langs->trans("Purge"),'','setup');
+print load_fiche_titre($langs->trans("Purge"),'','title_setup');
 
 print $langs->trans("PurgeAreaDesc",$dolibarr_main_data_root).'<br>';
 print '<br>';
@@ -134,25 +133,25 @@ print '<tr class="border"><td style="padding: 4px">';
 if (! empty($conf->syslog->enabled))
 {
 	print '<input type="radio" name="choice" value="logfile"';
-	print ($choice && $choice=='logfile') ? ' checked="checked"' : '';
+	print ($choice && $choice=='logfile') ? ' checked' : '';
 	print '> '.$langs->trans("PurgeDeleteLogFile",$filelog).'<br><br>';
 }
 
 print '<input type="radio" name="choice" value="tempfiles"';
-print (! $choice || $choice=='tempfiles' || $choice=='allfiles') ? ' checked="checked"' : '';
+print (! $choice || $choice=='tempfiles' || $choice=='allfiles') ? ' checked' : '';
 print '> '.$langs->trans("PurgeDeleteTemporaryFiles").'<br><br>';
 
 print '<input type="radio" name="choice" value="confirm_allfiles"';
-print ($choice && $choice=='confirm_allfiles') ? ' checked="checked"' : '';
+print ($choice && $choice=='confirm_allfiles') ? ' checked' : '';
 print '> '.$langs->trans("PurgeDeleteAllFilesInDocumentsDir",$dolibarr_main_data_root).'<br>';
 
 print '</td></tr></table>';
 
-if ($choice != 'confirm_allfiles')
-{
+//if ($choice != 'confirm_allfiles')
+//{
 	print '<br>';
-	print '<center><input class="button" type="submit" value="'.$langs->trans("PurgeRunNow").'"></center>';
-}
+	print '<div class="center"><input class="button" type="submit" value="'.$langs->trans("PurgeRunNow").'"></div>';
+//}
 
 print '</form>';
 

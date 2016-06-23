@@ -3,8 +3,6 @@
 # No errors
 NoErrorCommitIsDone=Žádná chyba se zavazujeme
 # Errors
-Error=Chyba
-Errors=Chyby
 ErrorButCommitIsDone=Byly nalezeny chyby, ale my ověřit i přes to
 ErrorBadEMail=EMail %s je špatně
 ErrorBadUrl=Url %s je špatně
@@ -63,9 +61,9 @@ ErrorSizeTooLongForVarcharType=Velikost příliš dlouho typu string (%s znaků 
 ErrorNoValueForSelectType=Vyplňte, prosím, hodnotu seznamu vyberte
 ErrorNoValueForCheckBoxType=Vyplňte, prosím, hodnotu checkbox seznamu
 ErrorNoValueForRadioType=Prosím vyplňte hodnotu pro rozhlasové seznamu
-ErrorBadFormatValueList=Seznam Hodnota nemůže mít více než jeden přijde: <u>%s,</u> ale potřebujete alespoň jeden: Llave, Valores
+ErrorBadFormatValueList=The list value cannot have more than one comma: <u>%s</u>, but need at least one: key,value
 ErrorFieldCanNotContainSpecialCharacters=Terénní <b>%s</b> nesmí obsahuje speciální znaky.
-ErrorFieldCanNotContainSpecialNorUpperCharacters=Field <b>%s</b> must not contains special characters, nor upper case characters.
+ErrorFieldCanNotContainSpecialNorUpperCharacters=Field <b>%s</b> must not contain special characters, nor upper case characters and cannot contain only numbers.
 ErrorNoAccountancyModuleLoaded=Ne účetnictví modul aktivován
 ErrorExportDuplicateProfil=This profile name already exists for this export set.
 ErrorLDAPSetupNotComplete=Dolibarr-LDAP shoda není úplná.
@@ -79,7 +77,7 @@ ErrorModuleRequireJavascript=Javascript musí být vypnuta, že tato funkce prac
 ErrorPasswordsMustMatch=Oba napsaný hesla se musí shodovat se navzájem
 ErrorContactEMail=Technické chybě. Prosím, obraťte se na správce, aby e-mailovou <b>%s</b> en poskytovat <b>%s</b> kód chyby ve zprávě, nebo ještě lépe přidáním obrazovky kopii této stránky.
 ErrorWrongValueForField=Chybná hodnota <b>%s</b> číslo pole (hodnota <b>&quot;%s</b> 'neodpovídá regex pravidel <b>%s)</b>
-ErrorFieldValueNotIn=Wrong value for field number <b>%s</b> (value '<b>%s</b>' is not a value available into field <b>%s</b> of table <b>%s</b> = <b>%s</b>)
+ErrorFieldValueNotIn=Wrong value for field number <b>%s</b> (value '<b>%s</b>' is not a value available into field <b>%s</b> of table <b>%s</b>)
 ErrorFieldRefNotIn=Chybná hodnota <b>%s</b> číslo pole (hodnota <b>&quot;%s&quot;</b> není <b>%s</b> stávající ref)
 ErrorsOnXLines=Chyby na <b>%s</b> zdrojovém záznamu (s)
 ErrorFileIsInfectedWithAVirus=Antivirový program nebyl schopen ověřit soubor (soubor může být napaden virem)
@@ -100,7 +98,7 @@ ErrorProdIdAlreadyExist=%s je přiřazen do jiné třetí
 ErrorFailedToSendPassword=Nepodařilo se odeslat heslo
 ErrorFailedToLoadRSSFile=Nedokáže dostat RSS feed. Zkuste přidat konstantní MAIN_SIMPLEXMLLOAD_DEBUG případě chybových hlášení neposkytuje dostatek informací.
 ErrorPasswordDiffers=Hesla se liší, zadejte prosím znovu.
-ErrorForbidden=Přístup byl odepřen. <br> Pokusu o přístup na stránku, oblasti nebo funkce, aniž by v ověřeném sezení nebo že není dovoleno, aby své uživatele.
+ErrorForbidden=Access denied.<br>You try to access to a page, area or feature of a disabled module or without being in an authenticated session or that is not allowed to your user.
 ErrorForbidden2=Povolení pro toto přihlášení může být definována správcem Dolibarr z nabídky %s-&gt; %s.
 ErrorForbidden3=Zdá se, že Dolibarr není využita prostřednictvím ověřené relace. Podívejte se na dokumentaci k nastavení Dolibarr vědět, jak řídit autentizace (htaccess, mod_auth nebo jiné ...).
 ErrorNoImagickReadimage=Třída Imagick není nalezen v této PHP. Náhled není mohou být k dispozici. Správci mohou zakázat tuto kartu z menu Nastavení - Zobrazení.
@@ -170,8 +168,15 @@ ErrorGlobalVariableUpdater4=SOAP client failed with error '%s'
 ErrorGlobalVariableUpdater5=No global variable selected
 ErrorFieldMustBeANumeric=Field <b>%s</b> must be a numeric value
 ErrorFieldMustBeAnInteger=Field <b>%s</b> must be an integer
+ErrorMandatoryParametersNotProvided=Mandatory parameter(s) not provided
+ErrorOppStatusRequiredIfAmount=You set an estimated amount for this opportunity/lead. So you must also enter its status
+ErrorBadDefinitionOfMenuArrayInModuleDescriptor=Bad Definition Of Menu Array In Module Descriptor (bad value for key fk_menu)
+ErrorSavingChanges=An error has ocurred when saving the changes
+ErrorWarehouseRequiredIntoShipmentLine=Warehouse is required on the line to ship
+ErrorFileMustHaveFormat=File must have format %s
 
 # Warnings
+WarningPasswordSetWithNoAccount=A password was set for this member. However, no user account was created. So this password is stored but can't be used to login to Dolibarr. It may be used by an external module/interface but if you don't need to define any login nor password for a member, you can disable option "Manage a login for each member" from Member module setup. If you need to manage a login but don't need any password, you can keep this field empty to avoid this warning. Note: Email can also be used as a login if the member is linked to a user.
 WarningMandatorySetupNotComplete=Povinné parametry jsou dosud stanoveny
 WarningSafeModeOnCheckExecDir=Pozor, PHP <b>safe_mode</b> volba je na to příkaz musí být uloženy uvnitř adresáře deklarované <b>safe_mode_exec_dir</b> parametrů php.
 WarningAllowUrlFopenMustBeOn=Parametr <b>allow_url_fopen</b> musí být nastavena <b>na</b> filtračním v <b>php.ini</b> za to, že tento modul pracovat úplně. Je nutné upravit tento soubor ručně.
@@ -189,4 +194,5 @@ WarningClickToDialUserSetupNotComplete=Nastavení ClickToDial informací pro už
 WarningNotRelevant=Nerozhoduje provoz v našem souboru
 WarningFeatureDisabledWithDisplayOptimizedForBlindNoJs=Feature disabled when display setup is optimized for blind person or text browsers.
 WarningPaymentDateLowerThanInvoiceDate=Payment date (%s) is earlier than invoice date (%s) for invoice %s.
-WarningTooManyDataPleaseUseMoreFilters=Too many data. Please use more filters
+WarningTooManyDataPleaseUseMoreFilters=Too many data (more than %s lines). Please use more filters or set the constant %s to a higher limit.
+WarningSomeLinesWithNullHourlyRate=Some times were recorded by users when their hourly rate was not defined. A value of 0 was used but this may result in wrong valuation of time spent.

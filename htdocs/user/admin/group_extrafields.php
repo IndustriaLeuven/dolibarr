@@ -66,50 +66,14 @@ llxHeader('',$langs->trans("UsersSetup"),$help_url);
 
 
 $linkback='<a href="'.DOL_URL_ROOT.'/admin/modules.php">'.$langs->trans("BackToModuleList").'</a>';
-print_fiche_titre($langs->trans("UsersSetup"),$linkback,'setup');
+print load_fiche_titre($langs->trans("UsersSetup"),$linkback,'title_setup');
 
 
 $head = user_admin_prepare_head();
 
-dol_fiche_head($head, 'attributes_group', $langs->trans("Group"), 0, 'user');
+dol_fiche_head($head, 'attributes_group', $langs->trans("MenuUsersAndGroups"), 0, 'user');
 
-
-print $langs->trans("DefineHereComplementaryAttributes",$textobject).'<br>'."\n";
-print '<br>';
-
-// Load attribute_label
-$extrafields->fetch_name_optionals_label($elementtype);
-
-print "<table summary=\"listofattributes\" class=\"noborder\" width=\"100%\">";
-
-print '<tr class="liste_titre">';
-print '<td>'.$langs->trans("Label").'</td>';
-print '<td>'.$langs->trans("AttributeCode").'</td>';
-print '<td>'.$langs->trans("Type").'</td>';
-print '<td align="right">'.$langs->trans("Size").'</td>';
-print '<td align="center">'.$langs->trans("Unique").'</td>';
-print '<td align="center">'.$langs->trans("Required").'</td>';
-print '<td width="80">&nbsp;</td>';
-print "</tr>\n";
-
-$var=True;
-foreach($extrafields->attribute_type as $key => $value)
-{
-	$var=!$var;
-	print "<tr ".$bc[$var].">";
-    print "<td>".$extrafields->attribute_label[$key]."</td>\n";
-	print "<td>".$key."</td>\n";
-	print "<td>".$type2label[$extrafields->attribute_type[$key]]."</td>\n";
-	print '<td align="right">'.$extrafields->attribute_size[$key]."</td>\n";
-    print '<td align="center">'.yn($extrafields->attribute_unique[$key])."</td>\n";
-    print '<td align="center">'.yn($extrafields->attribute_required[$key])."</td>\n";
-	print '<td align="right"><a href="'.$_SERVER["PHP_SELF"].'?action=edit&attrname='.$key.'">'.img_edit().'</a>';
-	print "&nbsp; <a href=\"".$_SERVER["PHP_SELF"]."?action=delete&attrname=".$key."\">".img_delete()."</a></td>\n";
-	print "</tr>";
-	//      $i++;
-}
-
-print "</table>";
+require DOL_DOCUMENT_ROOT.'/core/tpl/admin_extrafields_view.tpl.php';
 
 dol_fiche_end();
 
@@ -125,27 +89,27 @@ if ($action != 'create' && $action != 'edit')
 
 /* ************************************************************************** */
 /*                                                                            */
-/* Creation d'un champ optionnel
- /*                                                                            */
+/* Creation of an optional field											  */
+/*                                                                            */
 /* ************************************************************************** */
 
 if ($action == 'create')
 {
 	print "<br>";
-	print_titre($langs->trans('NewAttribute'));
+	print load_fiche_titre($langs->trans('NewAttribute'));
 
     require DOL_DOCUMENT_ROOT.'/core/tpl/admin_extrafields_add.tpl.php';
 }
 
 /* ************************************************************************** */
 /*                                                                            */
-/* Edition d'un champ optionnel                                               */
+/* Edition of an optional field                                               */
 /*                                                                            */
 /* ************************************************************************** */
 if ($action == 'edit' && ! empty($attrname))
 {
 	print "<br>";
-	print_titre($langs->trans("FieldEdition", $attrname));
+	print load_fiche_titre($langs->trans("FieldEdition", $attrname));
 
     require DOL_DOCUMENT_ROOT.'/core/tpl/admin_extrafields_edit.tpl.php';
 }

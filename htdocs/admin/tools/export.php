@@ -39,7 +39,7 @@ $page = GETPOST("page",'int');
 if (! $sortorder) $sortorder="DESC";
 if (! $sortfield) $sortfield="date";
 if ($page < 0) { $page = 0; }
-$limit = $conf->liste_limit;
+$limit = GETPOST('limit')?GETPOST('limit','int'):$conf->liste_limit;
 $offset = $limit * $page;
 
 if (! $user->admin) accessforbidden();
@@ -60,8 +60,8 @@ if ($action == 'delete')
 {
 	$file=$conf->admin->dir_output.'/'.GETPOST('urlfile');
 	$ret=dol_delete_file($file, 1);
-	if ($ret) setEventMessage($langs->trans("FileWasRemoved", GETPOST('urlfile')));
-	else setEventMessage($langs->trans("ErrorFailToDeleteFile", GETPOST('urlfile')), 'errors');
+	if ($ret) setEventMessages($langs->trans("FileWasRemoved", GETPOST('urlfile')), null, 'mesgs');
+	else setEventMessages($langs->trans("ErrorFailToDeleteFile", GETPOST('urlfile')), null, 'errors');
 	$action='';
 }
 
@@ -69,6 +69,10 @@ if ($action == 'delete')
 /*
  * View
  */
+
+$_SESSION["commandbackuplastdone"]='';
+$_SESSION["commandbackuptorun"]='';
+$_SESSION["commandbackupresult"]='';
 
 // Increase limit of time. Works only if we are not in safe mode
 $ExecTimeLimit=600;
@@ -88,10 +92,10 @@ if (!empty($MemoryLimit))
 $form=new Form($db);
 $formfile = new FormFile($db);
 
-$help_url='EN:Backups|FR:Sauvegardes|ES:Copias_de_seguridad';
-llxHeader('','',$help_url);
+//$help_url='EN:Backups|FR:Sauvegardes|ES:Copias_de_seguridad';
+//llxHeader('','',$help_url);
 
-print_fiche_titre($langs->trans("Backup"),'','setup');
+//print load_fiche_titre($langs->trans("Backup"),'','title_setup');
 
 
 // Start with empty buffer
@@ -165,13 +169,18 @@ if ($what == 'mysql')
         $paramclear.=' -p"'.str_replace(array('"','`'),array('\"','\`'),$dolibarr_main_db_pass).'"';
     }
 
+    $_SESSION["commandbackuplastdone"]=$command." ".$paramcrypted;
+    $_SESSION["commandbackuptorun"]="";
+    /*
     print '<b>'.$langs->trans("RunCommandSummary").':</b><br>'."\n";
     print '<textarea rows="'.ROWS_2.'" cols="120">'.$command." ".$paramcrypted.'</textarea><br>'."\n";
     print '<br>';
+
     //print $paramclear;
 
     // Now run command and show result
     print '<b>'.$langs->trans("BackupResult").':</b> ';
+	*/
 
     $errormsg='';
 
@@ -189,9 +198,12 @@ if ($what == 'mysql')
         $ok=0;
         dol_syslog("Run command ".$fullcommandcrypted);
         $handlein = popen($fullcommandclear, 'r');
+        $i=0;
         while (!feof($handlein))
         {
+            $i++;   // output line number
             $read = fgets($handlein);
+            if ($i == 1 && preg_match('/'.preg_quote('Warning: Using a password').'/i', $read)) continue;
             fwrite($handle,$read);
             if (preg_match('/'.preg_quote('-- Dump completed').'/i',$read)) $ok=1;
             elseif (preg_match('/'.preg_quote('SET SQL_NOTES=@OLD_SQL_NOTES').'/i',$read)) $ok=1;
@@ -264,6 +276,9 @@ if ($what == 'mysqlnobin')
     {
         backup_tables($outputfile);
     }
+
+    $_SESSION["commandbackuplastdone"]="";
+    $_SESSION["commandbackuptorun"]="";
 }
 
 // POSTGRESQL
@@ -320,7 +335,9 @@ if ($what == 'postgresql')
     $paramcrypted.=" -w ".$dolibarr_main_db_name;
     $paramclear.=" -w ".$dolibarr_main_db_name;
 
-    print $langs->trans("RunCommandSummaryToLaunch").':<br>'."\n";
+    $_SESSION["commandbackuplastdone"]="";
+    $_SESSION["commandbackuptorun"]=$command." ".$paramcrypted;
+    /*print $langs->trans("RunCommandSummaryToLaunch").':<br>'."\n";
     print '<textarea rows="'.ROWS_3.'" cols="120">'.$command." ".$paramcrypted.'</textarea><br>'."\n";
 
     print '<br>';
@@ -330,7 +347,7 @@ if ($what == 'postgresql')
     print $langs->trans("YouMustRunCommandFromCommandLineAfterLoginToUser",$dolibarr_main_db_user,$dolibarr_main_db_user);
 
     print '<br>';
-    print '<br>';
+    print '<br>';*/
 
     $what='';
 }
@@ -339,33 +356,48 @@ if ($what == 'postgresql')
 
 
 // Si on a demande une generation
-if ($what)
-{
+//if ($what)
+//{
     if ($errormsg)
     {
-        print '<div class="error">'.$langs->trans("Error")." : ".$errormsg.'</div>';
-        //		print '<a href="'.DOL_URL_ROOT.$relativepatherr.'">'.$langs->trans("DownloadErrorFile").'</a><br>';
-        print '<br>';
-        print '<br>';
+    	setEventMessages($langs->trans("Error")." : ".$errormsg, null, 'errors');
+
+    	$resultstring='';
+        $resultstring.='<div class="error">'.$langs->trans("Error")." : ".$errormsg.'</div>';
+
+        $_SESSION["commandbackupresult"]=$resultstring;
     }
     else
-    {
-        print '<div class="ok">';
-        print $langs->trans("BackupFileSuccessfullyCreated").'.<br>';
-        print $langs->trans("YouCanDownloadBackupFile");
-        print '</div>';
-        print '<br>';
-    }
-}
+	{
+		if ($what)
+		{
+	        setEventMessages($langs->trans("BackupFileSuccessfullyCreated").'.<br>'.$langs->trans("YouCanDownloadBackupFile"), null, 'mesgs');
 
+	        $resultstring='<div class="ok">';
+	        $resultstring.=$langs->trans("BackupFileSuccessfullyCreated").'.<br>';
+	        $resultstring.=$langs->trans("YouCanDownloadBackupFile");
+	        $resultstring.='<div>';
+
+	        $_SESSION["commandbackupresult"]=$resultstring;
+		}
+		else
+		{
+			setEventMessages($langs->trans("YouMustRunCommandFromCommandLineAfterLoginToUser",$dolibarr_main_db_user,$dolibarr_main_db_user), null, 'mesgs');
+		}
+    }
+//}
+
+/*
 $filearray=dol_dir_list($conf->admin->dir_output.'/backup','files',0,'','',$sortfield,(strtolower($sortorder)=='asc'?SORT_ASC:SORT_DESC),1);
 $result=$formfile->list_of_documents($filearray,null,'systemtools','',1,'backup/',1,0,($langs->trans("NoBackupFileAvailable").'<br>'.$langs->trans("ToBuildBackupFileClickHere",DOL_URL_ROOT.'/admin/tools/dolibarr_export.php')),0,$langs->trans("PreviousDumpFiles"));
 
 print '<br>';
+*/
+
+// Redirect t backup page
+header("Location: dolibarr_export.php");
 
 $time_end = time();
-
-llxFooter();
 
 $db->close();
 

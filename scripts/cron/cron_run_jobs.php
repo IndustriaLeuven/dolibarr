@@ -1,8 +1,8 @@
-#!/usr/bin/php
+#!/usr/bin/env php
 <?php
-/* Copyright (C) 2012   Nicolas Villa aka Boyquotes http://informetic.fr
- * Copyright (C) 2013   Florian Henry <forian.henry@open-concept.pro
- * Copyright (C) 2013   Laurent Destailleur <eldy@users.sourceforge.net>
+/* Copyright (C) 2012      Nicolas Villa aka Boyquotes http://informetic.fr
+ * Copyright (C) 2013      Florian Henry <forian.henry@open-concept.pro
+ * Copyright (C) 2013-2015 Laurent Destailleur <eldy@users.sourceforge.net>
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -42,22 +42,24 @@ if (substr($sapi_type, 0, 3) == 'cgi') {
 	exit(-1);
 }
 
+require_once ($path."../../htdocs/master.inc.php");
+require_once (DOL_DOCUMENT_ROOT."/cron/class/cronjob.class.php");
+require_once (DOL_DOCUMENT_ROOT.'/user/class/user.class.php');
+
+// Check parameters
 if (! isset($argv[1]) || ! $argv[1]) {
-	print "Usage: ".$script_file." securitykey userlogin cronjobid(optional)\n";
+	usage($path,$script_file);
 	exit(-1);
 }
 $key=$argv[1];
 
 if (! isset($argv[2]) || ! $argv[2]) {
-	print "Usage: ".$script_file." securitykey userlogin cronjobid(optional)\n";
+	usage($path,$script_file);
 	exit(-1);
 } else {
 	$userlogin=$argv[2];
 }
 
-require_once ($path."../../htdocs/master.inc.php");
-require_once (DOL_DOCUMENT_ROOT."/cron/class/cronjob.class.php");
-require_once (DOL_DOCUMENT_ROOT.'/user/class/user.class.php');
 
 // Global variables
 $version=DOL_VERSION;
@@ -119,44 +121,70 @@ if ($result<0)
 	exit(-1);
 }
 
+// TODO This sequence of code must be shared with code into cron_run_jobs.php php page.
+
 // current date
 $now=dol_now();
 
 if(is_array($object->lines) && (count($object->lines)>0))
 {
-		// Loop over job
-		foreach($object->lines as $line)
+	// Loop over job
+	foreach($object->lines as $line)
+	{
+	    dol_syslog("cron_run_jobs.php cronjobid: ".$line->id, LOG_WARNING);
+	    
+		//If date_next_jobs is less of current date, execute the program, and store the execution time of the next execution in database
+		if (($line->datenextrun < $now) && (empty($line->datestart) || $line->datestart <= $now) && (empty($line->dateend) || $line->dateend >= $now))
 		{
-			//If date_next_jobs is less of current date, execute the program, and store the execution time of the next execution in database
-			if (($line->datenextrun < $now) && (empty($line->datestart) || $line->datestart <= $now) && (empty($line->dateend) || $line->dateend >= $now))
+			dol_syslog("cron_run_jobs.php:: torun line->datenextrun:".dol_print_date($line->datenextrun,'dayhourtext')." line->dateend:".dol_print_date($line->dateend,'dayhourtext')." now:".dol_print_date($now,'dayhourtext'));
+		    
+			$cronjob=new Cronjob($db);
+			$result=$cronjob->fetch($line->id);
+			if ($result<0) 
 			{
-				$cronjob=new Cronjob($db);
-				$result=$cronjob->fetch($line->id);
-				if ($result<0) {
-					echo "Error:".$cronjob->error;
-					dol_syslog("cron_run_jobs.php:: fetch Error".$cronjob->error, LOG_ERR);
-					exit(-1);
-				}
-				// execute methode
-				$result=$cronjob->run_jobs($userlogin);
-				if ($result<0) {
-					echo "Error:".$cronjob->error;
-					dol_syslog("cron_run_jobs.php:: run_jobs Error".$cronjob->error, LOG_ERR);
-					exit(-1);
-				}
-
-					// we re-program the next execution and stores the last execution time for this job
-				$result=$cronjob->reprogram_jobs($userlogin);
-				if ($result<0) {
-					echo "Error:".$cronjob->error;
-					dol_syslog("cron_run_jobs.php:: reprogram_jobs Error".$cronjob->error, LOG_ERR);
-					exit(-1);
-				}
-
+				echo "Error:".$cronjob->error;
+				dol_syslog("cron_run_jobs.php:: fetch Error".$cronjob->error, LOG_ERR);
+				exit(-1);
 			}
+			// Execute job
+			$result=$cronjob->run_jobs($userlogin);
+			if ($result<0) 
+			{
+				echo "Error:".$cronjob->error;
+				dol_syslog("cron_run_jobs.php:: run_jobs Error".$cronjob->error, LOG_ERR);
+				exit(-1);
+			}
+
+			// we re-program the next execution and stores the last execution time for this job
+			$result=$cronjob->reprogram_jobs($userlogin, $now);
+			if ($result<0) 
+			{
+				echo "Error:".$cronjob->error;
+				dol_syslog("cron_run_jobs.php:: reprogram_jobs Error".$cronjob->error, LOG_ERR);
+				exit(-1);
+			}
+
 		}
+	}
 }
 
 $db->close();
 
 exit(0);
+
+
+
+function usage($path,$script_file)
+{
+	global $conf;
+
+	print "Usage: ".$script_file." securitykey userlogin [cronjobid]\n";
+	print "The script return 0 when everything worked successfully.\n";
+	print "\n";
+	print "On Linux system, you can have cron jobs ran automatically by adding an entry into cron.\n";
+	print "For example, to run pending tasks each day at 3:30, you can add this line:\n";
+	print "30 3 * * * ".$path.$script_file." securitykey userlogin > ".DOL_DATA_ROOT."/".$script_file.".log\n";
+	print "For example, to run pending tasks every 5mn, you can add this line:\n";
+	print "*/5 * * * * ".$path.$script_file." securitykey userlogin > ".DOL_DATA_ROOT."/".$script_file.".log\n";
+}
+

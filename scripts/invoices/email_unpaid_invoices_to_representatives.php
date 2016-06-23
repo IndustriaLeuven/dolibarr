@@ -1,4 +1,4 @@
-#!/usr/bin/php
+#!/usr/bin/env php
 <?php
 /*
  * Copyright (C) 2005		Rodolphe Quiedeville <rodolphe@quiedeville.org>
@@ -120,7 +120,7 @@ if ($resql)
                 $oldemail = $obj->email;
                 $olduid = $obj->uid;
                 $oldlang = $obj->lang;
-                $oldsalerepresentative=dolGetFirstLastname($obj->firstname, $obj->lastname);;
+                $oldsalerepresentative=dolGetFirstLastname($obj->firstname, $obj->lastname);
                 $message = '';
                 $total = 0;
                 $foundtoprocess = 0;

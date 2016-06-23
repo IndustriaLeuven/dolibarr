@@ -156,13 +156,13 @@ if (GETPOST('confirmation'))
 		}
 
 		if (isset($errheure)) {
-			setEventMessage($langs->trans("ErrorBadFormat"), 'errors');
+			setEventMessages($langs->trans("ErrorBadFormat"), null, 'errors');
 		}
 	}
 
 	//If just one day and no other time options, error message
 	if (count($_SESSION["totalchoixjour"])=="1" && $_POST["horaires0"][0]=="" && $_POST["horaires0"][1]=="" && $_POST["horaires0"][2]=="" && $_POST["horaires0"][3]=="" && $_POST["horaires0"][4]=="") {
-		setEventMessage($langs->trans("MoreChoices"), 'errors');
+		setEventMessages($langs->trans("MoreChoices"), null, 'errors');
 		$erreur=true;
 	}
 
@@ -227,7 +227,7 @@ if (! isset($_SESSION['mois'])) $_SESSION['mois']= date('n');
 if (! isset($_SESSION['annee'])) $_SESSION['annee']= date('Y');
 
 //mise a jour des valeurs de session si bouton retour a aujourd'hui
-if ((!issetAndNoEmpty('choixjourajout')) && !issetAndNoEmpty('choixjourretrait') || issetAndNoEmpty('retourmois')){
+if (!issetAndNoEmpty('choixjourajout') && !issetAndNoEmpty('choixjourretrait') && (issetAndNoEmpty('retourmois') || issetAndNoEmpty('retourmois_x'))) {
 	$_SESSION["jour"]=date("j");
 	$_SESSION["mois"]=date("n");
 	$_SESSION["annee"]=date("Y");
@@ -330,7 +330,7 @@ else
 //Debut du formulaire et bandeaux de tete
 print '<form name="formulaire" action="" method="POST">'."\n";
 
-print_fiche_titre($langs->trans("CreatePoll").' (2 / 2)');
+print load_fiche_titre($langs->trans("CreatePoll").' (2 / 2)');
 
 //affichage de l'aide pour les jours
 print '<div class="bodydate">'."\n";
@@ -338,8 +338,9 @@ print $langs->trans("OpenSurveyStep2")."\n";
 print '</div>'."\n";
 
 //debut du tableau qui affiche le calendrier
-print '<center><div class="corps">'."\n";
-print '<table align=center>'."\n";
+print '<div class="corps">'."\n";
+print '<div class="center">'."\n";
+print '<table align="center">'."\n";	// The div class=center has no effect on table, so we must keep the align=center for table
 print '<tr><td><input type="image" name="anneeavant" value="<<" src="../img/rewind.png"></td><td><input type="image" name="moisavant" value="<" src="../img/previous.png"></td>';
 print '<td width="150px" align="center"> '.$motmois.' '.$_SESSION["annee"].'<br>';
 print '<input type="image" name="retourmois" alt="'.dol_escape_htmltag($langs->trans("BackToCurrentMonth")).'" title="'.dol_escape_htmltag($langs->trans("BackToCurrentMonth")).'" value="" src="'.img_picto('', 'refresh','',0,1).'">';
@@ -347,7 +348,10 @@ print '</td><td><input type="image" name="moisapres" value=">" src="../img/next.
 print '<td><input type="image" name="anneeapres" value=">>" src="../img/fforward.png"></td><td></td><td></td><td></td><td></td><td></td><td>';
 print '</td></tr>'."\n";
 print '</table>'."\n";
-print '<table>'."\n";
+print '</div>'."\n";
+
+print '<div class="center">'."\n";
+print '<table align="center">'."\n";	// The div class=center has no effect on table, so we must keep the align=center for table
 print '<tr>'."\n";
 
 //affichage des jours de la semaine en haut du tableau
@@ -490,24 +494,27 @@ for ($i = 0; $i < $nbrejourmois + $premierjourmois; $i++) {
 //fin du tableau
 print '</tr>'."\n";
 print '</table>'."\n";
-print '</div></center>'."\n";
+print '</div></div>'."\n";
 
-print '<div class="bodydate"><center>'."\n";
+print '<div class="bodydate"><div class="center">'."\n";
 
 // affichage de tous les jours choisis
 if (issetAndNoEmpty('totalchoixjour', $_SESSION) || $erreur)
 {
 	//affichage des jours
 	print '<br>'."\n";
+	print '<div align="left">';
 	print '<strong>'. $langs->trans("SelectedDays") .':</strong>'."<br>\n";
 	print $langs->trans("SelectDayDesc")."<br>\n";
+	print '</div><br>';
+
 	print '<table>'."\n";
 	print '<tr>'."\n";
 	print '<td></td>'."\n";
 
 	for ($i = 0; $i < $_SESSION["nbrecaseshoraires"]; $i++) {
 		$j = $i+1;
-		print '<td classe="somme">'. $langs->trans("Time") .' '.$j.'</center></td>'."\n";
+		print '<td classe="somme"><div class="center">'. $langs->trans("Time") .' '.$j.'</div></td>'."\n";
 	}
 
 	if ($_SESSION["nbrecaseshoraires"] < 10) {
@@ -555,7 +562,7 @@ print '<a name=bas></a>'."\n";
 print '</form>'."\n";
 //bandeau de pied
 print '<br><br><br><br>'."\n";
-print '</center></div>'."\n";
+print '</div></div>'."\n";
 
 llxFooter();
 

@@ -63,7 +63,7 @@ class ModeleImports
 	 *  Charge en memoire et renvoie la liste des modeles actifs
 	 *
      *  @param	DoliDB	$db     			Database handler
-     *  @param  string	$maxfilenamelength  Max length of value to show
+     *  @param  integer	$maxfilenamelength  Max length of value to show
      *  @return	array						List of templates
 	 */
 	function liste_modeles($db,$maxfilenamelength=0)
@@ -84,7 +84,7 @@ class ModeleImports
     			{
     				$moduleid=$reg[1];
 
-    				// Chargement de la classe
+    				// Loading Class
     				$file = $dir."/import_".$moduleid.".modules.php";
     				$classname = "Import".ucfirst($moduleid);
 

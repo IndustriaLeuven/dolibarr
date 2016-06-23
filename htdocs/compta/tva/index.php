@@ -93,7 +93,7 @@ function pt ($db, $sql, $date)
 
             $i++;
         }
-        print '<tr class="liste_total"><td align="right">'.$langs->trans("Total")." :</td><td nowrap=\"nowrap\" align=\"right\"><b>".price($total)."</b></td><td>&nbsp;</td></tr>";
+        print '<tr class="liste_total"><td align="right">'.$langs->trans("Total")." :</td><td class=\"nowrap\" align=\"right\"><b>".price($total)."</b></td><td>&nbsp;</td></tr>";
 
         print "</table>";
         $db->free($result);
@@ -116,7 +116,7 @@ $tva = new Tva($db);
 $textprevyear="<a href=\"index.php?year=" . ($year_current-1) . "\">".img_previous()."</a>";
 $textnextyear=" <a href=\"index.php?year=" . ($year_current+1) . "\">".img_next()."</a>";
 
-print_fiche_titre($langs->trans("VAT"),"$textprevyear ".$langs->trans("Year")." $year_start $textnextyear");
+print load_fiche_titre($langs->trans("VAT"),"$textprevyear ".$langs->trans("Year")." $year_start $textnextyear");
 
 print $langs->trans("VATReportBuildWithOptionDefinedInModule").'<br>';
 print '('.$langs->trans("TaxModuleSetupToModifyRules",DOL_URL_ROOT.'/admin/taxes.php').')<br>';
@@ -124,12 +124,12 @@ print '<br>';
 
 print '<table width="100%" class="notopnoleftnoright">';
 print '<tr><td class="notopnoleft" width="50%">';
-print_titre($langs->trans("VATSummary"));
+print load_fiche_titre($langs->trans("VATSummary"));
 // The report mode is the one defined by defaut in tax module setup
 //print $modetax;
 //print '('.$langs->trans("SeeVATReportInInputOutputMode",'<a href="'.$_SERVER["PHP_SELF"].'?year='.$year_start.'&modetax=0">','</a>').')';
 print '</td><td>';
-print_titre($langs->trans("VATPaid"));
+print load_fiche_titre($langs->trans("VATPaid"));
 print '</td></tr>';
 
 print '<tr><td class="notopnoleft" width="50%" valign="top">';
@@ -160,9 +160,10 @@ for ($m = 1 ; $m < 13 ; $m++ )
     $parameters["mode"] = $modetax;
     $parameters["year"] = $y;
     $parameters["month"] = $m;
+
     // Initialize technical object to manage hooks of expenses. Note that conf->hooks_modules contains array array
     $hookmanager->initHooks(array('externalbalance'));
-    $reshook=$hookmanager->executeHooks('addStatisticLine',$parameters,$object,$action);    // Note that $action and $object may have been modified by some hooks
+    $reshook=$hookmanager->executeHooks('addVatLine',$parameters,$object,$action);    // Note that $action and $object may have been modified by some hooks
 
     if (! is_array($coll_listbuy) && $coll_listbuy == -1)
     {
@@ -216,7 +217,7 @@ for ($m = 1 ; $m < 13 ; $m++ )
         $subtotalcoll=0; $subtotalpaye=0; $subtotal=0;
     }
 }
-print '<tr class="liste_total"><td align="right" colspan="3">'.$langs->trans("TotalToPay").':</td><td nowrap align="right">'.price($total).'</td>';
+print '<tr class="liste_total"><td align="right" colspan="3">'.$langs->trans("TotalToPay").':</td><td class="nowrap" align="right">'.price($total).'</td>';
 print "<td>&nbsp;</td>\n";
 print '</tr>';
 
@@ -252,7 +253,5 @@ print "</td></tr></table>";
 print '</td></tr>';
 print '</table>';
 
-
-$db->close();
-
 llxFooter();
+$db->close();

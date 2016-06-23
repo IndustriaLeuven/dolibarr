@@ -85,6 +85,7 @@ class mailing_contacts4 extends MailingTargets
     	$sql.= " LEFT JOIN ".MAIN_DB_PREFIX."societe as s ON s.rowid = sp.fk_soc";
     	$sql.= " WHERE sp.email != ''";     // Note that null != '' is false
     	$sql.= " AND sp.no_email = 0";
+    	$sql.= " AND sp.statut = 1";
     	$sql.= " AND sp.entity IN (".getEntity('societe', 1).")";
     	if ($filtersarray[0] <> 'all') $sql.= " AND c.label = '".$this->db->escape($filtersarray[0])."'";
     	$sql.= " ORDER BY sp.lastname, sp.firstname";
@@ -145,7 +146,7 @@ class mailing_contacts4 extends MailingTargets
             $statssql[$i].= " AND sp.email != ''";    // Note that null != '' is false
             $statssql[$i].= " AND sp.entity IN (".getEntity('societe', 1).")";
             $statssql[$i].= " AND cs.fk_categorie = c.rowid";
-            $statssql[$i].= " AND cs.fk_societe = sp.fk_soc";
+            $statssql[$i].= " AND cs.fk_soc = sp.fk_soc";
             $statssql[$i].= " GROUP BY c.label";
             $statssql[$i].= " ORDER BY nb DESC";
             $statssql[$i].= " LIMIT $i,1";
@@ -158,7 +159,7 @@ class mailing_contacts4 extends MailingTargets
     /**
      *		Return here number of distinct emails returned by your selector.
      *
-     *		@param	string	$sql		Requete sql de comptage
+     *		@param		string	$sql		Requete sql de comptage
      *		@return		int		Number of recipients
      */
     function getNbOfRecipients($sql='')
@@ -173,6 +174,7 @@ class mailing_contacts4 extends MailingTargets
         $sql.= " WHERE c.entity IN (".getEntity('societe', 1).")";
         $sql.= " AND c.email != ''"; // Note that null != '' is false
         $sql.= " AND c.no_email = 0";
+        $sql.= " AND c.statut = 1";
         /*
     	$sql = "SELECT count(distinct(sp.email)) as nb";
         $sql.= " FROM ".MAIN_DB_PREFIX."socpeople as sp,";
@@ -183,7 +185,7 @@ class mailing_contacts4 extends MailingTargets
         $sql.= " AND sp.entity IN (".getEntity('societe', 1).")";
         $sql.= " AND sp.email != ''"; // Note that null != '' is false
         $sql.= " AND cs.fk_categorie = c.rowid";
-        $sql.= " AND cs.fk_societe = sp.fk_soc";
+        $sql.= " AND cs.fk_soc = sp.fk_soc";
         */
     	// La requete doit retourner un champ "nb" pour etre comprise
     	// par parent::getNbOfRecipients
@@ -208,6 +210,7 @@ class mailing_contacts4 extends MailingTargets
         $sql.= " INNER JOIN ".MAIN_DB_PREFIX."categorie as c ON cs.fk_categorie = c.rowid";
         $sql.= " WHERE sp.email != ''";     // Note that null != '' is false
         $sql.= " AND sp.no_email = 0";
+        $sql.= " AND sp.statut = 1";
         $sql.= " AND sp.entity IN (".getEntity('societe', 1).")";
         $sql.= " GROUP BY c.label";
         $sql.= " ORDER BY c.label";

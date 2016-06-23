@@ -2,6 +2,7 @@
 /* Copyright (C) 2003      Rodolphe Quiedeville <rodolphe@quiedeville.org>
  * Copyright (C) 2004-2014 Laurent Destailleur  <eldy@users.sourceforge.net>
  * Copyright (C) 2010-2014 Juanjo Menent		<jmenent@2byte.es>
+ * Copyright (C) 2015      Marcos García        <marcosgdf@gmail.com>
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -24,6 +25,7 @@
  */
 
 require '../../main.inc.php';
+require_once DOL_DOCUMENT_ROOT.'/core/class/notify.class.php';
 require_once DOL_DOCUMENT_ROOT.'/core/lib/company.lib.php';
 require_once DOL_DOCUMENT_ROOT.'/contact/class/contact.class.php';
 require_once DOL_DOCUMENT_ROOT.'/core/triggers/interface_50_modNotification_Notification.class.php';
@@ -54,65 +56,78 @@ if (! $sortfield) $sortfield="c.lastname";
 
 $now=dol_now();
 
+$object = new Societe($db);
+
+// Initialize technical object to manage hooks of thirdparties. Note that conf->hooks_modules contains array array
+$hookmanager->initHooks(array('thirdpartynotification','globalcard'));
+
+
 
 /*
  * Actions
  */
 
-// Add a notification
-if ($action == 'add')
+$parameters=array('id'=>$socid);
+$reshook=$hookmanager->executeHooks('doActions',$parameters,$object,$action);    // Note that $action and $object may have been modified by some hooks
+if ($reshook < 0) setEventMessages($hookmanager->error, $hookmanager->errors, 'errors');
+
+if (empty($reshook))
 {
     $error=0;
 
-    if (empty($contactid))
+    // Add a notification
+    if ($action == 'add')
     {
-	    setEventMessage($langs->trans("ErrorFieldRequired",$langs->transnoentitiesnoconv("Contact")), 'errors');
-        $error++;
-    }
-    if ($actionid <= 0)
-    {
-	    setEventMessage($langs->trans("ErrorFieldRequired",$langs->transnoentitiesnoconv("Action")), 'errors');
-        $error++;
-    }
-
-    if (! $error)
-    {
-        $db->begin();
-
-        $sql = "DELETE FROM ".MAIN_DB_PREFIX."notify_def";
-        $sql .= " WHERE fk_soc=".$socid." AND fk_contact=".$contactid." AND fk_action=".$actionid;
-        if ($db->query($sql))
+        if (empty($contactid))
         {
-            $sql = "INSERT INTO ".MAIN_DB_PREFIX."notify_def (datec,fk_soc, fk_contact, fk_action)";
-            $sql .= " VALUES ('".$db->idate($now)."',".$socid.",".$contactid.",".$actionid.")";
-
-            if (! $db->query($sql))
-            {
-                $error++;
-                dol_print_error($db);
-            }
+    	    setEventMessages($langs->trans("ErrorFieldRequired",$langs->transnoentitiesnoconv("Contact")), null, 'errors');
+            $error++;
         }
-        else
+        if ($actionid <= 0)
         {
-            dol_print_error($db);
+    	    setEventMessages($langs->trans("ErrorFieldRequired",$langs->transnoentitiesnoconv("Action")), null, 'errors');
+            $error++;
         }
-
+    
         if (! $error)
         {
-            $db->commit();
-        }
-        else
-        {
-            $db->rollback();
+            $db->begin();
+            
+            $sql = "DELETE FROM ".MAIN_DB_PREFIX."notify_def";
+            $sql .= " WHERE fk_soc=".$socid." AND fk_contact=".$contactid." AND fk_action=".$actionid;
+            if ($db->query($sql))
+            {
+                $sql = "INSERT INTO ".MAIN_DB_PREFIX."notify_def (datec,fk_soc, fk_contact, fk_action)";
+                $sql .= " VALUES ('".$db->idate($now)."',".$socid.",".$contactid.",".$actionid.")";
+    
+                if (! $db->query($sql))
+                {
+                    $error++;
+                    dol_print_error($db);
+                }
+            }
+            else
+            {
+                dol_print_error($db);
+            }
+    
+            if (! $error)
+            {
+                $db->commit();
+            }
+            else
+            {
+                $db->rollback();
+            }
         }
     }
-}
-
-// Remove a notification
-if ($action == 'delete')
-{
-    $sql = "DELETE FROM ".MAIN_DB_PREFIX."notify_def where rowid=".$_GET["actid"];
-    $db->query($sql);
+    
+    // Remove a notification
+    if ($action == 'delete')
+    {
+        $sql = "DELETE FROM ".MAIN_DB_PREFIX."notify_def where rowid=".$_GET["actid"];
+        $db->query($sql);
+    }
 }
 
 
@@ -123,10 +138,14 @@ if ($action == 'delete')
 
 $form = new Form($db);
 
-llxHeader();
-
 $object = new Societe($db);
 $result=$object->fetch($socid);
+
+$title=$langs->trans("ThirdParty").' - '.$langs->trans("Notification");
+if (! empty($conf->global->MAIN_HTML_TITLE) && preg_match('/thirdpartynameonly/',$conf->global->MAIN_HTML_TITLE) && $object->name) $title=$object->name.' - '.$langs->trans("Notification");
+$help_url='EN:Module_Third_Parties|FR:Module_Tiers|ES:Empresas';
+llxHeader('',$title,$help_url);
+
 
 if ($result > 0)
 {
@@ -136,12 +155,17 @@ if ($result > 0)
 
     dol_fiche_head($head, 'notify', $langs->trans("ThirdParty"),0,'company');
 
+    dol_banner_tab($object, 'socid', '', ($user->societe_id?0:1), 'rowid', 'nom');
+        
+    print '<div class="fichecenter">';
+    
+    print '<div class="underbanner clearboth"></div>';
+    print '<table class="border centpercent">';
 
-    print '<table class="border"width="100%">';
-
-    print '<tr><td width="25%">'.$langs->trans("ThirdPartyName").'</td><td colspan="3">';
-    print $form->showrefnav($object,'socid','',($user->societe_id?0:1),'rowid','nom');
-    print '</td></tr>';
+	// Alias names (commercial, trademark or alias names)
+	print '<tr><td class="titlefield">'.$langs->trans('AliasNames').'</td><td colspan="3">';
+	print $object->name_alias;
+	print "</td></tr>";
 
     // Prefix
     if (! empty($conf->global->SOCIETE_USEPREFIX))  // Old not used prefix field
@@ -169,46 +193,25 @@ if ($result > 0)
 
     print '<tr><td>'.$langs->trans("NbOfActiveNotifications").'</td>';
     print '<td colspan="3">';
-    $nb=0;
-    // List of per contact notifications
-    $sql = "SELECT COUNT(n.rowid) as nb";
-    $sql.= " FROM ".MAIN_DB_PREFIX."notify_def as n";
-    $sql.= " WHERE fk_soc = ".$object->id;
-    $resql=$db->query($sql);
-    if ($resql)
-    {
-        $num = $db->num_rows($resql);
-        $i = 0;
-        while ($i < $num)
-        {
-            $obj = $db->fetch_object($resql);
-            $nb=$obj->nb;
-            $i++;
-        }
-    }
-    else {
-        dol_print_error($db);
-    }
-    // List of notifications enabled for fixed email
-    foreach($conf->global as $key => $val)
-    {
-    	if (! preg_match('/^NOTIFICATION_FIXEDEMAIL_(.*)/', $key, $reg)) continue;
-    	$listtmp=explode(',',$val);
-    	$nb+=count($listtmp);
-    }
-    print $nb;
+    $notify=new Notify($db);
+    $tmparray = $notify->getNotificationsArray('', $object->id);
+    print count($tmparray);
     print '</td></tr>';
     print '</table>';
 
-    dol_fiche_end();
-
     // Help
-    print $langs->trans("NotificationsDesc").'<br><br>';
+    print '<br>'.$langs->trans("NotificationsDesc");
+
+    print '</div>';
+    
+    dol_fiche_end();
 
     print "\n";
 
+    print '<br>';
+    
     // Add notification form
-    print_fiche_titre($langs->trans("AddNewNotification"),'','');
+    print load_fiche_titre($langs->trans("AddNewNotification"),'','');
 
     print '<form action="'.$_SERVER["PHP_SELF"].'?socid='.$socid.'" method="post">';
     print '<input type="hidden" name="token" value="'.$_SESSION['newtoken'].'">';
@@ -223,7 +226,7 @@ if ($result > 0)
     print_liste_field_titre($langs->trans("Action"),$_SERVER["PHP_SELF"],"a.titre",'',$param,'"width="35%"',$sortfield,$sortorder);
     print_liste_field_titre($langs->trans("Type"),$_SERVER["PHP_SELF"],"",'',$param,'"width="10%"',$sortfield,$sortorder);
     print_liste_field_titre('');
-    print '</tr>';
+	print "</tr>\n";
 
     $var=false;
     $listofemails=$object->thirdparty_and_contact_email_array();
@@ -233,12 +236,12 @@ if ($result > 0)
 
         // Load array of available notifications
         $notificationtrigger=new InterfaceNotification($db);
-        $listofnotifiedevents=$notificationtrigger->getListOfManagedEvents();
+        $listofmanagedeventfornotification=$notificationtrigger->getListOfManagedEvents();
 
-        foreach($listofnotifiedevents as $notifiedevent)
+        foreach($listofmanagedeventfornotification as $managedeventfornotification)
         {
- 			$label=($langs->trans("Notify_".$notifiedevent['code'])!="Notify_".$notifiedevent['code']?$langs->trans("Notify_".$notifiedevent['code']):$notifiedevent['label']);
-            $actions[$notifiedevent['rowid']]=$label;
+ 			$label=($langs->trans("Notify_".$managedeventfornotification['code'])!="Notify_".$managedeventfornotification['code']?$langs->trans("Notify_".$managedeventfornotification['code']):$managedeventfornotification['label']);
+            $actions[$managedeventfornotification['rowid']]=$label;
         }
         print '<tr '.$bc[$var].'><td>';
         print $form->selectarray("contactid",$listofemails);
@@ -262,11 +265,12 @@ if ($result > 0)
 
     print '</table>';
 
+    
     print '</form>';
     print '<br>';
 
     // List of active notifications
-    print_fiche_titre($langs->trans("ListOfActiveNotifications"),'','');
+    print load_fiche_titre($langs->trans("ListOfActiveNotifications"),'','');
     $var=true;
 
     // Line with titles
@@ -278,37 +282,8 @@ if ($result > 0)
     print_liste_field_titre('','','');
     print '</tr>';
 
-    // List of notifications enabled for fixed email
-    foreach($conf->global as $key => $val)
-    {
-    	if (! preg_match('/^NOTIFICATION_FIXEDEMAIL_(.*)/', $key, $reg)) continue;
-		print '<tr '.$bc[$var].'><td>';
-		$listtmp=explode(',',$val);
-		foreach($listtmp as $keyemail => $valemail)
-		{
-			$valemail=trim($valemail);
-    		//print $keyemail.' - '.$valemail.' - '.$reg[1].'<br>';
-			if (isValidEmail($valemail))
-			{
-				print ' &lt;'.$valemail.'&gt;';
-			}
-			else
-			{
-				$langs->load("errors");
-				print ' &nbsp; '.img_warning().' '.$langs->trans("ErrorBadEMail",$valemail);
-			}
-		}
-		print '</td>';
-		print '<td>';
-		$label=($langs->trans("Notify_".$reg[1])!="Notify_".$reg[1]?$langs->trans("Notify_".$reg[1]):$reg[1]);
-		print $label;
-		print '</td>';
-		print '<td>';
-		print $langs->trans("Email");
-		print '</td>';
-		print '<td align="right">'.$langs->trans("SeeModuleSetup").'</td>';
-		print '</tr>';
-    }
+	$langs->load("errors");
+	$langs->load("other");
 
     // List of notifications enabled for contacts
     $sql = "SELECT n.rowid, n.type,";
@@ -371,12 +346,62 @@ if ($result > 0)
         dol_print_error($db);
     }
 
+    // List of notifications enabled for fixed email
+    /*
+    foreach($conf->global as $key => $val)
+    {
+    	if (! preg_match('/^NOTIFICATION_FIXEDEMAIL_(.*)/', $key, $reg)) continue;
+    	$var = ! $var;
+		print '<tr '.$bc[$var].'><td>';
+		$listtmp=explode(',',$val);
+		$first=1;
+		foreach($listtmp as $keyemail => $valemail)
+		{
+			if (! $first) print ', ';
+			$first=0;
+			$valemail=trim($valemail);
+    		//print $keyemail.' - '.$valemail.' - '.$reg[1].'<br>';
+			if (isValidEmail($valemail, 1))
+			{
+				if ($valemail == '__SUPERVISOREMAIL__') print $valemail;
+				else print ' &lt;'.$valemail.'&gt;';
+			}
+			else
+			{
+				print ' '.img_warning().' '.$langs->trans("ErrorBadEMail",$valemail);
+			}
+		}
+		print '</td>';
+		print '<td>';
+		$notifcode=preg_replace('/_THRESHOLD_.*$/','',$reg[1]);
+		$notifcodecond=preg_replace('/^.*_(THRESHOLD_)/','$1',$reg[1]);
+		$label=($langs->trans("Notify_".$notifcode)!="Notify_".$notifcode?$langs->trans("Notify_".$notifcode):$notifcode);
+		print $label;
+		if (preg_match('/^THRESHOLD_HIGHER_(.*)$/',$notifcodecond,$regcond) && ($regcond[1] > 0))
+		{
+			print ' - '.$langs->trans("IfAmountHigherThan",$regcond[1]);
+		}
+		print '</td>';
+		print '<td>';
+		print $langs->trans("Email");
+		print '</td>';
+		print '<td align="right">'.$langs->trans("SeeModuleSetup", $langs->transnoentitiesnoconv("Module600Name")).'</td>';
+		print '</tr>';
+    }*/
+    if ($user->admin)
+    {
+	    $var = ! $var;
+		print '<tr '.$bc[$var].'><td colspan="4">';
+		print '+ <a href="'.DOL_URL_ROOT.'/admin/notification.php">'.$langs->trans("SeeModuleSetup", $langs->transnoentitiesnoconv("Module600Name")).'</a>';
+		print '</td></tr>';
+    }
+
     print '</table>';
     print '<br>';
 
 
     // List of notifications done
-    print_fiche_titre($langs->trans("ListOfNotificationsDone"),'','');
+    print load_fiche_titre($langs->trans("ListOfNotificationsDone"),'','');
     $var=true;
 
     // Line with titles

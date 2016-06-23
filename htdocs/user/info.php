@@ -1,6 +1,6 @@
 <?php
 /* Copyright (C) 2004-2007 Laurent Destailleur  <eldy@users.sourceforge.net>
- * Copyright (C) 2005-2012 Regis Houssin        <regis.houssin@capnetworks.com>
+ * Copyright (C) 2005-2015 Regis Houssin        <regis.houssin@capnetworks.com>
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -31,8 +31,11 @@ $langs->load("users");
 
 // Security check
 $id = GETPOST('id','int');
-$fuser = new User($db);
-$fuser->fetch($id);
+$object = new User($db);
+if ($id > 0 || ! empty($ref))
+{
+	$result = $object->fetch($id, $ref);
+}
 
 // Security check
 $socid=0;
@@ -42,10 +45,10 @@ if ($user->id == $id)	// A user can always read its own card
 {
 	$feature2='';
 }
-$result = restrictedArea($user, 'user', $id, '&user', $feature2);
+$result = restrictedArea($user, 'user', $id, 'user&user', $feature2);
 
-// If user is not user read and no permission to read other users, we stop
-if (($fuser->id != $user->id) && (! $user->rights->user->user->lire))
+// If user is not user that read and no permission to read other users, we stop
+if (($object->id != $user->id) && (! $user->rights->user->user->lire))
   accessforbidden();
 
 
@@ -54,22 +57,37 @@ if (($fuser->id != $user->id) && (! $user->rights->user->user->lire))
  * View
  */
 
+$form = new Form($db);
+
 llxHeader();
 
-$fuser->info($id);
-
-$head = user_prepare_head($fuser);
+$head = user_prepare_head($object);
 
 $title = $langs->trans("User");
 dol_fiche_head($head, 'info', $title, 0, 'user');
 
 
-print '<table width="100%"><tr><td>';
-dol_print_object_info($fuser);
-print '</td></tr></table>';
+$linkback = '<a href="'.DOL_URL_ROOT.'/user/index.php">'.$langs->trans("BackToList").'</a>';
+
+dol_banner_tab($object, 'id', $linkback, $user->rights->user->user->lire || $user->admin);
+
+
+$object->info($id); // This overwrite ->ref with login instead of id
+
+
+print '<div class="fichecenter">';
+
+print '<div class="underbanner clearboth"></div>';
+
+print '<br>';
+
+dol_print_object_info($object);
 
 print '</div>';
 
-$db->close();
+
+dol_fiche_end();
+
 
 llxFooter();
+$db->close();

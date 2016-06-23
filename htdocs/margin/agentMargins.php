@@ -1,6 +1,7 @@
 <?php
 /* Copyright (C) 2012-2013	Christophe Battarel	<christophe.battarel@altairis.fr>
  * Copyright (C) 2014		Ferran Marcet		<fmarcet@2byte.es>
+ * Copyright (C) 2015       Marcos García       <marcosgdf@gmail.com>
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -34,7 +35,12 @@ $langs->load("products");
 $langs->load("margins");
 
 // Security check
-$agentid = GETPOST('agentid','int');
+
+if ($user->rights->margins->read->all) {
+	$agentid = GETPOST('agentid', 'int');
+} else {
+	$agentid = $user->id;
+}
 
 $mesg = '';
 
@@ -74,7 +80,7 @@ $form = new Form($db);
 llxHeader('',$langs->trans("Margins").' - '.$langs->trans("Agents"));
 
 $text=$langs->trans("Margins");
-//print_fiche_titre($text);
+//print load_fiche_titre($text);
 
 // Show tabs
 $head=marges_prepare_head($user);
@@ -85,10 +91,12 @@ dol_fiche_head($head, 'agentMargins', $titre, 0, $picto);
 print '<form method="post" name="sel" action="'.$_SERVER['PHP_SELF'].'">';
 print '<table class="border" width="100%">';
 
-print '<tr><td width="20%">'.$langs->trans('SalesRepresentative').'</td>';
-print '<td colspan="4">';
-print $form->select_dolusers($agentid,'agentid',1);
-print '</td></tr>';
+if ($user->rights->margins->read->all) {
+	print '<tr><td width="20%">'.$langs->trans('SalesRepresentative').'</td>';
+	print '<td colspan="4">';
+	print $form->select_dolusers($agentid, 'agentid', 1, '', 0, '', '', 0, 0, 0, '', 0, '', 'maxwidth300');
+	print '</td></tr>';
+}
 
 // Start date
 print '<td>'.$langs->trans('StartDate').' ('.$langs->trans("DateValidation").')</td>';

@@ -44,7 +44,7 @@ $companystatic=new Societe($db);
 
 llxHeader();
 
-print_fiche_titre($langs->trans("ProspectionArea"));
+print load_fiche_titre($langs->trans("ProspectionArea"));
 
 //print '<table border="0" width="100%" class="notopnoleftnoright">';
 //print '<tr><td valign="top" width="30%" class="notopnoleft">';
@@ -54,15 +54,15 @@ print '<div class="fichecenter"><div class="fichethirdleft">';
 if (! empty($conf->propal->enabled))
 {
 	$var=false;
-	print '<table class="noborder nohover" width="100%">';
 	print '<form method="post" action="'.DOL_URL_ROOT.'/comm/propal.php">';
 	print '<input type="hidden" name="token" value="'.$_SESSION['newtoken'].'">';
+	print '<table class="noborder nohover" width="100%">';
 	print '<tr class="liste_titre"><td colspan="3">'.$langs->trans("SearchAProposal").'</td></tr>';
 	print '<tr '.$bc[$var].'><td>';
 	print $langs->trans("Ref").':</td><td><input type="text" class="flat" name="sf_ref" size="18"></td><td rowspan="2"><input type="submit" value="'.$langs->trans("Search").'" class="button"></td></tr>';
 	print '<tr '.$bc[$var].'><td class="nowrap">'.$langs->trans("Other").':</td><td><input type="text" class="flat" name="sall" size="18"></td>';
 	print '</tr>';
-	print "</form></table><br>\n";
+	print "</table></form><br>\n";
 }
 
 /*
@@ -120,7 +120,7 @@ if (! empty($conf->propal->enabled) && $user->rights->propale->lire)
 	if (! $user->rights->societe->client->voir && ! $socid) $sql.= ", ".MAIN_DB_PREFIX."societe_commerciaux as sc";
 	$sql.= " WHERE p.fk_statut = 0";
 	$sql.= " AND p.fk_soc = s.rowid";
-	$sql.= " AND p.entity = ".$conf->entity;
+	$sql.= " AND p.entity IN (".getEntity('propal', 1).")";
 	if (! $user->rights->societe->client->voir && ! $socid) $sql.= " AND s.rowid = sc.fk_soc AND sc.fk_user = " .$user->id;
 
 	$resql=$db->query($sql);
@@ -183,7 +183,7 @@ if (! empty($conf->propal->enabled) && $user->rights->propale->lire)
 	$sql.= " WHERE p.fk_soc = s.rowid";
 	$sql.= " AND p.fk_statut = c.id";
 	$sql.= " AND p.fk_statut = 1";
-	$sql.= " AND p.entity = ".$conf->entity;
+	$sql.= " AND p.entity IN (".getEntity('propal', 1).")";
 	if (! $user->rights->societe->client->voir && ! $socid) $sql.= " AND s.rowid = sc.fk_soc AND sc.fk_user = " .$user->id;
 	if ($socid) $sql.= " AND s.rowid = ".$socid;
 	$sql.= " ORDER BY p.rowid DESC";

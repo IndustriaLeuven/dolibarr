@@ -1,6 +1,7 @@
 <?php
 /* Copyright (C) 2012      Regis Houssin       <regis.houssin@capnetworks.com>
- * Copyright (C) 2013-2014 Laurent Destailleur <eldy@users.sourceforge.net>
+ * Copyright (C) 2013-2015 Laurent Destailleur <eldy@users.sourceforge.net>
+ * Copyright (C) 2015	   Charlie BENKE 	<charlie@patas-monkey.com>
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -20,12 +21,8 @@
  * $withproject (if we are on task contact)
  */
 
-if (! class_exists('Contact')) {
-	require DOL_DOCUMENT_ROOT.'/contact/class/contact.class.php';
-}
-if (! class_exists('FormCompany')) {
-	require DOL_DOCUMENT_ROOT.'/core/class/html.formcompany.class.php';
-}
+require_once DOL_DOCUMENT_ROOT.'/contact/class/contact.class.php';
+require_once DOL_DOCUMENT_ROOT.'/core/class/html.formcompany.class.php';
 
 $module = $object->element;
 
@@ -53,7 +50,7 @@ $userstatic=new User($db);
 <?php if ($permission) { ?>
 	<form class="tagtr liste_titre">
 		<div class="tagtd"><?php echo $langs->trans("Source"); ?></div>
-		<div class="tagtd"><?php echo $langs->trans("Company"); ?></div>
+		<div class="tagtd"><?php echo $langs->trans("ThirdParty"); ?></div>
 		<div class="tagtd"><?php echo $langs->trans("Contacts"); ?></div>
 		<div class="tagtd"><?php echo $langs->trans("ContactType"); ?></div>
 		<div class="tagtd">&nbsp;</div>
@@ -76,7 +73,12 @@ $userstatic=new User($db);
 		<div class="nowrap tagtd"><?php echo img_object('','user').' '.$langs->trans("Users"); ?></div>
 		<div class="tagtd"><?php echo $conf->global->MAIN_INFO_SOCIETE_NOM; ?></div>
 		<div class="tagtd maxwidthonsmartphone"><?php echo $form->select_dolusers($user->id, 'userid', 0, (! empty($userAlreadySelected)?$userAlreadySelected:null), 0, null, null, 0, 56); ?></div>
-		<div class="tagtd maxwidthonsmartphone"><?php echo $formcompany->selectTypeContact($object, '', 'type','internal'); ?></div>
+		<div class="tagtd maxwidthonsmartphone">
+		<?php
+		$tmpobject=$object;
+		if ($object->element == 'shipping' && is_object($objectsrc)) $tmpobject=$objectsrc;
+		echo $formcompany->selectTypeContact($tmpobject, '', 'type','internal'); 
+		?></div>
 		<div class="tagtd">&nbsp;</div>
 		<div class="tagtd" align="right"><input type="submit" class="button" value="<?php echo $langs->trans("Add"); ?>"></div>
 	</form>
@@ -96,13 +98,17 @@ $userstatic=new User($db);
 	<input type="hidden" name="source" value="external" />
 	<?php if ($withproject) print '<input type="hidden" name="withproject" value="'.$withproject.'">'; ?>
 		<div class="tagtd nowrap"><?php echo img_object('','contact').' '.$langs->trans("ThirdPartyContacts"); ?></div>
-		<?php
-		$events=array();
-		$events[]=array('method' => 'getContacts', 'url' => dol_buildpath('/core/ajax/contacts.php',1), 'htmlname' => 'contactid', 'params' => array('add-customer-contact' => 'disabled'));
-		?>
 		<div class="tagtd nowrap maxwidthonsmartphone">
 			<?php $selectedCompany = isset($_GET["newcompany"])?$_GET["newcompany"]:$object->socid; ?>
-			<?php $selectedCompany = $formcompany->selectCompaniesForNewContact($object, 'id', $selectedCompany, 'newcompany', '', 0, $events); ?>
+			<?php 
+			// add company icon for direct link 
+			if ($selectedCompany && empty($conf->dol_use_jmobile)) 
+			{
+				$companystatic->fetch($selectedCompany);
+				echo $companystatic->getNomUrl(2, '', 0, 1); 
+			}
+			?>
+			<?php $selectedCompany = $formcompany->selectCompaniesForNewContact($object, 'id', $selectedCompany, 'newcompany', '', 0); ?>
 		</div>
 		<div class="tagtd maxwidthonsmartphone">
 			<?php $nbofcontacts=$form->select_contacts($selectedCompany, '', 'contactid'); ?>
@@ -115,7 +121,7 @@ $userstatic=new User($db);
 		</div>
 		<div class="tagtd">&nbsp;</div>
 		<div  class="tagtd" align="right">
-			<input type="submit" id="add-customer-contact" class="button" value="<?php echo $langs->trans("Add"); ?>"<?php if (! $nbofcontacts) echo ' disabled="disabled"'; ?>>
+			<input type="submit" id="add-customer-contact" class="button" value="<?php echo $langs->trans("Add"); ?>"<?php if (! $nbofcontacts) echo ' disabled'; ?>>
 		</div>
 	</form>
 
@@ -124,7 +130,7 @@ $userstatic=new User($db);
 
 	<form class="tagtr liste_titre">
 		<div class="tagtd"><?php echo $langs->trans("Source"); ?></div>
-		<div class="tagtd"><?php echo $langs->trans("Company"); ?></div>
+		<div class="tagtd"><?php echo $langs->trans("ThirdParty"); ?></div>
 		<div class="tagtd"><?php echo $langs->trans("Contacts"); ?></div>
 		<div class="tagtd"><?php echo $langs->trans("ContactType"); ?></div>
 		<div class="tagtd" align="center"><?php echo $langs->trans("Status"); ?></div>
@@ -172,6 +178,8 @@ $userstatic=new User($db);
 		</div>
 		<div class="tagtd">
 			<?php
+			$statusofcontact = $tab[$i]['status'];
+
 			if ($tab[$i]['source']=='internal')
 			{
 				$userstatic->id=$tab[$i]['id'];
@@ -190,24 +198,24 @@ $userstatic=new User($db);
 		</div>
 		<div class="tagtd"><?php echo $tab[$i]['libelle']; ?></div>
 		<div class="tagtd" align="center">
-			<?php if ($object->statut >= 0) echo '<a href="'.$_SERVER['PHP_SELF'].'?id='.$object->id.'&amp;action=swapstatut&amp;ligne='.$tab[$i]['rowid'].'">'; ?>
+			<?php //if ($object->statut >= 0) echo '<a href="'.$_SERVER['PHP_SELF'].'?id='.$object->id.'&amp;action=swapstatut&amp;ligne='.$tab[$i]['rowid'].'">'; ?>
 			<?php
 			if ($tab[$i]['source']=='internal')
 			{
 				$userstatic->id=$tab[$i]['id'];
 				$userstatic->lastname=$tab[$i]['lastname'];
 				$userstatic->firstname=$tab[$i]['firstname'];
-				//echo $userstatic->LibStatut($tab[$i]['status'],3);
+				echo $userstatic->LibStatut($tab[$i]['statuscontact'],3);
 			}
 			if ($tab[$i]['source']=='external')
 			{
 				$contactstatic->id=$tab[$i]['id'];
 				$contactstatic->lastname=$tab[$i]['lastname'];
 				$contactstatic->firstname=$tab[$i]['firstname'];
-				echo $contactstatic->LibStatut($tab[$i]['status'],3);
+				echo $contactstatic->LibStatut($tab[$i]['statuscontact'],3);
 			}
 			?>
-			<?php if ($object->statut >= 0) echo '</a>'; ?>
+			<?php //if ($object->statut >= 0) echo '</a>'; ?>
 		</div>
 		<div class="tagtd nowrap" align="right">
 			<?php if ($permission) { ?>

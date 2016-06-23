@@ -22,7 +22,7 @@ $statutarray=array('1' => $langs->trans("OnSell"), '0' => $langs->trans("NotOnSe
 
 <!-- BEGIN PHP TEMPLATE -->
 
-<?php print_fiche_titre($langs->trans("Product")); ?>
+<?php print load_fiche_titre($langs->trans("Product")); ?>
 
 <?php dol_htmloutput_errors((is_numeric($object->error)?'':$object->error),$object->errors); ?>
 
@@ -42,7 +42,7 @@ $statutarray=array('1' => $langs->trans("OnSell"), '0' => $langs->trans("NotOnSe
 <tr>
 <td class="fieldrequired" width="20%"><?php echo $langs->trans("Ref"); ?></td>
 <td><input name="ref" size="40" maxlength="32" value="<?php echo $object->ref; ?>">
-<?php if ($_error == 1) echo $langs->trans("RefAlreadyExists"); ?>
+<?php if ($refalreadyexists == 1) echo $langs->trans("RefAlreadyExists"); ?>
 </td></tr>
 
 <tr>
@@ -89,9 +89,6 @@ $statutarray=array('1' => $langs->trans("OnSell"), '0' => $langs->trans("NotOnSe
 <input name="volume" size="4" value="<?php echo $object->volume; ?>">
 <?php echo $object->volume_units; ?>
 </td></tr>
-
-<tr><td><?php echo $langs->trans("Hidden"); ?></td>
-<td><?php echo $object->hidden; ?></td></tr>
 
 <tr><td valign="top"><?php echo $langs->trans("NoteNotVisibleOnBill"); ?></td><td>
 <?php echo $object->textarea_note; ?>

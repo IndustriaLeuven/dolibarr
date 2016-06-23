@@ -3,7 +3,8 @@
  * Copyright (C) 2004-2011 Laurent Destailleur   <eldy@users.sourceforge.net>
  * Copyright (C) 2005      Marc Barilley / Ocebo <marc@ocebo.com>
  * Copyright (C) 2005-2012 Regis Houssin         <regis.houssin@capnetworks.com>
- * Copyright (C) 2013		Marcos García		<marcosgdf@gmail.com>
+ * Copyright (C) 2013	   Marcos García		 <marcosgdf@gmail.com>
+ * Copyright (C) 2015	   Juanjo Menent		 <jmenent@2byte.es>
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -65,7 +66,7 @@ if ($action == 'setnote' && $user->rights->facture->paiement)
     }
     else
     {
-	    setEventMessage($object->error, 'errors');
+	    setEventMessages($object->error, $object->errors, 'errors');
         $db->rollback();
     }
 }
@@ -85,7 +86,7 @@ if ($action == 'confirm_delete' && $confirm == 'yes' && $user->rights->facture->
 	else
 	{
 	    $langs->load("errors");
-		setEventMessage($langs->trans($object->error), 'errors');
+		setEventMessages($object->error, $object->errors, 'errors');
         $db->rollback();
 	}
 }
@@ -123,7 +124,7 @@ if ($action == 'confirm_valide' && $confirm == 'yes' && $user->rights->facture->
 	else
 	{
 	    $langs->load("errors");
-		setEventMessage($langs->trans($object->error), 'errors');
+		setEventMessages($object->error, $object->errors, 'errors');
 		$db->rollback();
 	}
 }
@@ -134,11 +135,11 @@ if ($action == 'setnum_paiement' && ! empty($_POST['num_paiement']))
     $res = $object->update_num($_POST['num_paiement']);
 	if ($res === 0)
 	{
-		setEventMessage($langs->trans('PaymentNumberUpdateSucceeded'));
+		setEventMessages($langs->trans('PaymentNumberUpdateSucceeded'), null, 'mesgs');
 	}
 	else
 	{
-		setEventMessage($langs->trans('PaymentNumberUpdateFailed'), 'errors');
+		setEventMessages($langs->trans('PaymentNumberUpdateFailed'), null, 'errors');
 	}
 }
 
@@ -149,11 +150,11 @@ if ($action == 'setdatep' && ! empty($_POST['datepday']))
 	$res = $object->update_date($datepaye);
 	if ($res === 0)
 	{
-		setEventMessage($langs->trans('PaymentDateUpdateSucceeded'));
+		setEventMessages($langs->trans('PaymentDateUpdateSucceeded'), null, 'mesgs');
 	}
 	else
 	{
-		setEventMessage($langs->trans('PaymentDateUpdateFailed'), 'errors');
+		setEventMessages($langs->trans('PaymentDateUpdateFailed'), null, 'errors');
 	}
 }
 
@@ -200,28 +201,33 @@ if ($action == 'valide')
 
 print '<table class="border" width="100%">';
 
+$linkback = '<a href="' . DOL_URL_ROOT . '/compta/paiement/list.php">' . $langs->trans("BackToList") . '</a>';
+
+
 // Ref
-print '<tr><td valign="top" width="20%">'.$langs->trans('Ref').'</td><td colspan="3">'.$object->id.'</td></tr>';
+print '<tr><td width="20%">'.$langs->trans('Ref').'</td><td colspan="3">';
+print $form->showrefnav($object, 'ref', $linkback, 1, 'ref', 'ref', '');
+print '</td></tr>';
 
 // Date payment
-print '<tr><td valign="top">'.$form->editfieldkey("Date",'datep',$object->date,$object,$user->rights->facture->paiement).'</td><td colspan="3">';
+print '<tr><td>'.$form->editfieldkey("Date",'datep',$object->date,$object,$user->rights->facture->paiement).'</td><td colspan="3">';
 print $form->editfieldval("Date",'datep',$object->date,$object,$user->rights->facture->paiement,'datepicker','',null,$langs->trans('PaymentDateUpdateSucceeded'));
 print '</td></tr>';
 
 // Payment type (VIR, LIQ, ...)
 $labeltype=$langs->trans("PaymentType".$object->type_code)!=("PaymentType".$object->type_code)?$langs->trans("PaymentType".$object->type_code):$object->type_libelle;
-print '<tr><td valign="top">'.$langs->trans('PaymentMode').'</td><td colspan="3">'.$labeltype.'</td></tr>';
+print '<tr><td>'.$langs->trans('PaymentMode').'</td><td colspan="3">'.$labeltype.'</td></tr>';
 
 // Payment numero
-print '<tr><td valign="top">'.$form->editfieldkey("Numero",'num_paiement',$object->numero,$object,$object->statut == 0 && $user->rights->fournisseur->facture->creer).'</td><td colspan="3">';
+print '<tr><td>'.$form->editfieldkey("Numero",'num_paiement',$object->numero,$object,$object->statut == 0 && $user->rights->fournisseur->facture->creer).'</td><td colspan="3">';
 print $form->editfieldval("Numero",'num_paiement',$object->numero,$object,$object->statut == 0 && $user->rights->fournisseur->facture->creer,'string','',null,$langs->trans('PaymentNumberUpdateSucceeded'));
 print '</td></tr>';
 
 // Amount
-print '<tr><td valign="top">'.$langs->trans('Amount').'</td><td colspan="3">'.price($object->montant,'',$langs,0,0,-1,$conf->currency).'</td></tr>';
+print '<tr><td>'.$langs->trans('Amount').'</td><td colspan="3">'.price($object->montant,'',$langs,0,0,-1,$conf->currency).'</td></tr>';
 
 // Note
-print '<tr><td valign="top">'.$form->editfieldkey("Note",'note',$object->note,$object,$user->rights->facture->paiement).'</td><td colspan="3">';
+print '<tr><td class="tdtop">'.$form->editfieldkey("Note",'note',$object->note,$object,$user->rights->facture->paiement).'</td><td colspan="3">';
 print $form->editfieldval("Note",'note',$object->note,$object,$user->rights->facture->paiement,'textarea');
 print '</td></tr>';
 
@@ -250,7 +256,8 @@ if (! empty($conf->banque->enabled))
     	print '</td>';
     	print '</tr>';
 
-		if($object->type_code == 'CHQ' && $bankline->fk_bordereau > 0) {
+		if ($object->type_code == 'CHQ' && $bankline->fk_bordereau > 0) 
+		{
 			dol_include_once('/compta/paiement/cheque/class/remisecheque.class.php');
 			$bordereau = new RemiseCheque($db);
 			$bordereau->fetch($bankline->fk_bordereau);

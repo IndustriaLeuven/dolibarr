@@ -1,8 +1,9 @@
 <?php
-/* Copyright (C) 2001-2004 Rodolphe Quiedeville <rodolphe@quiedeville.org>
- * Copyright (C) 2004-2010 Laurent Destailleur  <eldy@users.sourceforge.net>
- * Copyright (C) 2005      Simon Tosser         <simon@kornog-computing.com>
- * Copyright (C) 2005-2012 Regis Houssin        <regis.houssin@capnetworks.com>
+/* Copyright (C) 2001-2004  Rodolphe Quiedeville    <rodolphe@quiedeville.org>
+ * Copyright (C) 2004-2010  Laurent Destailleur     <eldy@users.sourceforge.net>
+ * Copyright (C) 2005       Simon Tosser            <simon@kornog-computing.com>
+ * Copyright (C) 2005-2012  Regis Houssin           <regis.houssin@capnetworks.com>
+ * Copyright (C) 2016       Raphaël Doursenaud      <rdoursenaud@gpcsolutions.fr>
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -97,6 +98,12 @@ $modules=array(
 						'img' => 'user'
 				)
 		),
+		'expensereport' => array(
+				array(
+						'code' => 'MAIN_DELAY_EXPENSEREPORTS',
+						'img' => 'trip'
+				)
+		),
 );
 
 if ($action == 'update')
@@ -127,7 +134,7 @@ $form = new Form($db);
 
 llxHeader();
 
-print_fiche_titre($langs->trans("DelaysOfToleranceBeforeWarning"),'','setup');
+print load_fiche_titre($langs->trans("DelaysOfToleranceBeforeWarning"),'','title_setup');
 
 print $langs->transnoentities("DelaysOfToleranceDesc",img_warning());
 print " ".$langs->trans("OnlyActiveElementsAreShown",DOL_URL_ROOT.'/admin/modules.php')."<br>\n";
@@ -152,7 +159,7 @@ if ($action == 'edit')
     		foreach($delays as $delay)
     		{
     			$var=!$var;
-    			$value=(! empty($conf->global->$delay['code'])?$conf->global->$delay['code']:0);
+				$value=(! empty($conf->global->{$delay['code']})?$conf->global->{$delay['code']}:0);
     			print '<tr '.$bc[$var].'>';
     			print '<td width="20px">'.img_object('',$delay['img']).'</td>';
     			print '<td>'.$langs->trans('Delays_'.$delay['code']).'</td><td>';
@@ -169,15 +176,15 @@ if ($action == 'edit')
 	print '<table class="noborder" width="100%">';
 	print '<tr class="liste_titre"><td>'.$langs->trans("Parameter").'</td><td width="120px">'.$langs->trans("Value").'</td></tr>';
 
-	$var=!$var;
+	$var=false;
 	print '<tr '.$bc[$var].'>';
-	print '<td>'.$langs->trans("MAIN_DISABLE_METEO").'</td><td>' .$form->selectyesno('MAIN_DISABLE_METEO',(isset($conf->global->MAIN_DISABLE_METEO)?1:0),1) . '</td></tr>';
+	print '<td>'.$langs->trans("MAIN_DISABLE_METEO").'</td><td>' .$form->selectyesno('MAIN_DISABLE_METEO',(empty($conf->global->MAIN_DISABLE_METEO)?0:1),1) . '</td></tr>';
 
 	print '</table>';
 
 	print '<br>';
 
-    print '<br><center><input type="submit" class="button" value="'.$langs->trans("Save").'"></center>';
+    print '<br><div class="center"><input type="submit" class="button" value="'.$langs->trans("Save").'"></div>';
     print '<br>';
 
     print '</form>';
@@ -199,7 +206,7 @@ else
     		foreach($delays as $delay)
     		{
     			$var=!$var;
-    			$value=(! empty($conf->global->$delay['code'])?$conf->global->$delay['code']:0);
+				$value=(! empty($conf->global->{$delay['code']})?$conf->global->{$delay['code']}:0);
     			print '<tr '.$bc[$var].'>';
     			print '<td width="20px">'.img_object('',$delay['img']).'</td>';
     			print '<td>'.$langs->trans('Delays_'.$delay['code']).'</td>';
@@ -216,7 +223,7 @@ else
 	print '<table class="noborder" width="100%">';
 	print '<tr class="liste_titre"><td>'.$langs->trans("Parameter").'</td><td width="120px">'.$langs->trans("Value").'</td></tr>';
 
-	$var=!$var;
+	$var=false;
 	print '<tr '.$bc[$var].'>';
 	print '<td>'.$langs->trans("MAIN_DISABLE_METEO").'</td><td>' . yn($conf->global->MAIN_DISABLE_METEO) . '</td></tr>';
 

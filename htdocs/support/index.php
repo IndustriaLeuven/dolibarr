@@ -1,5 +1,5 @@
 <?php
-/* Copyright (C) 2008-2013	Laurent Destailleur	<eldy@users.sourceforge.net>
+/* Copyright (C) 2008-2015	Laurent Destailleur	<eldy@users.sourceforge.net>
  * Copyright (C) 2008-2012	Regis Houssin		<regis.houssin@capnetworks.com>
  * Copyright (C) 2012		Juanjo Menent		<jmenent@2byte.es>
  *
@@ -66,7 +66,7 @@ print '<div style="width: 100%"><div class="inline-block">';
 print "\n";
 
 // Forum/wiki support
-print '<table class="login" width="100%">';
+print '<table class="login tablesupport" width="100%">';
 print '<tr class="title" valign="top">';
 print '<td width="100%" align="left" valign="top">';
 
@@ -179,7 +179,7 @@ print '</div><div class="inline-block">';
 */
 
 // EMail support
-print '<table class="login" width="100%">';
+print '<table class="login tablesupport" width="100%">';
 print '<tr class="title" valign="top">';
 print '<td width="100%" align="left" valign="top">';
 
@@ -194,7 +194,8 @@ print '</td></tr></table>';
 
 print '</td>';
 print '</tr><tr>';
-$urlwiki='http://wiki.dolibarr.org/index.php/List of Dolibarr partners and providers';
+//$urlwiki='http://wiki.dolibarr.org/index.php/List of Dolibarr partners and providers';
+$urlwiki='http://partners.dolibarr.org';
 print '<td align="center" valign="top">';
 print '<table class="nocellnopadd">';
 print '<tr><td align="center">';
@@ -212,7 +213,7 @@ print '</div><div class="inline-block">';
 
 
 // Other support
-print '<table class="login" width="100%">';
+print '<table class="login tablesupport" width="100%">';
 print '<tr class="title">';
 print '<td width="100%" align="left" valign="top">';
 
@@ -228,7 +229,8 @@ print '</td></tr></table>';
 
 print '</td>';
 print '</tr><tr>';
-$urlwiki='http://wiki.dolibarr.org/index.php/List of Dolibarr partners and providers';
+//$urlwiki='http://wiki.dolibarr.org/index.php/List of Dolibarr partners and providers';
+$urlwiki='http://partners.dolibarr.org';
 print '<td align="center" valign="top">';
 print '<table class="nocellnopadd">';
 print '<tr><td align="center">';

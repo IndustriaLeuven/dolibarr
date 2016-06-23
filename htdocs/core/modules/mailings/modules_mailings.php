@@ -27,8 +27,7 @@ require_once DOL_DOCUMENT_ROOT.'/core/lib/functions.lib.php';
 
 
 /**
- *	    \class      MailingTargets
- *		\brief      Parent class of emailing target selectors modules
+ *		Parent class of emailing target selectors modules
  */
 class MailingTargets    // This can't be abstract as it is used for some method
 {
@@ -63,7 +62,7 @@ class MailingTargets    // This can't be abstract as it is used for some method
     /**
 	 *	Return number of records for email selector
      *
-     *  @return     string      Example
+     *  @return     integer      Example
      */
     function getNbOfRecords()
     {
@@ -73,8 +72,8 @@ class MailingTargets    // This can't be abstract as it is used for some method
     /**
      * Retourne nombre de destinataires
      *
-     * @param      string	$sql        Requete sql de comptage
-     * @return     int       			Nb de destinataires si ok, < 0 si erreur
+     * @param      string	$sql        Sql request to count
+     * @return     int       			Nb of recipient, or <0 if error
      */
     function getNbOfRecipients($sql)
     {
@@ -86,7 +85,7 @@ class MailingTargets    // This can't be abstract as it is used for some method
         }
         else
         {
-        	$this->error=$this->db->error();
+        	$this->error=$this->db->lasterror();
             return -1;
         }
     }
@@ -204,9 +203,9 @@ class MailingTargets    // This can't be abstract as it is used for some method
         //Update the status to show contact mail that don't want to be contacted anymore'
         $sql = "UPDATE ".MAIN_DB_PREFIX."mailing_cibles";
         $sql .= " SET statut=3";
-        $sql .= " WHERE fk_mailing=".$mailing_id." AND email in (SELECT sc.email FROM ".MAIN_DB_PREFIX."socpeople AS sc ";
+        $sql .= " WHERE fk_mailing=".$mailing_id." AND source_type='contact' AND (email in (SELECT sc.email FROM ".MAIN_DB_PREFIX."socpeople AS sc ";
         $sql .= " INNER JOIN ".MAIN_DB_PREFIX."societe s ON s.fk_stcomm=-1 AND s.rowid=sc.fk_soc)";
-        $sql .= " AND source_type='contact'";
+        $sql .= "  OR no_email=1)";
         $result=$this->db->query($sql);
 
         dol_syslog(get_class($this)."::add_to_target: mailing update status to display contact mail that do not want to be contacted sql:".$sql);

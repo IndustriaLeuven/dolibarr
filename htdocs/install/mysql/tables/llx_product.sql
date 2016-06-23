@@ -2,8 +2,8 @@
 -- Copyright (C) 2002-2006 Rodolphe Quiedeville <rodolphe@quiedeville.org>
 -- Copyright (C) 2008-2010 Laurent Destailleur  <eldy@users.sourceforge.net>
 -- Copyright (C) 2005-2010 Regis Houssin        <regis.houssin@capnetworks.com>
--- Copyright (C) 2010      juanjo Menent        <jmenent@2byte.es>
--- Copyright (C) 2013      Cédric Salvador      <csalvador@gpcsolutions.fr>
+-- Copyright (C) 2010      Juanjo Menent        <jmenent@2byte.es>
+-- Copyright (C) 2012-2013 Cédric Salvador      <csalvador@gpcsolutions.fr>
 -- Copyright (C) 2014      Marcos García        <marcosgdf@gmail.com>
 --
 -- This program is free software; you can redistribute it and/or modify
@@ -31,7 +31,6 @@ create table llx_product
 
   datec						datetime,
   tms						timestamp,
-  virtual					tinyint	  DEFAULT 0 NOT NULL,	-- Not used. Used by external modules. Value 0 for physical product, 1 for virtual product
   fk_parent					integer	  DEFAULT 0,			-- Not used. Used by external modules. Virtual product id
 
   label						varchar(255) NOT NULL,
@@ -44,24 +43,28 @@ create table llx_product
   price_min					double(24,8) DEFAULT 0,
   price_min_ttc				double(24,8) DEFAULT 0,
   price_base_type			varchar(3)   DEFAULT 'HT',
-  tva_tx					double(6,3),					  -- Default VAT rate of product
-  recuperableonly           integer NOT NULL DEFAULT '0',  -- French NPR VAT
-  localtax1_tx				double(6,3)  DEFAULT 0,         -- Spanish local VAT 1 
-  localtax2_tx				double(6,3)  DEFAULT 0,         -- Spanish local VAT 2
+  cost_price			    double(24,8) DEFAULT NULL,      -- Cost price without tax. Can be used for margin calculation.
+  tva_tx					double(6,3),					-- Default VAT rate of product
+  recuperableonly           integer NOT NULL DEFAULT '0',   -- French NPR VAT
+  localtax1_tx				double(6,3)  DEFAULT 0,         -- 
+  localtax1_type			varchar(10)  NOT NULL DEFAULT '0',         -- 
+  localtax2_tx				double(6,3)  DEFAULT 0,         -- 
+  localtax2_type			varchar(10)  NOT NULL DEFAULT '0',         -- 
   fk_user_author			integer DEFAULT NULL,			  -- user making creation
   fk_user_modif             integer,                         -- user making last change
   tosell					tinyint      DEFAULT 1,	          -- Product you sell
   tobuy						tinyint      DEFAULT 1,            -- Product you buy
+  onportal     				tinyint      DEFAULT 0,	          -- If it is a product you sell and you want to sell it on portal (module website must be on)
   tobatch					tinyint      DEFAULT 0 NOT NULL,  -- Is it a product that need a batch or eat-by management
   fk_product_type			integer      DEFAULT 0,			-- Type of product: 0 for regular product, 1 for service, 9 for other (used by external module)
   duration					varchar(6),
   seuil_stock_alerte		integer      DEFAULT 0,
   url						varchar(255),
-  barcode					varchar(255) DEFAULT NULL,
-  fk_barcode_type			integer      DEFAULT NULL,
+  barcode					varchar(255) DEFAULT NULL,		-- barcode
+  fk_barcode_type			integer      DEFAULT NULL,		-- barcode type
   accountancy_code_sell		varchar(32),                    -- Selling accountancy code
   accountancy_code_buy		varchar(32),                    -- Buying accountancy code
-  partnumber				varchar(32),                    -- Not used. Used by external modules.
+  partnumber				varchar(32),                    -- Part/Serial number. TODO To use it into screen if not a duplicate of barcode.
   weight					float        DEFAULT NULL,
   weight_units				tinyint      DEFAULT NULL,
   length					float        DEFAULT NULL,
@@ -71,10 +74,15 @@ create table llx_product
   volume					float        DEFAULT NULL,
   volume_units				tinyint      DEFAULT NULL,
   stock						integer,						-- Current physical stock (dernormalized field)
-  pmp						double(24,8) DEFAULT 0 NOT NULL,
+  pmp						double(24,8) DEFAULT 0 NOT NULL,		-- To store valuation of stock calculated using average price method, for this product
+  fifo						double(24,8),							-- To store valuation of stock calculated using fifo method, for this product
+  lifo						double(24,8),							-- To store valuation of stock calculated using lifo method, for this product
   canvas					varchar(32)  DEFAULT NULL,
-  finished					tinyint      DEFAULT NULL,
+  finished					tinyint      DEFAULT NULL,		-- 1=manufactured product, 0=matiere premiere
   hidden					tinyint      DEFAULT 0,			-- Not used. Deprecated.
   import_key				varchar(14),					-- Import key
-  desiredstock              integer      DEFAULT 0
+  fk_price_expression integer,                     -- Link to the rule for dynamic price calculation
+  desiredstock              integer      DEFAULT 0,
+  fk_unit					integer      DEFAULT NULL,
+  price_autogen TINYINT DEFAULT 0
 )ENGINE=innodb;

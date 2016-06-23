@@ -20,10 +20,13 @@ create table llx_projet_task_time
 (
   rowid            integer AUTO_INCREMENT PRIMARY KEY,
   fk_task          integer NOT NULL,
-  task_date        date,				-- only the day
-  task_datehour    datetime,			-- day + hour
+  task_date        date,					-- only the day
+  task_datehour    datetime,				-- day + hour
+  task_date_withhour integer DEFAULT 0,	-- 0 by default, 1 if date was entered with start hour
   task_duration    double,
   fk_user          integer,
   thm			   double(24,8),
+  invoice_id       integer DEFAULT NULL,				-- If we need to invoice each line of timespent, we can save invoice id here
+  invoice_line_id  integer DEFAULT NULL,                -- If we need to invoice each line of timespent, we can save invoice line id here
   note             text
 )ENGINE=innodb;

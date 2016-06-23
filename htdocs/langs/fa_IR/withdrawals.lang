@@ -48,7 +48,6 @@ RefusedReason=دلیلی برای رد
 RefusedInvoicing=حسابداری رد
 NoInvoiceRefused=آیا رد اتهام نیست
 InvoiceRefused=Invoice refused (Charge the rejection to customer)
-Status=وضعیت
 StatusUnknown=ناشناخته
 StatusWaiting=انتظار
 StatusTrans=فرستاده
@@ -84,6 +83,11 @@ WithdrawalFile=فایل برداشت
 SetToStatusSent=تنظیم به وضعیت "فایل ارسال شد"
 ThisWillAlsoAddPaymentOnInvoice=این نیز خواهد پرداخت به فاکتورها اعمال می شود و آنها را طبقه بندی به عنوان "پرداخت"
 StatisticsByLineStatus=Statistics by status of lines
+RUM=RUM
+RUMWillBeGenerated=RUM number will be generated once bank account information are saved
+WithdrawMode=Withdraw mode (FRST or RECUR)
+WithdrawRequestAmount=Withdraw request amount:
+WithdrawRequestErrorNilAmount=Unable to create withdraw request for nil amount.
 
 ### Notifications
 InfoCreditSubject=پرداخت سفارش ثابت٪ توسط بانک

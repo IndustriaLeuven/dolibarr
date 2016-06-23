@@ -30,6 +30,8 @@ ThirdPartyContact=شخص ثالث تماس با ما / آدرس
 StatusContactValidated=وضعیت تماس / آدرس
 Company=شرکت
 CompanyName=نام شرکت
+AliasNames=Alias name (commercial, trademark, ...)
+AliasNameShort=Alias name
 Companies=شرکت
 CountryIsInEEC=کشور است در داخل جامعه اقتصادی اروپا
 ThirdPartyName=نام و نام خانوادگی شخص ثالث
@@ -54,7 +56,6 @@ ReportByCustomers=گزارش های مشتریان
 ReportByQuarter=گزارش های نرخ
 CivilityCode=کد تمدن
 RegisteredOffice=دفتر ثبت نام
-Name=نام
 Lastname=نام خانوادگی
 Firstname=نام
 PostOrFunction=ارسال / تابع
@@ -62,11 +63,13 @@ UserTitle=عنوان
 Surname=نام خانوادگی / شبه
 Address=نشانی
 State=ایالت / استان
+StateShort=State
 Region=منطقه
 Country=کشور
 CountryCode=کد کشور
 CountryId=شناسه کشور
 Phone=تلفن
+PhoneShort=Phone
 Skype=اسکایپ
 Call=تماس
 Chat=انجمن
@@ -85,8 +88,10 @@ VATIsNotUsed=مالیات بر ارزش افزوده استفاده نمی شو�
 CopyAddressFromSoc=آدرس با آدرس thirdparty را پر کنید
 NoEmailDefined=هیچ ایمیل تعریف شده وجود دارد
 ##### Local Taxes #####
+LocalTax1IsUsed=Use second tax
 LocalTax1IsUsedES= RE استفاده شده است
 LocalTax1IsNotUsedES= RE استفاده نمی شود
+LocalTax2IsUsed=Use third tax
 LocalTax2IsUsedES= IRPF استفاده شده است
 LocalTax2IsNotUsedES= IRPF استفاده نمی شود
 LocalTax1ES=RE
@@ -106,7 +111,7 @@ ProfId2Short=پروفسور شناسه (شماره) 2
 ProfId3Short=پروفسور شناسه (شماره) 3
 ProfId4Short=پروفسور شناسه (شماره) 4
 ProfId5Short=پروفسور شناسه (شماره) 5
-ProfId6Short=پروفسور شناسه (شماره) 5
+ProfId6Short=Prof. id 6
 ProfId1=ID حرفه ای 1
 ProfId2=ID حرفه ای 2
 ProfId3=ID حرفه ای 3
@@ -119,6 +124,12 @@ ProfId3AR=-
 ProfId4AR=-
 ProfId5AR=-
 ProfId6AR=-
+ProfId1AT=Prof Id 1 (USt.-IdNr)
+ProfId2AT=Prof Id 2 (USt.-Nr)
+ProfId3AT=Prof Id 3 (Handelsregister-Nr.)
+ProfId4AT=-
+ProfId5AT=-
+ProfId6AT=-
 ProfId1AU=پروفسور شناسه 1 (ABN)
 ProfId2AU=-
 ProfId3AU=-
@@ -191,11 +202,17 @@ ProfId3IN=پروفسور کد 3 (TAX SRVC)
 ProfId4IN=پروفسور کد 4
 ProfId5IN=پروفسور کد 5
 ProfId6IN=-
+ProfId1LU=Id. prof. 1 (R.C.S. Luxembourg)
+ProfId2LU=Id. prof. 2 (Business permit)
+ProfId3LU=-
+ProfId4LU=-
+ProfId5LU=-
+ProfId6LU=-
 ProfId1MA=استاد آیدی. 1 (RC)
 ProfId2MA=استاد آیدی. 2 (Patente)
 ProfId3MA=استاد آیدی. 3 (IF)
 ProfId4MA=استاد آیدی. 4 (CNSS)
-ProfId5MA=-
+ProfId5MA=Id prof. 5 (C.I.C.E.)
 ProfId6MA=-
 ProfId1MX=پروفسور شناسه 1 (RFC).
 ProfId2MX=پروفسور کد 2 (R..P. IMSS)
@@ -259,8 +276,8 @@ AvailableGlobalDiscounts=تخفیف مطلق در دسترس
 DiscountNone=هیچ یک
 Supplier=تامین کننده
 CompanyList=لیست شرکت
-AddContact=اضافه کردن تماس
-AddContactAddress=اضافه کردن تماس / آدرس
+AddContact=Create contact
+AddContactAddress=Create contact/address
 EditContact=ویرایش مخاطب
 EditContactAddress=ویرایش مخاطب / آدرس
 Contact=تماس با
@@ -268,13 +285,15 @@ ContactsAddresses=تماس / آدرس
 NoContactDefinedForThirdParty=بدون تماس تعریف شده برای این حزب سوم
 NoContactDefined=بدون تماس تعریف
 DefaultContact=پیش فرض تماس با ما / آدرس
-AddCompany=اضافه کردن شرکت
-AddThirdParty=اضافه کردن شخص ثالث
+AddCompany=Create company
+AddThirdParty=Create third party
 DeleteACompany=حذف یک شرکت
 PersonalInformations=اطلاعات شخصی
 AccountancyCode=کد حسابداری
 CustomerCode=کد مشتری
 SupplierCode=کد تامین کننده
+CustomerCodeShort=Customer code
+SupplierCodeShort=Supplier code
 CustomerAccount=حساب کاربری مشتری
 SupplierAccount=حساب تامین کننده
 CustomerCodeDesc=کد مشتری، منحصر به فرد برای همه مشتریان
@@ -293,15 +312,17 @@ ListOfCustomersContacts=فهرست تماس مشتری
 ListOfSuppliersContacts=لیست مخاطبین با عرضه کننده کالا
 ListOfCompanies=فهرست شرکت
 ListOfThirdParties=فهرست اشخاص ثالث
-ShowCompany=نمایش شرکت
+ShowCompany=Show thirdparty
 ShowContact=نمایش تماس
 ContactsAllShort=همه (بدون فیلتر)
 ContactType=تماس با نوع
 ContactForOrders=تماس با سفارش
+ContactForOrdersOrShipments=Order's or shipment's contact
 ContactForProposals=تماس پیشنهاد را
 ContactForContracts=تماس قرارداد را
 ContactForInvoices=تماس با فاکتور را
 NoContactForAnyOrder=این تماس یک تماس برای هر سفارش نمی
+NoContactForAnyOrderOrShipment=This contact is not a contact for any order or shipment
 NoContactForAnyProposal=این تماس یک تماس برای هر پیشنهاد تجاری
 NoContactForAnyContract=این تماس یک تماس برای هر قرارداد
 NoContactForAnyInvoice=این تماس یک تماس برای هر فاکتور نمی
@@ -329,6 +350,7 @@ ProspectLevel=بالقوه چشم انداز
 ContactPrivate=خصوصی
 ContactPublic=به اشتراک گذاشته شده
 ContactVisibility=دید
+ContactOthers=Other
 OthersNotLinkedToThirdParty=دیگران، به شخص ثالث در ارتباط نیست
 ProspectStatus=وضعیت چشم انداز
 PL_NONE=هیچ یک
@@ -372,6 +394,7 @@ ExportDataset_company_2=اطلاعات تماس و خواص
 ImportDataset_company_1=احزاب سوم (شرکت / پایه / مردم فیزیکی) و خواص
 ImportDataset_company_2=تماس / آدرس (از thirdparties یا نه) و ویژگی
 ImportDataset_company_3=جزئیات بانک
+ImportDataset_company_4=Third parties/Sales representatives (Affect sales representatives users to companies)
 PriceLevel=سطح قیمت
 DeliveriesAddress=آدرس تحویل
 DeliveryAddress=آدرس تحویل
@@ -379,8 +402,8 @@ DeliveryAddressLabel=تحویل برچسب آدرس
 DeleteDeliveryAddress=حذف یک آدرس تحویل
 ConfirmDeleteDeliveryAddress=آیا مطمئن هستید که می خواهید این آدرس تحویل را حذف کنید؟
 NewDeliveryAddress=آدرس تحویل جدید
-AddDeliveryAddress=اضافه کردن آدرس
-AddAddress=اضافه کردن آدرس
+AddDeliveryAddress=Create address
+AddAddress=Create address
 NoOtherDeliveryAddress=بدون آدرس های تحویل جایگزین تعریف
 SupplierCategory=طبقه بندی کننده
 JuridicalStatus200=مستقل
@@ -403,12 +426,20 @@ UniqueThirdParties=مجموع اشخاص ثالث منحصر به فرد
 InActivity=باز
 ActivityCeased=بسته
 ActivityStateFilter=وضعیت فعالیت
-ProductsIntoElements=لیست محصولات را به٪ s
+ProductsIntoElements=List of products/services into %s
 CurrentOutstandingBill=لایحه برجسته کنونی
 OutstandingBill=حداکثر. برای لایحه برجسته
 OutstandingBillReached=رسیدم حداکثر. برای لایحه برجسته
 MonkeyNumRefModelDesc=numero بازگشت با فرمت syymm-NNNN برای کد مشتری و٪ syymm-NNNN برای کد منبع که در آن YY سال است٪، میلی متر در ماه است و NNNN دنباله بدون استراحت و بدون بازگشت به 0 است.
 LeopardNumRefModelDesc=کد آزاد است. این کد را می توان در هر زمان تغییر یافتهاست.
 ManagingDirectors=مدیر (بازدید کنندگان) نام (مدیر عامل شرکت، مدیر، رئيس جمهور ...)
-SearchThirdparty=Search thirdparty
+SearchThirdparty=Search third party
 SearchContact=Search contact
+MergeOriginThirdparty=Duplicate third party (third party you want to delete)
+MergeThirdparties=Merge third parties
+ConfirmMergeThirdparties=Are you sure you want to merge this third party into the current one ? All linked objects (invoices, orders, ...) will be moved to current third party so you will be able to delete the duplicate one.
+ThirdpartiesMergeSuccess=Thirdparties have been merged
+ErrorThirdpartiesMerge=There was an error when deleting the thirdparties. Please check the log. Changes have been reverted.
+SaleRepresentativeLogin=Login of sale representative
+SaleRepresentativeFirstname=Firstname of sale representative
+SaleRepresentativeLastname=Lastname of sale representative

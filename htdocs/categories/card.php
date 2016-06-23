@@ -1,9 +1,10 @@
 <?php
 /* Copyright (C) 2005		Matthieu Valleton	<mv@seeschloss.org>
- * Copyright (C) 2006-2011	Laurent Destailleur	<eldy@users.sourceforge.net>
+ * Copyright (C) 2006-2015	Laurent Destailleur	<eldy@users.sourceforge.net>
  * Copyright (C) 2005-2014	Regis Houssin		<regis.houssin@capnetworks.com>
  * Copyright (C) 2007		Patrick Raguin		<patrick.raguin@gmail.com>
  * Copyright (C) 2013		Florian Henry		<florian.henry@open-concept.pro>
+ * Copyright (C) 2015       Raphaël Doursenaud  <rdoursenaud@gpcsolutions.fr>
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -28,6 +29,7 @@
 require '../main.inc.php';
 require_once DOL_DOCUMENT_ROOT.'/categories/class/categorie.class.php';
 require_once DOL_DOCUMENT_ROOT.'/core/class/extrafields.class.php';
+require_once DOL_DOCUMENT_ROOT.'/core/class/html.formother.class.php';
 
 $langs->load("categories");
 
@@ -45,24 +47,29 @@ $urlfrom	= GETPOST('urlfrom','alpha');
 $socid=GETPOST('socid','int');
 $label=GETPOST('label');
 $description=GETPOST('description');
+$color=GETPOST('color');
 $visible=GETPOST('visible');
 $parent=GETPOST('parent');
 
 if ($origin)
 {
-	if ($type == 0) $idProdOrigin 		= $origin;
-	if ($type == 1) $idSupplierOrigin 	= $origin;
-	if ($type == 2) $idCompanyOrigin 	= $origin;
-	if ($type == 3) $idMemberOrigin 	= $origin;
-	if ($type == 4) $idContactOrigin 	= $origin;
+	if ($type == Categorie::TYPE_PRODUCT)     $idProdOrigin     = $origin;
+	if ($type == Categorie::TYPE_SUPPLIER)    $idSupplierOrigin = $origin;
+	if ($type == Categorie::TYPE_CUSTOMER)    $idCompanyOrigin  = $origin;
+	if ($type == Categorie::TYPE_MEMBER)      $idMemberOrigin   = $origin;
+	if ($type == Categorie::TYPE_CONTACT)     $idContactOrigin  = $origin;
 }
 
-if ($catorigin && $type == 0) $idCatOrigin = $catorigin;
+if ($catorigin && $type == Categorie::TYPE_PRODUCT) $idCatOrigin = $catorigin;
 
 $object = new Categorie($db);
 
 $extrafields = new ExtraFields($db);
 $extralabels=$extrafields->fetch_name_optionals_label($object->table_element);
+
+// Initialize technical object to manage hooks. Note that conf->hooks_modules contains array array
+$hookmanager->initHooks(array('categorycard'));
+
 
 /*
  *	Actions
@@ -119,6 +126,7 @@ if ($action == 'add' && $user->rights->categorie->creer)
 
 
 	$object->label			= $label;
+	$object->color			= $color;
 	$object->description	= dol_htmlcleanlastbr($description);
 	$object->socid			= ($socid ? $socid : 'null');
 	$object->visible		= $visible;
@@ -132,7 +140,7 @@ if ($action == 'add' && $user->rights->categorie->creer)
 	if (! $object->label)
 	{
 		$error++;
-		setEventMessage($langs->trans("ErrorFieldRequired",$langs->transnoentities("Ref")), 'errors');
+		setEventMessages($langs->trans("ErrorFieldRequired", $langs->transnoentities("Ref")), null, 'errors');
 		$action = 'create';
 	}
 
@@ -147,7 +155,7 @@ if ($action == 'add' && $user->rights->categorie->creer)
 		}
 		else
 		{
-			setEventMessage($object->error,'errors');
+			setEventMessages($object->error, $object->errors, 'errors');
 		}
 	}
 }
@@ -205,6 +213,7 @@ if (($action == 'add' || $action == 'confirmed') && $user->rights->categorie->cr
  */
 
 $form = new Form($db);
+$formother = new FormOther($db);
 
 llxHeader("","",$langs->trans("Categories"));
 
@@ -227,13 +236,15 @@ if ($user->rights->categorie->creer)
 		if ($origin) print '<input type="hidden" name="origin" value="'.$origin.'">';
 		if ($catorigin)	print '<input type="hidden" name="catorigin" value="'.$catorigin.'">';
 
-		print_fiche_titre($langs->trans("CreateCat"));
+		print load_fiche_titre($langs->trans("CreateCat"));
+
+		dol_fiche_head('');
 
 		print '<table width="100%" class="border">';
 
 		// Ref
 		print '<tr>';
-		print '<td width="25%" class="fieldrequired">'.$langs->trans("Ref").'</td><td><input id="label" class="flat" name="label" size="25" value="'.$label.'">';
+		print '<td width="20%" class="fieldrequired">'.$langs->trans("Ref").'</td><td><input id="label" class="flat" name="label" size="25" value="'.$label.'">';
 		print'</td></tr>';
 
 		// Description
@@ -243,6 +254,11 @@ if ($user->rights->categorie->creer)
 		$doleditor->Create();
 		print '</td></tr>';
 
+		// Color
+		print '<tr><td>'.$langs->trans("Color").'</td><td>';
+		print $formother->selectColor($color,'color');
+		print '</td></tr>';
+		
 		// Parent category
 		print '<tr><td>'.$langs->trans("AddIn").'</td><td>';
 		print $form->select_all_categories($type, $catorigin);
@@ -257,11 +273,13 @@ if ($user->rights->categorie->creer)
 
 		print '</table>';
 
-		print '<center><br>';
+		dol_fiche_end('');
+
+		print '<div class="center">';
 		print '<input type="submit" class="button" value="'.$langs->trans("CreateThisCat").'" name="creation" />';
-		print ' &nbsp; &nbsp; ';
+		print '&nbsp; &nbsp; &nbsp;';
 		print '<input type="submit" class="button" value="'.$langs->trans("Cancel").'" name="cancel" />';
-		print '</center>';
+		print '</div>';
 
 		print '</form>';
 	}

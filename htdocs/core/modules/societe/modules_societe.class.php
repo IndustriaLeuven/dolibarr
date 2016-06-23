@@ -39,7 +39,7 @@ abstract class ModeleThirdPartyDoc extends CommonDocGenerator
      *  Return list of active generation modules
      *
 	 * 	@param	DoliDB		$db					Database handler
-     *  @param	string		$maxfilenamelength  Max length of value to show
+     *  @param	integer		$maxfilenamelength  Max length of value to show
      * 	@return	array							List of templates
      */
     static function liste_modeles($db,$maxfilenamelength=0)
@@ -142,7 +142,7 @@ abstract class ModeleThirdPartyCode
      *  Renvoi la liste des modeles de numéroation
      *
      *  @param	DoliDB	$db     			Database handler
-     *  @param  string	$maxfilenamelength  Max length of value to show
+     *  @param  integer	$maxfilenamelength  Max length of value to show
      *  @return	array						List of numbers
      */
     static function liste_modeles($db,$maxfilenamelength=0)
@@ -363,6 +363,28 @@ abstract class ModeleAccountancyCode
 
 
 
+/**
+ *  Create a document onto disk according to template module.
+ *
+ *	@param	DoliDB		$db  			Database handler
+ *	@param  Facture		$object			Object invoice
+ *  @param  string      $message        Message (not used, deprecated)
+ *	@param	string		$modele			Force template to use ('' to not force)
+ *	@param	Translate	$outputlangs	objet lang a utiliser pour traduction
+ *  @param  int			$hidedetails    Hide details of lines
+ *  @param  int			$hidedesc       Hide description
+ *  @param  int			$hideref        Hide ref
+ *	@return int        					<0 if KO, >0 if OK
+ *  @deprecated Use the new function generateDocument of Facture class
+ *  @see Societe::generateDocument()
+ */
+function thirdparty_doc_create(DoliDB $db, Societe $object, $message, $modele, $outputlangs, $hidedetails=0, $hidedesc=0, $hideref=0)
+{
+	dol_syslog(__METHOD__ . " is deprecated", LOG_WARNING);
+
+	return $object->generateDocument($modele, $outputlangs, $hidedetails, $hidedesc, $hideref);
+}
+
 
 /**
  *	Create a document for third party
@@ -374,7 +396,7 @@ abstract class ModeleAccountancyCode
  *	@param	Translate	$outputlangs	Object lang to use for translation
  *	@return int        					<0 if KO, >0 if OK
  */
-function thirdparty_doc_create($db, $object, $message, $modele, $outputlangs)
+/*function thirdparty_doc_create($db, $object, $message, $modele, $outputlangs)
 {
     global $conf,$langs,$user;
     $langs->load("bills");
@@ -413,7 +435,6 @@ function thirdparty_doc_create($db, $object, $message, $modele, $outputlangs)
         require_once $dir.'/'.$file;
 
         $obj = new $classname($db);
-        $obj->message = $message;
 
         // We save charset_output to restore it because write_file can change it if needed for
         // output format that does not support UTF8.
@@ -438,5 +459,5 @@ function thirdparty_doc_create($db, $object, $message, $modele, $outputlangs)
         return -1;
     }
 }
-
+*/
 

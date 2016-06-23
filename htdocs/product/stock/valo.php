@@ -31,7 +31,7 @@ $langs->load("stocks");
 // Security check
 $result=restrictedArea($user,'stock');
 
-$sref=GETPOST("sref");;
+$sref=GETPOST("sref");
 $snom=GETPOST("snom");
 $sall=GETPOST("sall");
 
@@ -41,7 +41,7 @@ if (! $sortfield) $sortfield="e.label";
 if (! $sortorder) $sortorder="ASC";
 $page = $_GET["page"];
 if ($page < 0) $page = 0;
-$limit = $conf->liste_limit;
+$limit = GETPOST('limit')?GETPOST('limit','int'):$conf->liste_limit;
 $offset = $limit * $page;
 
 $year = strftime("%Y",time());
@@ -56,7 +56,7 @@ $sql.= " SUM(ps.pmp * ps.reel) as estimatedvalue, SUM(p.price * ps.reel) as sell
 $sql.= " FROM ".MAIN_DB_PREFIX."entrepot as e";
 $sql.= " LEFT JOIN ".MAIN_DB_PREFIX."product_stock as ps ON e.rowid = ps.fk_entrepot";
 $sql.= " LEFT JOIN ".MAIN_DB_PREFIX."product as p ON ps.fk_product = p.rowid";
-$sql.= " WHERE e.entity = ".$conf->entity;
+$sql.= " WHERE e.entity IN (".getEntity('stock', 1).")";
 if ($sref)
 {
     $sql.= " AND e.label LIKE '%".$db->escape($sref)."%'";

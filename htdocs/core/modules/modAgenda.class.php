@@ -5,7 +5,8 @@
  * Copyright (C) 2004      Sebastien Di Cintio  <sdicintio@ressource-toi.org>
  * Copyright (C) 2004      Benoit Mortier       <benoit.mortier@opensides.be>
  * Copyright (C) 2009-2011 Regis Houssin        <regis.houssin@capnetworks.com>
- * Copyright (C) 2013      Cedric Gross          <c.gross@kreiz-it.fr>
+ * Copyright (C) 2013      Cedric Gross         <c.gross@kreiz-it.fr>
+ * Copyright (C) 2015      Bahfir Abbes         <bafbes@gmail.com>
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -49,6 +50,7 @@ class modAgenda extends DolibarrModules
 		$this->numero = 2400;
 
 		$this->family = "projects";
+		$this->module_position = 15;
 		// Module label (no space allowed), used if translation string 'ModuleXXXName' not found (where XXX is value of numeric property 'numero' of module)
 		$this->name = preg_replace('/^mod/i','',get_class($this));
 		$this->description = "Gestion de l'agenda et des actions";
@@ -63,7 +65,7 @@ class modAgenda extends DolibarrModules
 
 		// Config pages
 		//-------------
-		$this->config_page_url = array("agenda.php");
+		$this->config_page_url = array("agenda_other.php");
 
 		// Dependancies
 		//-------------
@@ -71,7 +73,7 @@ class modAgenda extends DolibarrModules
 		$this->requiredby = array();
 		$this->langfiles = array("companies");
 
-		// Constantes
+		// Constants
 		//-----------
 		$this->const = array();
 		$this->const[15] = array("MAIN_AGENDA_ACTIONAUTO_COMPANY_SENTBYMAIL","chaine","1");
@@ -90,6 +92,7 @@ class modAgenda extends DolibarrModules
         $this->const[12] = array("MAIN_AGENDA_ACTIONAUTO_SHIPPING_VALIDATE","chaine","1");
         $this->const[13] = array("MAIN_AGENDA_ACTIONAUTO_SHIPPING_SENTBYMAIL","chaine","1");
         $this->const[14] = array("MAIN_AGENDA_ACTIONAUTO_BILL_UNVALIDATE","chaine","1");
+        $this->const[15] = array("MAIN_AGENDA_ACTIONAUTO_BILL_SUPPLIER_UNVALIDATE","chaine","1");
 
 		// New pages on tabs
 		// -----------------
@@ -225,7 +228,7 @@ class modAgenda extends DolibarrModules
 		// Calendar
 		$this->menu[$r]=array('fk_menu'=>'r=1',
 													'type'=>'left',
-													'titre'=>'Calendar',
+													'titre'=>'Agenda',
 													'mainmenu'=>'agenda',
 													'url'=>'/comm/action/index.php?mainmenu=agenda&amp;leftmenu=agenda',
 													'langs'=>'agenda',
@@ -263,7 +266,7 @@ class modAgenda extends DolibarrModules
 													'type'=>'left',
 													'titre'=>'MenuToDoActions',
 													'mainmenu'=>'agenda',
-													'url'=>'/comm/action/index.php?mainmenu=agenda&amp;leftmenu=agenda&amp;status=todo',
+													'url'=>'/comm/action/index.php?mainmenu=agenda&amp;leftmenu=agenda&amp;status=todo&amp;filtert=-1',
 													'langs'=>'agenda',
 													'position'=>105,
 													'perms'=>'$user->rights->agenda->allactions->read',
@@ -275,7 +278,7 @@ class modAgenda extends DolibarrModules
 													'type'=>'left',
 													'titre'=>'MenuDoneActions',
 													'mainmenu'=>'agenda',
-													'url'=>'/comm/action/index.php?mainmenu=agenda&amp;leftmenu=agenda&amp;status=done',
+													'url'=>'/comm/action/index.php?mainmenu=agenda&amp;leftmenu=agenda&amp;status=done&amp;filtert=-1',
 													'langs'=>'agenda',
 													'position'=>106,
 													'perms'=>'$user->rights->agenda->allactions->read',
@@ -324,7 +327,7 @@ class modAgenda extends DolibarrModules
 													'type'=>'left',
 													'titre'=>'MenuToDoActions',
 													'mainmenu'=>'agenda',
-													'url'=>'/comm/action/listactions.php?mainmenu=agenda&amp;leftmenu=agenda&amp;status=todo',
+													'url'=>'/comm/action/listactions.php?mainmenu=agenda&amp;leftmenu=agenda&amp;status=todo&amp;filtert=-1',
 													'langs'=>'agenda',
 													'position'=>115,
 													'perms'=>'$user->rights->agenda->allactions->read',
@@ -336,7 +339,7 @@ class modAgenda extends DolibarrModules
 													'type'=>'left',
 													'titre'=>'MenuDoneActions',
 													'mainmenu'=>'agenda',
-													'url'=>'/comm/action/listactions.php?mainmenu=agenda&amp;leftmenu=agenda&amp;status=done',
+													'url'=>'/comm/action/listactions.php?mainmenu=agenda&amp;leftmenu=agenda&amp;status=done&amp;filtert=-1',
 													'langs'=>'agenda',
 													'position'=>116,
 													'perms'=>'$user->rights->agenda->allactions->read',
@@ -374,7 +377,7 @@ class modAgenda extends DolibarrModules
 			'co.code'=>'CountryCode','s.phone'=>'Phone','s.siren'=>'ProfId1','s.siret'=>'ProfId2','s.ape'=>'ProfId3','s.idprof4'=>'ProfId4','s.idprof5'=>'ProfId5','s.idprof6'=>'ProfId6',
 			's.code_compta'=>'CustomerAccountancyCode','s.code_compta_fournisseur'=>'SupplierAccountancyCode','s.tva_intra'=>'VATIntra');
 		$this->export_TypeFields_array[$r]=array('ac.ref_ext'=>"Text",'ac.datec'=>"Date",'ac.datep'=>"Date",
-			'ac.datep2'=>"Date",'ac.label'=>"Text",'ac.note'=>"Text",'ac.percent'=>"Number",
+			'ac.datep2'=>"Date",'ac.label'=>"Text",'ac.note'=>"Text",'ac.percent'=>"Numeric",
 			'ac.durationp'=>"Duree",
 			'cac.libelle'=>"List:c_actioncomm:libelle:id",
 			's.nom'=>'Text','s.address'=>'Text','s.zip'=>'Text','s.town'=>'Text',
@@ -393,43 +396,8 @@ class modAgenda extends DolibarrModules
 		$this->export_sql_end[$r] .=' LEFT JOIN '.MAIN_DB_PREFIX.'socpeople as sp on ac.fk_contact = sp.rowid';
 		$this->export_sql_end[$r] .=' LEFT JOIN '.MAIN_DB_PREFIX.'societe as s on ac.fk_soc = s.rowid';
 		$this->export_sql_end[$r] .=' LEFT JOIN '.MAIN_DB_PREFIX.'c_country as co on s.fk_pays = co.rowid';
-		$this->export_sql_end[$r] .=' Where ac.entity = '.$conf->entity;
+		$this->export_sql_end[$r] .=' WHERE ac.entity IN ('.getEntity('agenda',1).')';
 		$this->export_sql_end[$r] .=' ORDER BY ac.datep';
 
 	}
-
-
-	/**
-	 *		Function called when module is enabled.
-	 *		The init function add constants, boxes, permissions and menus (defined in constructor) into Dolibarr database.
-	 *		It also creates data directories
-	 *
-     *      @param      string	$options    Options when enabling module ('', 'noboxes')
-	 *      @return     int             	1 if OK, 0 if KO
-	 */
-	function init($options='')
-	{
-		// Prevent pb of modules not correctly disabled
-		//$this->remove($options);
-
-		$sql = array();
-
-		return $this->_init($sql,$options);
-	}
-
-	/**
-	 *		Function called when module is disabled.
-	 *      Remove from database constants, boxes and permissions from Dolibarr database.
-	 *		Data directories are not deleted
-	 *
-     *      @param      string	$options    Options when enabling module ('', 'noboxes')
-	 *      @return     int             	1 if OK, 0 if KO
-	 */
-	function remove($options='')
-	{
-		$sql = array();
-
-		return $this->_remove($sql,$options);
-	}
-
 }

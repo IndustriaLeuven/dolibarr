@@ -1,5 +1,6 @@
 <?php
-/* Copyright (C) 2011 Laurent Destailleur  <eldy@users.sourceforge.net>
+/* Copyright (C) 2011       Laurent Destailleur <eldy@users.sourceforge.net>
+ * Copyright (C) 2016       Raphaël Doursenaud  <rdoursenaud@gpcsolutions.fr>
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -106,11 +107,11 @@ class Import
 						//print_r("$perm[0]-$perm[1]-$perm[2]<br>");
 						if ($perm[2])
 						{
-						$bool=$user->rights->$perm[0]->$perm[1]->$perm[2];
+						$bool=$user->rights->{$perm[0]}->{$perm[1]}->{$perm[2]};
 						}
 						else
 						{
-						$bool=$user->rights->$perm[0]->$perm[1];
+						$bool=$user->rights->{$perm[0]}->{$perm[1]};
 						}
 						if ($perm[0]=='user' && $user->admin) $bool=true;
 						//print $bool." $perm[0]"."<br>";
@@ -146,7 +147,7 @@ class Import
 						$this->array_import_entities[$i]=$module->import_entities_array[$r];
 						// Tableau des alias a exporter (cle=champ, valeur=alias)
 						$this->array_import_regex[$i]=$module->import_regex_array[$r];
-						// Tableau des alias a exporter (cle=champ, valeur=exemple)
+						// Array of examples
 						$this->array_import_examplevalues[$i]=$module->import_examplevalues_array[$r];
 						// Tableau des regles de conversion d'une valeur depuis une autre source (cle=champ, valeur=tableau des regles)
 						$this->array_import_convertvalue[$i]=(isset($module->import_convertvalue_array[$r])?$module->import_convertvalue_array[$r]:'');

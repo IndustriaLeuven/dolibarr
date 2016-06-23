@@ -106,7 +106,7 @@ class doc_generic_task_odt extends ModelePDFTask
 	/**
 	 * Define array with couple substitution key => substitution value
 	 *
-	 * @param   Object			$object             Main object to use as data source
+	 * @param   Project			$object             Main object to use as data source
 	 * @param   Translate		$outputlangs        Lang object to use for output
 	 * @return	array								Array of substitution
 	 */
@@ -416,7 +416,7 @@ class doc_generic_task_odt extends ModelePDFTask
 			$project= new Project($this->db);
 			$project->fetch($object->fk_project);
 
-			$dir = $conf->projet->dir_output. "/" . $project->ref. "/";;
+			$dir = $conf->projet->dir_output. "/" . $project->ref. "/";
 			$objectref = dol_sanitizeFileName($object->ref);
 			if (! preg_match('/specimen/i',$objectref)) $dir.= "/" . $objectref;
 			$file = $dir . "/" . $objectref . ".odt";
@@ -585,9 +585,9 @@ class doc_generic_task_odt extends ModelePDFTask
 						$odfHandler->mergeSegment($listlinestaskres);
 					}
 
-					//Time ressources
+					// Time ressources
 					$sql = "SELECT t.rowid, t.task_date, t.task_duration, t.fk_user, t.note";
-					$sql.= ", u.name, u.firstname";
+					$sql.= ", u.lastname, u.firstname";
 					$sql .= " FROM ".MAIN_DB_PREFIX."projet_task_time as t";
 					$sql .= " , ".MAIN_DB_PREFIX."user as u";
 					$sql .= " WHERE t.fk_task =".$object->id;
@@ -607,6 +607,7 @@ class doc_generic_task_odt extends ModelePDFTask
 							if (!empty($row['fk_user'])) {
 								$objectdetail=new User($this->db);
 								$objectdetail->fetch($row['fk_user']);
+								// TODO Use a cache to aoid fetch for same user
 								$row['fullcivname']=$objectdetail->getFullName($outputlangs,1);
 							} else {
 								$row['fullcivname']='';

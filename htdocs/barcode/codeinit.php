@@ -1,5 +1,5 @@
 <?php
-/* Copyright (C) 2014 Laurent Destailleur  <eldy@users.sourceforge.net>
+/* Copyright (C) 2014-2015 Laurent Destailleur  <eldy@users.sourceforge.net>
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -92,7 +92,7 @@ if ($action == 'initbarcodeproducts')
 	if (! is_object($modBarCodeProduct))
 	{
 		$error++;
-		setEventMessage($langs->trans("NoBarcodeNumberingTemplateDefined"),'errors');
+		setEventMessages($langs->trans("NoBarcodeNumberingTemplateDefined"), null, 'errors');
 	}
 
 	if (! $error)
@@ -109,7 +109,7 @@ if ($action == 'initbarcodeproducts')
 			$resql=$db->query($sql);
 			if ($resql)
 			{
-				setEventMessage($langs->trans("AllBarcodeReset"),'mesgs');
+				setEventMessages($langs->trans("AllBarcodeReset"), null, 'mesgs');
 			}
 			else
 			{
@@ -160,7 +160,7 @@ if ($action == 'initbarcodeproducts')
 
 			if (! $error)
 			{
-				setEventMessage($langs->trans("RecordsModified",$nbok),'mesgs');
+				setEventMessages($langs->trans("RecordsModified",$nbok), null, 'mesgs');
 			}
 		}
 
@@ -191,7 +191,7 @@ $form=new Form($db);
 
 llxHeader('',$langs->trans("MassBarcodeInit"));
 
-print_fiche_titre($langs->trans("MassBarcodeInit"));
+print load_fiche_titre($langs->trans("MassBarcodeInit"));
 print '<br>';
 
 print $langs->trans("MassBarcodeInitDesc").'<br>';
@@ -211,7 +211,7 @@ if ($conf->societe->enabled)
 {
 	$nbno=$nbtotal=0;
 
-	print_fiche_titre($langs->trans("BarcodeInitForThirdparties"),'','');
+	print load_fiche_titre($langs->trans("BarcodeInitForThirdparties"),'','object_company');
 	print '<br>'."\n";
 	$sql="SELECT count(rowid) as nb FROM ".MAIN_DB_PREFIX."societe where barcode IS NULL or barcode = ''";
 	$resql=$db->query($sql);
@@ -233,10 +233,10 @@ if ($conf->societe->enabled)
 
 	print $langs->trans("CurrentlyNWithoutBarCode", $nbno, $nbtotal, $langs->transnoentitiesnoconv("ThirdParties")).'<br>'."\n";
 
-	print '<br><input class="button" type="submit" id="submitformbarcodethirdpartygen" '.((GETPOST("selectorforbarcode") && GETPOST("selectorforbarcode"))?'':'disabled="checked" ').'value="'.$langs->trans("InitEmptyBarCode",$nbno).'"';
-	print ' title="'.dol_escape_htmltag($langs->trans("FeatureNotYetAvailable")).'" disabled="disabled"';
+	print '<br><input class="button" type="submit" id="submitformbarcodethirdpartygen" '.((GETPOST("selectorforbarcode") && GETPOST("selectorforbarcode"))?'':'disabled ').'value="'.$langs->trans("InitEmptyBarCode",$nbno).'"';
+	print ' title="'.dol_escape_htmltag($langs->trans("FeatureNotYetAvailable")).'" disabled';
 	print '>';
-	print '<br><br><br>';
+	print '<br><br><br><br>';
 }
 
 
@@ -252,7 +252,7 @@ if ($conf->product->enabled || $conf->product->service)
 
 	$nbno=$nbtotal=0;
 
-	print_fiche_titre($langs->trans("BarcodeInitForProductsOrServices"),'','');
+	print load_fiche_titre($langs->trans("BarcodeInitForProductsOrServices"),'','object_product');
 	print '<br>'."\n";
 
 	$sql ="SELECT count(rowid) as nb, fk_product_type, datec";
@@ -307,12 +307,12 @@ if ($conf->product->enabled || $conf->product->service)
 
 	print '<br>';
 	//print '<input type="checkbox" id="erasealreadyset" name="erasealreadyset"> '.$langs->trans("ResetBarcodeForAllRecords").'<br>';
-	$moretags1=(($disabled||$disabled1)?' disabled="disabled" title="'.dol_escape_htmltag($titleno).'"':'');
+	$moretags1=(($disabled||$disabled1)?' disabled title="'.dol_escape_htmltag($titleno).'"':'');
 	print '<input class="button" type="submit" name="submitformbarcodeproductgen" id="submitformbarcodeproductgen" value="'.$langs->trans("InitEmptyBarCode",min($maxperinit,$nbno)).'"'.$moretags1.'>';
-	$moretags2=(($nbno == $nbtotal)?' disabled="disabled"':'');
+	$moretags2=(($nbno == $nbtotal)?' disabled':'');
 	print ' &nbsp; ';
 	print '<input class="button" type="submit" name="eraseallbarcode" id="eraseallbarcode" value="'.$langs->trans("EraseAllCurrentBarCode").'"'.$moretags2.' onClick="return confirm_erase();">';
-	print '<br><br><br>';
+	print '<br><br><br><br>';
 }
 
 

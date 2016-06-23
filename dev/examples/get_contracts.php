@@ -1,4 +1,4 @@
-#!/usr/bin/php
+#!/usr/bin/env php
 <?php
 /* Copyright (C) 2009 Laurent Destailleur  <eldy@users.sourceforge.net>
  *
@@ -73,7 +73,7 @@ $obj->socid=$argv[1];
 
 $listofcontractsforcompany=$obj->getListOfContracts('all');
 
-print_r($listofcontractsforcompany);
+print $listofcontractsforcompany;
 
 
 // -------------------- END OF YOUR CODE --------------------

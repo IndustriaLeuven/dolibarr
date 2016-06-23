@@ -3,8 +3,6 @@
 # No errors
 NoErrorCommitIsDone=Нет ошибок, мы принимаем
 # Errors
-Error=Ошибка
-Errors=Ошибки
 ErrorButCommitIsDone=Обнаружены ошибки, но мы подтвердиле несмотря на это
 ErrorBadEMail=EMail %s неправильно
 ErrorBadUrl=Url %s неправильно
@@ -63,9 +61,9 @@ ErrorSizeTooLongForVarcharType=Размер слишком долго для с�
 ErrorNoValueForSelectType=Пожалуйста, заполните значение для выпадающего списка
 ErrorNoValueForCheckBoxType=Пожалуйста, заполните значение для списка флажков
 ErrorNoValueForRadioType=Пожалуйста, заполните  значени для списка переключателей
-ErrorBadFormatValueList=The list value cannot have more than one come : <u>%s</u>, but need at least one: llave,valores
+ErrorBadFormatValueList=The list value cannot have more than one comma: <u>%s</u>, but need at least one: key,value
 ErrorFieldCanNotContainSpecialCharacters=<b>Поле %s</b> не содержит специальных символов.
-ErrorFieldCanNotContainSpecialNorUpperCharacters=Field <b>%s</b> must not contains special characters, nor upper case characters.
+ErrorFieldCanNotContainSpecialNorUpperCharacters=Field <b>%s</b> must not contain special characters, nor upper case characters and cannot contain only numbers.
 ErrorNoAccountancyModuleLoaded=Нет бухгалтерского модуля активируется
 ErrorExportDuplicateProfil=Имя этого профиля уже сущесвует для этого набора для экспорта.
 ErrorLDAPSetupNotComplete=Dolibarr-LDAP соответствия не является полной.
@@ -79,7 +77,7 @@ ErrorModuleRequireJavascript=Javascript не должна быть отключ�
 ErrorPasswordsMustMatch=Оба введенных пароля должны совпадать друг с другом
 ErrorContactEMail=Техническая ошибка. Пожалуйста, обратитесь к администратору следующую электронную почту <b>%s</b> ан обеспечить <b>%s</b> код ошибки в ваше сообщение, или даже лучше, добавив экран копию этой страницы.
 ErrorWrongValueForField=Неверное значение для области количество <b>%s</b> (значение <b>%s</b> &quot;не соответствует регулярное <b>%s</b> правило)
-ErrorFieldValueNotIn=Wrong value for field number <b>%s</b> (value '<b>%s</b>' is not a value available into field <b>%s</b> of table <b>%s</b> = <b>%s</b>)
+ErrorFieldValueNotIn=Wrong value for field number <b>%s</b> (value '<b>%s</b>' is not a value available into field <b>%s</b> of table <b>%s</b>)
 ErrorFieldRefNotIn=Неверное значение для <b>%s</b> номер поля <b>(«%s&quot;</b> значение не является <b>%s</b> существующих ссылка)
 ErrorsOnXLines=Ошибки на источник <b>%s</b> линий
 ErrorFileIsInfectedWithAVirus=Антивирусная программа не смогла проверить файл (файл может быть заражен вирусом)
@@ -100,7 +98,7 @@ ErrorProdIdAlreadyExist=%s назначается еще одна треть
 ErrorFailedToSendPassword=Не удалось отправить пароль
 ErrorFailedToLoadRSSFile=Не в состоянии получить RSS-канал. Попробуйте добавить постоянные MAIN_SIMPLEXMLLOAD_DEBUG если сообщения об ошибках не предоставляет достаточно информации.
 ErrorPasswordDiffers=Пароли отличается, введите их заново.
-ErrorForbidden=Доступ запрещен. <br> При попытке доступа к странице, района или функцию, не будучи в аутентифицированных сессии или, что не разрешено пользователя.
+ErrorForbidden=Access denied.<br>You try to access to a page, area or feature of a disabled module or without being in an authenticated session or that is not allowed to your user.
 ErrorForbidden2=Разрешение на этот логин может быть определено администратором вашей Dolibarr из меню %s-> %s.
 ErrorForbidden3=Кажется, что Dolibarr не используется через аутентифицированных сессии. Взгляните на Dolibarr Настройка документации знать, как управлять подлинности (htaccess, mod_auth или другие ...).
 ErrorNoImagickReadimage=Функция imagick_readimage не найдена в этой PHP. Нет предварительного просмотра могут быть доступны. Администраторы могут отключить эту закладку из меню Настройка - Экран.
@@ -170,8 +168,15 @@ ErrorGlobalVariableUpdater4=Ошибка SOAP-клиента '%s'
 ErrorGlobalVariableUpdater5=Не выбрана глобальная переменная
 ErrorFieldMustBeANumeric=Field <b>%s</b> must be a numeric value
 ErrorFieldMustBeAnInteger=Field <b>%s</b> must be an integer
+ErrorMandatoryParametersNotProvided=Mandatory parameter(s) not provided
+ErrorOppStatusRequiredIfAmount=You set an estimated amount for this opportunity/lead. So you must also enter its status
+ErrorBadDefinitionOfMenuArrayInModuleDescriptor=Bad Definition Of Menu Array In Module Descriptor (bad value for key fk_menu)
+ErrorSavingChanges=An error has ocurred when saving the changes
+ErrorWarehouseRequiredIntoShipmentLine=Warehouse is required on the line to ship
+ErrorFileMustHaveFormat=File must have format %s
 
 # Warnings
+WarningPasswordSetWithNoAccount=A password was set for this member. However, no user account was created. So this password is stored but can't be used to login to Dolibarr. It may be used by an external module/interface but if you don't need to define any login nor password for a member, you can disable option "Manage a login for each member" from Member module setup. If you need to manage a login but don't need any password, you can keep this field empty to avoid this warning. Note: Email can also be used as a login if the member is linked to a user.
 WarningMandatorySetupNotComplete=Обязательные параметры не определены
 WarningSafeModeOnCheckExecDir=Предупреждение, PHP <b>safe_mode</b> вариант находится на так команда должна храниться в каталог заявил на PHP <b>safe_mode_exec_dir</b> параметра.
 WarningAllowUrlFopenMustBeOn=Параметр <b>allow_url_fopen</b> должен быть установлен на заполнителя <b>в php.ini</b> за этот модуль полностью рабочий. Вы должны изменить этот файл вручную.
@@ -189,4 +194,5 @@ WarningClickToDialUserSetupNotComplete=Setup of ClickToDial information for your
 WarningNotRelevant=Ненужная операция для этого набора данных
 WarningFeatureDisabledWithDisplayOptimizedForBlindNoJs=Функция отключена, когда отображение оадптировано для слабовидящих или текстовых браузеров. 
 WarningPaymentDateLowerThanInvoiceDate=Дата платежа (%s)  меньше, чем дата  (%s)  счёта  %s.
-WarningTooManyDataPleaseUseMoreFilters=Слишком много данных. Пожалуйста, используйте дополнительные фильтры 
+WarningTooManyDataPleaseUseMoreFilters=Too many data (more than %s lines). Please use more filters or set the constant %s to a higher limit.
+WarningSomeLinesWithNullHourlyRate=Some times were recorded by users when their hourly rate was not defined. A value of 0 was used but this may result in wrong valuation of time spent.

@@ -1,7 +1,7 @@
 <?php
 /* Copyright (C) 2004		Rodolphe Quiedeville	<rodolphe@quiedeville.org>
  * Copyright (C) 2005-2012	Laurent Destailleur		<eldy@uers.sourceforge.net>
- * Copyright (C) 2005-2012	Regis Houssin			<regis.houssin@capnetworks.com>
+ * Copyright (C) 2005-2016	Regis Houssin			<regis.houssin@capnetworks.com>
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -117,7 +117,7 @@ if (empty($reshook))
 	{
 		if (empty($_REQUEST["clone_content"]) && empty($_REQUEST["clone_receivers"]))
 		{
-			setEventMessage($langs->trans("NoCloneOptionsSpecified"), 'errors');
+			setEventMessages($langs->trans("NoCloneOptionsSpecified"), null, 'errors');
 		}
 		else
 		{
@@ -129,7 +129,7 @@ if (empty($reshook))
 			}
 			else
 			{
-				setEventMessage($object->error, 'errors');
+				setEventMessages($object->error, $object->errors, 'errors');
 			}
 		}
 	    $action='';
@@ -140,22 +140,20 @@ if (empty($reshook))
 	{
 		if (empty($conf->global->MAILING_LIMIT_SENDBYWEB))
 		{
-			//TODO: What is this for?
-			// Pour des raisons de securite, on ne permet pas cette fonction via l'IHM,
-			// on affiche donc juste un message
-			setEventMessage($langs->trans("MailingNeedCommand"), 'warnings');
-			setEventMessage('<textarea cols="70" rows="'.ROWS_2.'" wrap="soft">php ./scripts/emailings/mailing-send.php '.$object->id.'</textarea>', 'warnings');
-			setEventMessage($langs->trans("MailingNeedCommand2"), 'warnings');
+			// As security measure, we don't allow send from the GUI
+			setEventMessages($langs->trans("MailingNeedCommand"), null, 'warnings');
+			setEventMessages('<textarea cols="70" rows="'.ROWS_2.'" wrap="soft">php ./scripts/emailings/mailing-send.php '.$object->id.'</textarea>', null, 'warnings');
+			setEventMessages($langs->trans("MailingNeedCommand2"), null, 'warnings');
 			$action='';
 		}
 		else if ($conf->global->MAILING_LIMIT_SENDBYWEB < 0)
 		{
-			setEventMessage($langs->trans("NotEnoughPermissions"), 'warnings');
+			setEventMessages($langs->trans("NotEnoughPermissions"), null, 'warnings');
 			$action='';
 		}
 		else
 		{
-			$upload_dir = $conf->mailing->dir_output . "/" . get_exdir($object->id,2,0,1);
+			$upload_dir = $conf->mailing->dir_output . "/" . get_exdir($object->id,2,0,1,$object,'mailing');
 
 			if ($object->statut == 0)
 			{
@@ -224,6 +222,8 @@ if (empty($reshook))
 	                    $tmpfield=explode('=',$other[2],2); $other3=(isset($tmpfield[1])?$tmpfield[1]:$tmpfield[0]);
 	                    $tmpfield=explode('=',$other[3],2); $other4=(isset($tmpfield[1])?$tmpfield[1]:$tmpfield[0]);
 	                    $tmpfield=explode('=',$other[4],2); $other5=(isset($tmpfield[1])?$tmpfield[1]:$tmpfield[0]);
+	                    $signature = ((!empty($user->signature) && empty($conf->global->MAIN_MAIL_DO_NOT_USE_SIGN))?$user->signature:'');
+
 	                    // Array of possible substitutions (See also fie mailing-send.php that should manage same substitutions)
 						$substitutionarray=array(
 								'__ID__' => $obj->source_id,
@@ -236,6 +236,7 @@ if (empty($reshook))
 								'__OTHER3__' => $other3,
 								'__OTHER4__' => $other4,
 								'__OTHER5__' => $other5,
+								'__SIGNATURE__' => $signature,	// Signature is empty when ran from command line or taken from user in parameter)
 								'__CHECK_READ__' => '<img src="'.DOL_MAIN_URL_ROOT.'/public/emailing/mailing-read.php?tag='.$obj->tag.'&securitykey='.urlencode($conf->global->MAILING_EMAIL_UNSUBSCRIBE_KEY).'" width="1" height="1" style="width:1px;height:1px" border="0"/>',
 								'__UNSUBSCRIBE__' => '<a href="'.DOL_MAIN_URL_ROOT.'/public/emailing/mailing-unsubscribe.php?tag='.$obj->tag.'&unsuscrib=1&securitykey='.urlencode($conf->global->MAILING_EMAIL_UNSUBSCRIBE_KEY).'" target="_blank">'.$langs->trans("MailUnsubcribe").'</a>'
 						);
@@ -325,8 +326,12 @@ if (empty($reshook))
 								}
 							}
 
+						    if (!empty($conf->global->MAILING_DELAY))
+						    {
+                            	sleep($conf->global->MAILING_DELAY);
+                        	}
 
-							//test if CHECK READ change statut prospect contact
+                        	//test if CHECK READ change statut prospect contact
 						}
 						else
 						{
@@ -349,27 +354,27 @@ if (empty($reshook))
 				}
 				else
 				{
-					setEventMessage($langs->transnoentitiesnoconv("NoMoreRecipientToSendTo"));
+					setEventMessages($langs->transnoentitiesnoconv("NoMoreRecipientToSendTo"), null, 'mesgs');
 				}
 
 				// Loop finished, set global statut of mail
 				if ($nbko > 0)
 				{
 					$statut=2;	// Status 'sent partially' (because at least one error)
-					if ($nbok > 0) 	setEventMessage($langs->transnoentitiesnoconv("EMailSentToNRecipients",$nbok));
-					else setEventMessage($langs->transnoentitiesnoconv("EMailSentToNRecipients",$nbok));
+					if ($nbok > 0) 	setEventMessages($langs->transnoentitiesnoconv("EMailSentToNRecipients",$nbok), null, 'mesgs');
+					else setEventMessages($langs->transnoentitiesnoconv("EMailSentToNRecipients",$nbok), null, 'mesgs');
 				}
 				else
 				{
 					if ($nbok >= $num)
 					{
 						$statut=3;	// Send to everybody
-						setEventMessage($langs->transnoentitiesnoconv("EMailSentToNRecipients",$nbok));
+						setEventMessages($langs->transnoentitiesnoconv("EMailSentToNRecipients",$nbok), null, 'mesgs');
 					}
 					else
 					{
 						$statut=2;	// Status 'sent partially' (because not send to everybody)
-						setEventMessage($langs->transnoentitiesnoconv("EMailSentToNRecipients",$nbok));
+						setEventMessages($langs->transnoentitiesnoconv("EMailSentToNRecipients",$nbok), null, 'mesgs');
 					}
 				}
 
@@ -396,12 +401,12 @@ if (empty($reshook))
 	{
 		$error=0;
 
-		$upload_dir = $conf->mailing->dir_output . "/" . get_exdir($object->id,2,0,1);
+		$upload_dir = $conf->mailing->dir_output . "/" . get_exdir($object->id,2,0,1,$object,'mailing');
 
 		$object->sendto = $_POST["sendto"];
 		if (! $object->sendto)
 		{
-			setEventMessage($langs->trans("ErrorFieldRequired",$langs->trans("MailTo")), 'errors');
+			setEventMessages($langs->trans("ErrorFieldRequired", $langs->trans("MailTo")), null, 'errors');
 			$error++;
 		}
 
@@ -441,11 +446,11 @@ if (empty($reshook))
 			$result=$mailfile->sendfile();
 			if ($result)
 			{
-				setEventMessage($langs->trans("MailSuccessfulySent",$mailfile->getValidAddress($object->email_from,2),$mailfile->getValidAddress($object->sendto,2)));
+				setEventMessages($langs->trans("MailSuccessfulySent",$mailfile->getValidAddress($object->email_from,2),$mailfile->getValidAddress($object->sendto,2)), null, 'mesgs');
 			}
 			else
 			{
-				setEventMessage($langs->trans("ResultKo").'<br>'.$mailfile->error.' '.$result, 'errors');
+				setEventMessages($langs->trans("ResultKo").'<br>'.$mailfile->error.' '.$result, null, 'errors');
 			}
 
 			$action='';
@@ -486,14 +491,14 @@ if (empty($reshook))
 			$mesgs[] = $object->error;
 		}
 
-		setEventMessage($mesgs, 'errors');
+		setEventMessages($mesg, $mesgs, 'errors');
 		$action="create";
 	}
 
 	// Action update description of emailing
 	if ($action == 'settitre' || $action == 'setemail_from' || $action == 'setreplyto' || $action == 'setemail_errorsto')
 	{
-		$upload_dir = $conf->mailing->dir_output . "/" . get_exdir($object->id,2,0,1);
+		$upload_dir = $conf->mailing->dir_output . "/" . get_exdir($object->id,2,0,1,$object,'mailing');
 
 		if ($action == 'settitre')					$object->titre          = trim(GETPOST('titre','alpha'));
 		else if ($action == 'setemail_from')		$object->email_from     = trim(GETPOST('email_from','alpha'));
@@ -516,7 +521,7 @@ if (empty($reshook))
 			$mesg = $object->error;
 		}
 
-		setEventMessage($mesg, 'errors');
+		setEventMessages($mesg, $mesgs, 'errors');
 		$action="";
 	}
 
@@ -525,7 +530,7 @@ if (empty($reshook))
 	 */
 	if (! empty($_POST['addfile']))
 	{
-		$upload_dir = $conf->mailing->dir_output . "/" . get_exdir($object->id,2,0,1);
+		$upload_dir = $conf->mailing->dir_output . "/" . get_exdir($object->id,2,0,1,$object,'mailing');
 
 		require_once DOL_DOCUMENT_ROOT.'/core/lib/files.lib.php';
 
@@ -538,11 +543,11 @@ if (empty($reshook))
 	// Action remove file
 	if (! empty($_POST["removedfile"]))
 	{
-		$upload_dir = $conf->mailing->dir_output . "/" . get_exdir($object->id,2,0,1);
+		$upload_dir = $conf->mailing->dir_output . "/" . get_exdir($object->id,2,0,1,$object,'mailing');
 
 		require_once DOL_DOCUMENT_ROOT.'/core/lib/files.lib.php';
 
-	    dol_remove_file_process($_POST['removedfile'],0);
+	    dol_remove_file_process($_POST['removedfile'],0,0);    // We really delete file linked to mailing
 
 		$action="edit";
 	}
@@ -580,7 +585,7 @@ if (empty($reshook))
 				$mesgs[] =$object->error;
 			}
 
-			setEventMessage($mesgs, 'errors');
+			setEventMessages($mesg, $mesgs, 'errors');
 			$action="edit";
 		}
 		else
@@ -595,7 +600,7 @@ if (empty($reshook))
 		if ($object->id > 0)
 		{
 			$object->valid($user);
-			setEventMessage($langs->trans("MailingSuccessfullyValidated"));
+			setEventMessages($langs->trans("MailingSuccessfullyValidated"), null, 'mesgs');
 			header("Location: ".$_SERVER['PHP_SELF']."?id=".$object->id);
 			exit;
 		}
@@ -626,7 +631,7 @@ if (empty($reshook))
 			}
 			else
 			{
-				setEventMessage($object->error, 'errors');
+				setEventMessages($object->error, $object->errors, 'errors');
 				$db->rollback();
 			}
 		}
@@ -671,7 +676,9 @@ if ($action == 'create')
 	print '<input type="hidden" name="token" value="'.$_SESSION['newtoken'].'">';
 	print '<input type="hidden" name="action" value="add">';
 
-	print_fiche_titre($langs->trans("NewMailing"));
+	print load_fiche_titre($langs->trans("NewMailing"));
+
+	dol_fiche_head();
 
 	print '<table class="border" width="100%">';
 	print '<tr><td width="25%" class="fieldrequired">'.$langs->trans("MailTitle").'</td><td><input class="flat" name="titre" size="40" value="'.$_POST['titre'].'"></td></tr>';
@@ -704,12 +711,14 @@ if ($action == 'create')
 	print '<td>';
 	// Editeur wysiwyg
 	require_once DOL_DOCUMENT_ROOT.'/core/class/doleditor.class.php';
-	$doleditor=new DolEditor('body',$_POST['body'],'',320,'dolibarr_mailings','',true,true,$conf->global->FCKEDITOR_ENABLE_MAILING,20,70);
+	$doleditor=new DolEditor('body',$_POST['body'],'',320,'dolibarr_mailings','',true,true,$conf->global->FCKEDITOR_ENABLE_MAILING,20,'90%');
 	$doleditor->Create();
 	print '</td></tr>';
 	print '</table>';
 
-	print '<br><center><input type="submit" class="button" value="'.$langs->trans("CreateMailing").'"></center>';
+	dol_fiche_end();
+
+	print '<div class="center"><input type="submit" class="button" value="'.$langs->trans("CreateMailing").'"></div>';
 
 	print '</form>';
 }
@@ -717,7 +726,7 @@ else
 {
 	if ($object->id > 0)
 	{
-		$upload_dir = $conf->mailing->dir_output . "/" . get_exdir($object->id,2,0,1);
+		$upload_dir = $conf->mailing->dir_output . "/" . get_exdir($object->id,2,0,1,$object,'mailing');
 
 		$head = emailing_prepare_head($object);
 
@@ -758,18 +767,18 @@ else
 					// You ensure that every user is using its own SMTP server.
 					$linktoadminemailbefore='<a href="'.DOL_URL_ROOT.'/admin/mails.php">';
 					$linktoadminemailend='</a>';
-					setEventMessage($langs->trans("MailSendSetupIs", $listofmethods[$sendingmode]), 'warnings');
-					setEventMessage($langs->trans("MailSendSetupIs2", $linktoadminemailbefore, $linktoadminemailend, $langs->transnoentitiesnoconv("MAIN_MAIL_SENDMODE"), $listofmethods['smtps']), 'warnings');
-					if (! empty($conf->global->MAILING_SMTP_SETUP_EMAILS_FOR_QUESTIONS)) setEventMessage($langs->trans("MailSendSetupIs3", $conf->global->MAILING_SMTP_SETUP_EMAILS_FOR_QUESTIONS), 'warnings');
+					setEventMessages($langs->trans("MailSendSetupIs", $listofmethods[$sendingmode]), null, 'warnings');
+					setEventMessages($langs->trans("MailSendSetupIs2", $linktoadminemailbefore, $linktoadminemailend, $langs->transnoentitiesnoconv("MAIN_MAIL_SENDMODE"), $listofmethods['smtps']), null, 'warnings');
+					if (! empty($conf->global->MAILING_SMTP_SETUP_EMAILS_FOR_QUESTIONS)) setEventMessages($langs->trans("MailSendSetupIs3", $conf->global->MAILING_SMTP_SETUP_EMAILS_FOR_QUESTIONS), null, 'warnings');
 					$_GET["action"]='';
 				}
 				else if (empty($conf->global->MAILING_LIMIT_SENDBYWEB))
 				{
 					// Pour des raisons de securite, on ne permet pas cette fonction via l'IHM,
 					// on affiche donc juste un message
-					setEventMessage($langs->trans("MailingNeedCommand"), 'warnings');
-					setEventMessage('<textarea cols="60" rows="'.ROWS_1.'" wrap="soft">php ./scripts/emailings/mailing-send.php '.$object->id.'</textarea>', 'warnings');
-					setEventMessage($langs->trans("MailingNeedCommand2"), 'warnings');
+					setEventMessages($langs->trans("MailingNeedCommand"), null, 'warnings');
+					setEventMessages('<textarea cols="60" rows="'.ROWS_1.'" wrap="soft">php ./scripts/emailings/mailing-send.php '.$object->id.'</textarea>', null, 'warnings');
+					setEventMessages($langs->trans("MailingNeedCommand2"), null, 'warnings');
 					$_GET["action"]='';
 				}
 				else
@@ -952,7 +961,7 @@ else
 			// Affichage formulaire de TEST
 			if ($action == 'test')
 			{
-				print_titre($langs->trans("TestMailing"));
+				print load_fiche_titre($langs->trans("TestMailing"));
 
 				// Create l'objet formulaire mail
 				include_once DOL_DOCUMENT_ROOT.'/core/class/html.formmail.class.php';
@@ -985,7 +994,10 @@ else
 			}
 
 			// Print mail content
-			print_fiche_titre($langs->trans("EMail"),'','');
+			print load_fiche_titre($langs->trans("EMail"),'','');
+
+			dol_fiche_head('');
+
 			print '<table class="border" width="100%">';
 
 			// Subject
@@ -1036,7 +1048,8 @@ else
 			print '</tr>';
 
 			print '</table>';
-			print "<br>";
+
+			dol_fiche_end();
 		}
 		else
 		{
@@ -1083,7 +1096,10 @@ else
 			}
 
 			print '</table>';
-			print "</div>";
+
+			dol_fiche_end();
+
+
 
 			print "\n";
 			print '<form name="edit_mailing" action="card.php" method="post" enctype="multipart/form-data">'."\n";
@@ -1092,7 +1108,10 @@ else
 			print '<input type="hidden" name="id" value="'.$object->id.'">';
 
 			// Print mail content
-			print_fiche_titre($langs->trans("EMail"),'','');
+			print load_fiche_titre($langs->trans("EMail"),'','');
+
+			dol_fiche_head();
+
 			print '<table class="border" width="100%">';
 
 			// Subject
@@ -1158,11 +1177,13 @@ else
 
 			print '</table>';
 
-			print '<br><center>';
+			dol_fiche_end();
+
+			print '<div class="center">';
 			print '<input type="submit" class="button" value="'.$langs->trans("Save").'" name="save">';
-			print ' &nbsp; ';
+			print '&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;';
 			print '<input type="submit" class="button" value="'.$langs->trans("Cancel").'" name="cancel">';
-			print '</center>';
+			print '</div>';
 
 			print '</form>';
 			print '<br>';

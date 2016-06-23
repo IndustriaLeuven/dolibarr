@@ -48,7 +48,6 @@ RefusedReason=Motivo de devolución
 RefusedInvoicing=Facturación de la devolución
 NoInvoiceRefused=No facturar la devolución
 InvoiceRefused=Factura rechazada (Cargar los gastos al cliente)
-Status=Estado
 StatusUnknown=Desconocido
 StatusWaiting=En espera
 StatusTrans=Enviada
@@ -84,6 +83,11 @@ WithdrawalFile=Archivo de la domiciliación
 SetToStatusSent=Clasificar como "Archivo enviado"
 ThisWillAlsoAddPaymentOnInvoice=Se crearán los pagos de las facturas y las clasificará como pagadas
 StatisticsByLineStatus=Estadísticas por estados de líneas
+RUM=RUM
+RUMWillBeGenerated=El número RUM se generará una vez que se guarde la información de la cuenta bancaria
+WithdrawMode=Modo domiciliación (FRST o RECUR)
+WithdrawRequestAmount=Importe petición domiciliación:
+WithdrawRequestErrorNilAmount=No es posible crear una petición de domiciliación con importe nulo
 
 ### Notifications
 InfoCreditSubject=Abono de domiciliación %s por el banco

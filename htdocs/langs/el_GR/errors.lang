@@ -3,8 +3,6 @@
 # No errors
 NoErrorCommitIsDone=Κανένα σφάλμα
 # Errors
-Error=Σφάλμα
-Errors=Λάθη
 ErrorButCommitIsDone=Σφάλματα που διαπιστώθηκαν αλλά παρόλα αυτά επικυρώνει
 ErrorBadEMail=%s email είναι λάθος
 ErrorBadUrl=%s url είναι λάθος
@@ -63,9 +61,9 @@ ErrorSizeTooLongForVarcharType=Μέγεθος υπερβολικά μεγάλο 
 ErrorNoValueForSelectType=Please fill value for select list
 ErrorNoValueForCheckBoxType=Please fill value for checkbox list
 ErrorNoValueForRadioType=Please fill value for radio list
-ErrorBadFormatValueList=The list value cannot have more than one come : <u>%s</u>, but need at least one: llave,valores
+ErrorBadFormatValueList=The list value cannot have more than one comma: <u>%s</u>, but need at least one: key,value
 ErrorFieldCanNotContainSpecialCharacters=<b>%s</b> πεδίου δεν πρέπει να περιέχει ειδικούς χαρακτήρες.
-ErrorFieldCanNotContainSpecialNorUpperCharacters=Το πεδίο <b>%s</b> δεν πρέπει να περιέχει ειδικούς χαρακτήρες, ούτε κεφαλαία γράμματα.
+ErrorFieldCanNotContainSpecialNorUpperCharacters=Field <b>%s</b> must not contain special characters, nor upper case characters and cannot contain only numbers.
 ErrorNoAccountancyModuleLoaded=Δεν λογιστική μονάδα ενεργοποιηθεί
 ErrorExportDuplicateProfil=Αυτό το όνομα προφίλ υπάρχει ήδη για αυτό το σύνολο των εξαγωγών.
 ErrorLDAPSetupNotComplete=Dolibarr-LDAP αντιστοίχιση δεν είναι πλήρης.
@@ -79,7 +77,7 @@ ErrorModuleRequireJavascript=Η Javascript πρέπει να είναι άτομ
 ErrorPasswordsMustMatch=Και οι δύο πληκτρολογήσει τους κωδικούς πρόσβασης πρέπει να ταιριάζουν μεταξύ τους
 ErrorContactEMail=Ένα τεχνικό σφάλμα. Παρακαλούμε, επικοινωνήστε με τον διαχειριστή για μετά <b>%s</b> email en παρέχουν την <b>%s</b> κωδικό σφάλματος στο μήνυμά σας, ή ακόμα καλύτερα με την προσθήκη ενός αντιγράφου της οθόνης αυτής της σελίδας.
 ErrorWrongValueForField=Λάθος τιμή για <b>%s</b> αριθμό τομέα <b>(«%s»</b> τιμή δεν ταιριάζει regex <b>%s</b> κανόνα)
-ErrorFieldValueNotIn=Wrong value for field number <b>%s</b> (value '<b>%s</b>' is not a value available into field <b>%s</b> of table <b>%s</b> = <b>%s</b>)
+ErrorFieldValueNotIn=Wrong value for field number <b>%s</b> (value '<b>%s</b>' is not a value available into field <b>%s</b> of table <b>%s</b>)
 ErrorFieldRefNotIn=Λάθος τιμή για τον αριθμό <b>%s</b> τομέα <b>(«%s»</b> τιμή δεν είναι <b>%s</b> υφιστάμενων ref)
 ErrorsOnXLines=Λάθη σε <b>%s</b> γραμμές πηγή
 ErrorFileIsInfectedWithAVirus=Το πρόγραμμα προστασίας από ιούς δεν ήταν σε θέση να επικυρώσει το αρχείο (αρχείο μπορεί να μολυνθεί από έναν ιό)
@@ -100,7 +98,7 @@ ErrorProdIdAlreadyExist=%s έχει ανατεθεί σε άλλη τρίτη
 ErrorFailedToSendPassword=Αποτυχία αποστολής κωδικού
 ErrorFailedToLoadRSSFile=Αποτυγχάνει να πάρει RSS feed. Προσπαθήστε να προσθέσετε σταθερή MAIN_SIMPLEXMLLOAD_DEBUG εάν τα μηνύματα λάθους δεν παρέχει αρκετές πληροφορίες.
 ErrorPasswordDiffers=Κωδικοί πρόσβασης διαφέρει, παρακαλώ πληκτρολογήστε ξανά.
-ErrorForbidden=Απαγορεύεται η πρόσβαση. <br> Μπορείτε να προσπαθήσετε να αποκτήσετε πρόσβαση σε μια σελίδα, ή περιοχή, χωρίς να διαθέτουν σε πιστοποιημένο συνεδρία ή ότι δεν επιτρέπεται στο χρήστη σας.
+ErrorForbidden=Access denied.<br>You try to access to a page, area or feature of a disabled module or without being in an authenticated session or that is not allowed to your user.
 ErrorForbidden2=Η άδεια για αυτή τη σύνδεση μπορεί να οριστεί από το διαχειριστή σας Dolibarr από το μενού %s-> %s.
 ErrorForbidden3=Φαίνεται ότι Dolibarr δεν χρησιμοποιείται μέσω επικυρωμένο συνεδρία. Ρίξτε μια ματιά στην τεκμηρίωση της εγκατάστασης Dolibarr να ξέρει πώς να διαχειριστεί authentications (htaccess, mod_auth ή άλλα ...).
 ErrorNoImagickReadimage=Κατηγορία imagick δεν βρίσκεται σε αυτό το PHP. Δεν προεπισκόπηση μπορεί να είναι διαθέσιμες. Οι διαχειριστές μπορούν να απενεργοποιήσουν αυτή την καρτέλα από το πρόγραμμα Εγκατάστασης μενού - Οθόνη.
@@ -170,8 +168,15 @@ ErrorGlobalVariableUpdater4=SOAP client failed with error '%s'
 ErrorGlobalVariableUpdater5=No global variable selected
 ErrorFieldMustBeANumeric=Field <b>%s</b> must be a numeric value
 ErrorFieldMustBeAnInteger=Field <b>%s</b> must be an integer
+ErrorMandatoryParametersNotProvided=Mandatory parameter(s) not provided
+ErrorOppStatusRequiredIfAmount=You set an estimated amount for this opportunity/lead. So you must also enter its status
+ErrorBadDefinitionOfMenuArrayInModuleDescriptor=Bad Definition Of Menu Array In Module Descriptor (bad value for key fk_menu)
+ErrorSavingChanges=An error has ocurred when saving the changes
+ErrorWarehouseRequiredIntoShipmentLine=Warehouse is required on the line to ship
+ErrorFileMustHaveFormat=File must have format %s
 
 # Warnings
+WarningPasswordSetWithNoAccount=A password was set for this member. However, no user account was created. So this password is stored but can't be used to login to Dolibarr. It may be used by an external module/interface but if you don't need to define any login nor password for a member, you can disable option "Manage a login for each member" from Member module setup. If you need to manage a login but don't need any password, you can keep this field empty to avoid this warning. Note: Email can also be used as a login if the member is linked to a user.
 WarningMandatorySetupNotComplete=Mandatory setup parameters are not yet defined
 WarningSafeModeOnCheckExecDir=Προειδοποίηση, PHP <b>safe_mode</b> επιλογή είναι τόσο εντολή αυτή πρέπει να αποθηκεύονται σε ένα κατάλογο που δηλώνονται από <b>safe_mode_exec_dir</b> παράμετρο php.
 WarningAllowUrlFopenMustBeOn=<b>Allow_url_fopen</b> παράμετρος πρέπει να είναι <b>ενεργοποιημένη</b> στο <b>php.ini</b> filer για το γεγονός ότι αυτή την ενότητα εργασίας εντελώς. Θα πρέπει να τροποποιήσετε αυτό το αρχείο χειροκίνητα.
@@ -189,4 +194,5 @@ WarningClickToDialUserSetupNotComplete=Setup of ClickToDial information for your
 WarningNotRelevant=Irrelevant operation for this dataset
 WarningFeatureDisabledWithDisplayOptimizedForBlindNoJs=Απενεργοποιημένη λειτουργία όταν οι ρυθμίσεις της οθόνης έχουν προσαρμοστεί για χρήση από άτομα με προβλήματα όρασης ή φυλλομετρητές κειμένου.
 WarningPaymentDateLowerThanInvoiceDate=Η ημερομηνία πληρωμής (%s) είναι νωρίτερα από την ημερομηνία του τιμολογίου (%s) για το τιμολόγιο %s.
-WarningTooManyDataPleaseUseMoreFilters=Πάρα πολλά στοιχεία. Παρακαλούμε χρησιμοποιήστε περισσότερα φίλτρα
+WarningTooManyDataPleaseUseMoreFilters=Too many data (more than %s lines). Please use more filters or set the constant %s to a higher limit.
+WarningSomeLinesWithNullHourlyRate=Some times were recorded by users when their hourly rate was not defined. A value of 0 was used but this may result in wrong valuation of time spent.

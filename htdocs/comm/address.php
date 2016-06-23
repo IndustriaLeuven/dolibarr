@@ -106,7 +106,7 @@ if ($action == 'add' || $action == 'update')
         }
         else
         {
-	        setEventMessage($object->error, 'errors');
+	        setEventMessages($object->error, $object->errors, 'errors');
             $action='create';
         }
     }
@@ -147,7 +147,7 @@ if ($action == 'add' || $action == 'update')
         else
         {
             $reload = 0;
-	        setEventMessage($object->error, 'errors');
+	        setEventMessages($object->error, $object->errors, 'errors');
             $action= "edit";
         }
     }
@@ -211,7 +211,7 @@ if ($action == 'create')
             $object->country		= $tmparray['label'];
         }
 
-        print_fiche_titre($langs->trans("AddAddress"));
+        print load_fiche_titre($langs->trans("AddAddress"));
 
         print "<br>\n";
 
@@ -281,14 +281,14 @@ if ($action == 'create')
 
         print '</table>'."\n";
 
-        print '<br><center>';
+        print '<br><div class="center">';
         print '<input type="submit" class="button" value="'.$langs->trans('Add').'">';
         if (! empty($backtopage))
         {
-        	print ' &nbsp; &nbsp; ';
+        	print '&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;';
         	print '<input type="submit" class="button" name="cancel" value="'.$langs->trans("Cancel").'">';
         }
-        print '</center>'."\n";
+        print '</div>'."\n";
 
         print '</form>'."\n";
 
@@ -306,7 +306,7 @@ elseif ($action == 'edit')
 
     dol_fiche_head($head, 'card', $societe->name);
 
-    print_titre($langs->trans("EditAddress"));
+    print load_fiche_titre($langs->trans("EditAddress"));
     print "<br>\n";
 
     if ($socid)
@@ -381,11 +381,11 @@ elseif ($action == 'edit')
 
         print '</table><br>';
 
-        print '<center>';
+        print '<div class="center">';
         print '<input type="submit" class="button" name="save" value="'.$langs->trans("Save").'">';
-        print ' &nbsp; ';
+        print '&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;';
         print '<input type="submit" class="button" name="cancel" value="'.$langs->trans("Cancel").'">';
-        print '</center>';
+        print '</div>';
 
         print '</form>';
     }

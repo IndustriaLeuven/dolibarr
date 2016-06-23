@@ -9,6 +9,7 @@ TripCard=Išlaidų ataskaitos kortelė
 AddTrip=Sukurti išlaidų ataskaitą
 ListOfTrips=Išlaidų ataskaitų sąrašas
 ListOfFees=Įmokų sąrašas
+ShowTrip=Rodyti išlaidų ataskaitą
 NewTrip=Nauja išlaidų ataskaita
 CompanyVisited=Aplankyta įmonė/organizacija
 Kilometers=Kilometrų
@@ -27,12 +28,10 @@ AnyOtherInThisListCanValidate=Asmuo informuojamas patvirtinimui.
 TripSociete=Informacijos įmonė
 TripSalarie=Informacijos vartotojas
 TripNDF=Informacijos išlaidų ataskaiata
-DeleteLine=Ištrinti išlaidų taskaitos eilutę
-ConfirmDeleteLine=Ar tikrai norite ištrinti šią eilutę ?
 PDFStandardExpenseReports=Standartinis šablonas PDF dokumento išlaidų ataskaitoje generavimui
 ExpenseReportLine=Išlaidų ataskaitos eilutė
 TF_OTHER=Kitas
-TF_TRANSPORTATION=Transportas
+TF_TRIP=Transportas
 TF_LUNCH=Pietūs
 TF_METRO=Metro
 TF_TRAIN=Traukinys
@@ -40,11 +39,10 @@ TF_BUS=Autobusas
 TF_CAR=Automobilis
 TF_PEAGE=Mokamas
 TF_ESSENCE=Kuras
-TF_HOTEL=Hostelis
+TF_HOTEL=Viešbutis
 TF_TAXI=Taksi
 
 ErrorDoubleDeclaration=Jūs deklaravote kitą išlaidų ataskaitą panašiame laiko periode.
-ListTripsAndExpenses=Išlaidų ataskaitų sąrašas
 AucuneNDF=Pagal šį kriterijų nerasta išlaidų ataskaitos
 AucuneLigne=Dar nėra deklaruotos išlaidų ataskaitos
 AddLine=Pridėti eilutę
@@ -53,15 +51,13 @@ AddLineMini=Pridėti
 Date_DEBUT=Laikotarpio pradžia
 Date_FIN=Laikotarpio pabaiga
 ModePaiement=Mokėjimo būdas
-Note=Pranešimas
-Project=Projektas
 
-VALIDATOR=Vartotojas patvirtinimo informavimui
+VALIDATOR=Vartotojas atsakingas už patvirtinimą
 VALIDOR=Patvirtinta
 AUTHOR=Įrašyta
-AUTHORPAIEMENT=Apmokėta
+AUTHORPAIEMENT=Apmokėtas kieno
 REFUSEUR=Atmesta
-CANCEL_USER=Nutraukta
+CANCEL_USER=Ištrintas kieno
 
 MOTIF_REFUS=Priežastis
 MOTIF_CANCEL=Priežastis
@@ -74,9 +70,10 @@ DATE_PAIEMENT=Mokėjimo data
 
 TO_PAID=Mokėti
 BROUILLONNER=Atidaryti iš naujo
-SendToValid=Siųsti patvirtinimui
+SendToValid=Išsiųstas patvirtinimui
 ModifyInfoGen=Redaguoti
 ValidateAndSubmit=Įvertinti ir pateikti tvirtinimui
+ValidatedWaitingApproval=Pripažintas (laukia patvirtinimo)
 
 NOT_VALIDATOR=Jums neleidžiama patvirtinti šią išlaidų ataskaitą
 NOT_AUTHOR=Jūs nesate šios išlaidų ataskaitos autorius. Operacija nutraukta.
@@ -93,10 +90,14 @@ ConfirmPaidTrip=Ar tikrai norite pakeisti šios išlaidų ataskaitos būklę į 
 CancelTrip=Nutraukti išlaidų ataskaitą
 ConfirmCancelTrip=Ar tikrai norite nutraukti šią išlaidų ataskaitą ?
 
-BrouillonnerTrip=Išlaidų ataskaitos būklę grąžinti į "Projektas"
+BrouillonnerTrip=Grąžinti išlaidų ataskaitos būklę į "Projektas"
 ConfirmBrouillonnerTrip=Ar tikrai norite grąžinti šios išlaidų ataskaitos būklę į "Projektas" ?
 
 SaveTrip=Patvirtinti išlaidų ataskaitą
 ConfirmSaveTrip=Ar tikrai norite patvirtinti šią išlaidų ataskaitą ?
 
 NoTripsToExportCSV=Už šį laikotarpį nėra išlaidų ataskaitų eksportui
+ExpenseReportPayment=Išlaidų apmokėjimų ataskaita
+
+ExpenseReportsToApprove=Išlaidų ataskaitos patvirtinimui
+ExpenseReportsToPay=Apmokėti išlaidų ataskaitą

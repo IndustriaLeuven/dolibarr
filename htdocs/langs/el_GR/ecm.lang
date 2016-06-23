@@ -1,5 +1,4 @@
 # Dolibarr language file - Source file is en_US - ecm
-MenuECM=Έγγραφα
 DocsMine=Τα Έγγραφά Μου
 DocsGenerated=Generated documents
 DocsElements=Elements documents
@@ -35,7 +34,7 @@ ECMSearchByEntity=Search by object
 ECMSectionOfDocuments=Directories of documents
 ECMTypeManual=Χειροκίνητα
 ECMTypeAuto=Αυτόματα
-ECMDocsBySocialContributions=Έγγραφα που συνδέονται με τις κοινωνικές εισφορές
+ECMDocsBySocialContributions=Έγγραφα που συνδέονται με την κοινωνική εισφορά ή φόρους
 ECMDocsByThirdParties=Έγγραφα συνδεδεμένα με στοιχεία
 ECMDocsByProposals=Έγγραφα που σχετίζονται με τις προτάσεις
 ECMDocsByOrders=Έγγραφα συνδεδεμένα με παραγγελίες πελατών

@@ -1,7 +1,8 @@
 <?php
-/* Copyright (C) 2009 		Laurent Destailleur            <eldy@users.sourceforge.net>
- * Copyright (C) 2010-2013  Juanjo Menent			       <jmenent@2byte.es>
- * Copyright (C) 2013       Philippe Grand                 <philippe.grand@atoo-net.com>
+/* Copyright (C) 2009       Laurent Destailleur        <eldy@users.sourceforge.net>
+ * Copyright (C) 2010-2013  Juanjo Menent	       <jmenent@2byte.es>
+ * Copyright (C) 2013-2014  Philippe Grand             <philippe.grand@atoo-net.com>
+ * Copyright (C) 2015       Jean-François Ferry         <jfefe@aternatik.fr>
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -26,6 +27,7 @@
 
 require '../main.inc.php';
 require_once DOL_DOCUMENT_ROOT.'/core/lib/admin.lib.php';
+require_once DOL_DOCUMENT_ROOT.'/core/lib/bank.lib.php';
 require_once DOL_DOCUMENT_ROOT.'/compta/facture/class/facture.class.php';
 
 $langs->load("admin");
@@ -54,11 +56,11 @@ if ($action == 'set_BANK_CHEQUERECEIPT_FREE_TEXT')
 
  	if (! $error)
     {
-        setEventMessage($langs->trans("SetupSaved"));
+        setEventMessages($langs->trans("SetupSaved"), null, 'mesgs');
     }
     else
     {
-        setEventMessage($langs->trans("Error"),'errors');
+        setEventMessages($langs->trans("Error"), null, 'errors');
     }
 }
 
@@ -85,9 +87,15 @@ llxHeader("",$langs->trans("BankSetupModule"));
 $form=new Form($db);
 
 $linkback='<a href="'.DOL_URL_ROOT.'/admin/modules.php">'.$langs->trans("BackToModuleList").'</a>';
-print_fiche_titre($langs->trans("BankSetupModule"),$linkback,'setup');
-print '<br>';
+print load_fiche_titre($langs->trans("BankSetupModule"),$linkback,'title_setup');
 
+
+print '<form action="'.$_SERVER["PHP_SELF"].'" method="post">';
+print '<input type="hidden" name="token" value="'.$_SESSION['newtoken'].'">';
+print '<input type="hidden" name="action" value="set_BANK_CHEQUERECEIPT_FREE_TEXT">';
+
+$head = bank_admin_prepare_head(null);
+dol_fiche_head($head, 'general', $langs->trans("BankSetupModule"), 0, 'account');
 
 print '<table class="noborder" width="100%">';
 print '<tr class="liste_titre">';
@@ -98,12 +106,20 @@ print "</tr>\n";
 $var=true;
 
 $var=! $var;
-print '<form action="'.$_SERVER["PHP_SELF"].'" method="post">';
-print '<input type="hidden" name="token" value="'.$_SESSION['newtoken'].'">';
-print '<input type="hidden" name="action" value="set_BANK_CHEQUERECEIPT_FREE_TEXT">';
+
 print '<tr '.$bc[$var].'><td colspan="2">';
 print $langs->trans("FreeLegalTextOnChequeReceipts").' ('.$langs->trans("AddCRIfTooLong").')<br>';
-print '<textarea name="BANK_CHEQUERECEIPT_FREE_TEXT" class="flat" cols="120">'.$conf->global->BANK_CHEQUERECEIPT_FREE_TEXT.'</textarea>';
+$variablename='BANK_CHEQUERECEIPT_FREE_TEXT';
+if (empty($conf->global->PDF_ALLOW_HTML_FOR_FREE_TEXT))
+{
+    print '<textarea name="'.$variablename.'" class="flat" cols="120">'.$conf->global->$variablename.'</textarea>';
+}
+else
+{
+    include_once DOL_DOCUMENT_ROOT.'/core/class/doleditor.class.php';
+    $doleditor=new DolEditor($variablename, $conf->global->$variablename,'',80,'dolibarr_details');
+    print $doleditor->Create();
+}
 print '</td><td align="right">';
 print '<input type="submit" class="button" value="'.$langs->trans("Modify").'">';
 print "</td></tr>\n";
@@ -126,7 +142,7 @@ print '</form>';
 
 
 //Show bank account order
-print_titre($langs->trans("BankOrderShow"));
+print load_fiche_titre($langs->trans("BankOrderShow"));
 
 print '<table class="noborder" width="100%">';
 print '<tr class="liste_titre">';
@@ -184,6 +200,10 @@ while ($i < $nbofbank)
 
 print '</table>'."\n";
 
-$db->close();
+dol_fiche_end();
+
+print '</form>';
 
 llxFooter();
+
+$db->close();

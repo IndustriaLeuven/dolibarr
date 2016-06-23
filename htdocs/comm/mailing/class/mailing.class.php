@@ -34,8 +34,6 @@ class Mailing extends CommonObject
 	public $element='mailing';
 	public $table_element='mailing';
 
-	var $id;
-	var $statut;
 	var $titre;
 	var $sujet;
 	var $body;
@@ -196,7 +194,7 @@ class Mailing extends CommonObject
 		$sql.= ", m.date_envoi";
 		$sql.= ", m.extraparams";
 		$sql.= " FROM ".MAIN_DB_PREFIX."mailing as m";
-		$sql.= " WHERE m.rowid = ".$rowid;
+		$sql.= " WHERE m.rowid = ".(int) $rowid;
 
 		dol_syslog(get_class($this)."::fetch", LOG_DEBUG);
 		$result=$this->db->query($sql);
@@ -421,12 +419,35 @@ class Mailing extends CommonObject
 		$resql=$this->db->query($sql);
 		if ($resql)
 		{
-			return 1;
+			return $this->delete_targets();
 		}
 		else
 		{
 			$this->error=$this->db->lasterror();
 			return -1;
+		}
+	}
+	
+	/**
+	 *  Delete targets emailing
+	 *
+	 *  @return int       1 if OK, 0 if error
+	 */
+	function delete_targets()
+	{
+		$sql = "DELETE FROM ".MAIN_DB_PREFIX."mailing_cibles";
+		$sql.= " WHERE fk_mailing = ".$this->id;
+
+		dol_syslog("Mailing::delete_targets", LOG_DEBUG);
+		$resql=$this->db->query($sql);
+		if ($resql)
+		{
+			return 1;
+		}
+		else
+		{
+			$this->error=$this->db->lasterror();
+			return 0;
 		}
 	}
 
@@ -533,11 +554,11 @@ class Mailing extends CommonObject
 
 		if ($mode == 0)
 		{
-			return $langs->trans($this->statut_dest[$statut]);
+			return $langs->trans('MailingStatusError');
 		}
 		if ($mode == 1)
 		{
-			return $langs->trans($this->statut_dest[$statut]);
+			return $langs->trans('MailingStatusSent');
 		}
 		if ($mode == 2)
 		{

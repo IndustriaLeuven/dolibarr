@@ -62,12 +62,13 @@ if ($action == 'remove')
  * View
  */
 
-llxHeader('',$langs->trans("DefaultRights"));
+$wikihelp='EN:Setup_Security|FR:Paramétrage_Sécurité|ES:Configuración_Seguridad';
+llxHeader('',$langs->trans("DefaultRights"), $wikihelp);
 
-print_fiche_titre($langs->trans("SecuritySetup"),'','setup');
+print load_fiche_titre($langs->trans("SecuritySetup"),'','title_setup');
 
 print $langs->trans("DefaultRightsDesc");
-print " ".$langs->trans("OnlyActiveElementsAreShown")."<br>\n";
+print " ".$langs->trans("OnlyActiveElementsAreShown")."<br><br>\n";
 
 $db->begin();
 
@@ -115,14 +116,13 @@ foreach ($modulesdir as $dir)
 
 $db->commit();
 
-// Show warning about external users
-print info_admin(showModulesExludedForExternal($modules)).'<br>'."\n";
-print "<br>\n";
-
-
 $head=security_prepare_head();
 
 dol_fiche_head($head, 'default', $langs->trans("Security"));
+
+
+// Show warning about external users
+print info_admin(showModulesExludedForExternal($modules)).'<br>'."\n";
 
 
 print '<table class="noborder" width="100%">';
@@ -218,7 +218,5 @@ print '</table>';
 
 print '</div>';
 
-
-$db->close();
-
 llxFooter();
+$db->close();

@@ -1,10 +1,16 @@
 # Dolibarr language file - en_US - Accounting Expert
-CHARSET=Кодировка UTF-8
+ACCOUNTING_EXPORT_SEPARATORCSV=Column separator for export file
+ACCOUNTING_EXPORT_DATE=Date format for export file
+ACCOUNTING_EXPORT_PIECE=Export the number of piece
+ACCOUNTING_EXPORT_GLOBAL_ACCOUNT=Export with global account
+ACCOUNTING_EXPORT_LABEL=Export the label
+ACCOUNTING_EXPORT_AMOUNT=Export the amount
+ACCOUNTING_EXPORT_DEVISE=Export the devise
+Selectformat=Select the format for the file
+ACCOUNTING_EXPORT_PREFIX_SPEC=Specify the prefix for the file name
 
 Accounting=Бухгалтерия
 Globalparameters=Глобальные параметры
-Chartofaccounts=Chart of accounts
-Fiscalyear=Финансовые года
 Menuaccount=Учётные записи бухгалтерии
 Menuthirdpartyaccount=Учётные записи контрагентов
 MenuTools=Инструменты
@@ -20,44 +26,39 @@ Selectmodelcsv=Выбрать модель экспорта
 Modelcsv_normal=Классический экспорт
 Modelcsv_CEGID=Export towards CEGID Expert
 BackToChartofaccounts=Return chart of accounts
-Back=Назад
 
 Definechartofaccounts=Define a chart of accounts
 Selectchartofaccounts=Select a chart of accounts
-Validate=Подтвердить
-Addanaccount=Add an accounting account
-AccountAccounting=Accounting account
+Addanaccount=Добавить бухгалтерский счёт
+AccountAccounting=Бухгалтерский счёт
+AccountAccountingSuggest=Accounting account suggest
 Ventilation=Breakdown
-ToDispatch=На отправку
-Dispatched=Отправленный
 
+MenuAccountancy=Accountancy
 CustomersVentilation=Распределение клиентов
 SuppliersVentilation=Распределение поставщиков
 TradeMargin=Торговая наценка
 Reports=Отчёты
 ByCustomerInvoice=По счетам клиентов
-ByMonth=По месяцам
-NewAccount=New accounting account
-Update=Обновить
-List=Список
+NewAccount=Новый бухгалтерский счёт
 Create=Создать
+CreateMvts=Create movement
 UpdateAccount=Modification of an accounting account
 UpdateMvts=Modification of a movement
-WriteBookKeeping=Record accounts in general ledger
+WriteBookKeeping=Записать счета в главную книгу
 Bookkeeping=Главная книга
-AccountBalanceByMonth=Account balance by month
+AccountBalance=Account balance
 
 AccountingVentilation=Breakdown accounting
 AccountingVentilationSupplier=Breakdown accounting supplier
 AccountingVentilationCustomer=Breakdown accounting customer
-Line=Строка
 
-CAHTF=Total purchase supplier HT
-InvoiceLines=Lines of invoice to be ventilated
+CAHTF=Total purchase supplier before tax
+InvoiceLines=Строки счёта для обсуждения
 InvoiceLinesDone=Ventilated lines of invoice
-IntoAccount=In the accounting account
+IntoAccount=Ventilate in the accounting account
 
-Ventilate=Ventilate
+Ventilate=Обсудить
 VentilationAuto=Automatic breakdown
 
 Processing=Обрабатывается
@@ -76,14 +77,15 @@ ACCOUNTING_LIST_SORT_VENTILATION_DONE=Begin the sorting of the breakdown pages "
 
 AccountLength=Length of the accounting accounts shown in Dolibarr
 AccountLengthDesc=Function allowing to feign a length of accounting account by replacing spaces by the zero figure. This function touches only the display, it does not modify the accounting accounts registered in Dolibarr. For the export, this function is necessary to be compatible with certain software.
+ACCOUNTING_LENGTH_DESCRIPTION=Length for displaying product & services description in listings (Best = 50)
+ACCOUNTING_LENGTH_DESCRIPTION_ACCOUNT=Length for displaying product & services account description form in listings (Best = 50)
 ACCOUNTING_LENGTH_GACCOUNT=Length of the general accounts
 ACCOUNTING_LENGTH_AACCOUNT=Length of the third party accounts
 
 ACCOUNTING_SELL_JOURNAL=Журнал продаж
 ACCOUNTING_PURCHASE_JOURNAL=Журнал платежей
-ACCOUNTING_BANK_JOURNAL=Банковский журнал
-ACCOUNTING_CASH_JOURNAL=Журнал наличных средств
 ACCOUNTING_MISCELLANEOUS_JOURNAL=Журнал "Разное"
+ACCOUNTING_EXPENSEREPORT_JOURNAL=Expense report journal
 ACCOUNTING_SOCIAL_JOURNAL=Социальный журнал
 
 ACCOUNTING_ACCOUNT_TRANSFER_CASH=Account of transfer
@@ -100,22 +102,16 @@ Docref=Ссылка
 Numerocompte=Бухгалтерский счёт
 Code_tiers=Контрагент
 Labelcompte=Метка бухгалтерского счёта
-Debit=Дебит
-Credit=Кредит
-Amount=Количество
 Sens=Sens
 Codejournal=Журнал
+NumPiece=Piece number
 
 DelBookKeeping=Удалить записи главной книги
 
-SellsJournal=Журнал продаж
-PurchasesJournal=Журнал покупок
 DescSellsJournal=Журнал продаж
 DescPurchasesJournal=Журнал покупок
-BankJournal=Банковский журнал
-DescBankJournal=Банковский журнал включает в себя все платежи с типом оплаты отличным от "наличные".
-CashJournal=Журнал наличных средств
-DescCashJournal=Журнал наличных средств включает в себя тип оплаты -  "наличными"
+FinanceJournal=Finance journal
+DescFinanceJournal=Finance journal including all the types of payments by bank account
 
 CashPayment=Платёж наличными средствами
 
@@ -138,12 +134,9 @@ Pcgversion=Version of the plan
 Pcgtype=Класс бухгалтерского счёта
 Pcgsubtype=Подкласс бухгалтерского счёта
 Accountparent=Владелец бухгалтерского счёта
-Active=Официальный отчёт
-
-NewFiscalYear=Новый финансовый год
 
 DescVentilCustomer=Consult here the annual breakdown accounting of your invoices customers
-TotalVente=Total turnover HT
+TotalVente=Total turnover before tax
 TotalMarge=Итоговая наценка на продажи
 DescVentilDoneCustomer=Consult here the list of the lines of invoices customers and their accounting account
 DescVentilTodoCustomer=Ventilate your lines of customer invoice with an accounting account
@@ -156,5 +149,31 @@ DescVentilDoneSupplier=Consult here the list of the lines of invoices supplier a
 ValidateHistory=Подтверждать автоматически
 
 ErrorAccountancyCodeIsAlreadyUse=Error, you cannot delete this accounting account because it is used
-
+MvtNotCorrectlyBalanced=Mouvement not correctly balanced. Credit = %s. Debit = %s
 FicheVentilation=Breakdown card
+GeneralLedgerIsWritten=Operations are written in the general ledger
+
+MvtNotCorrectlyBalanced=Mouvement not correctly balanced. Credit = %s. Debit = %s
+
+##Export Journal Feature
+ExportFormat=Format of Export
+Prefixname=Prefix of export File
+Separate=Export separator
+Textframe=Frame of text value
+Headercol=Colname in header of file
+Fieldname=Name of Field
+Headername=Name in header
+Type=Type of fields
+Param=Additionnal parameters
+EnabledProduct=In Product
+EnabledTiers=In third party
+EnabledVat=In VAT
+
+## Tools - Init accounting account on product / service
+InitAccountancy=Init accountancy
+InitAccountancyDesc=This page can be used to initialize an accounting account on products and services that does not have accountancy account defined for sales and purchases. Check before that setup of module accountancy is complete.
+Options=Options
+OptionModeProductSell=Mode sales
+OptionModeProductBuy=Mode purchases
+OptionModeProductSellDesc=Show all products with no accounting account defined for sales.
+OptionModeProductBuyDesc=Show all products with no accounting account defined for purchases.

@@ -3,8 +3,6 @@
 # No errors
 NoErrorCommitIsDone=Không có lỗi, chúng tôi cam kết
 # Errors
-Error=Lỗi
-Errors=Lỗi
 ErrorButCommitIsDone=Lỗi được tìm thấy nhưng chúng tôi xác nhận mặc dù điều này
 ErrorBadEMail=Thư điện tử của% s là sai
 ErrorBadUrl=Url% s là sai
@@ -63,9 +61,9 @@ ErrorSizeTooLongForVarcharType=Kích thước quá dài cho kiểu chuỗi (ký 
 ErrorNoValueForSelectType=Xin vui lòng điền giá trị so với danh sách lựa chọn
 ErrorNoValueForCheckBoxType=Xin vui lòng điền giá trị so với danh sách hộp
 ErrorNoValueForRadioType=Xin vui lòng điền giá trị so với danh sách phát thanh
-ErrorBadFormatValueList=Giá trị danh sách không thể có nhiều hơn một <u>đến:% s,</u> nhưng cần ít nhất một: Llave, Valores
+ErrorBadFormatValueList=The list value cannot have more than one comma: <u>%s</u>, but need at least one: key,value
 ErrorFieldCanNotContainSpecialCharacters=<b>Dòng% s</b> không được chứa các ký tự đặc biệt.
-ErrorFieldCanNotContainSpecialNorUpperCharacters=<b>Dòng% s</b> không được chứa các ký tự đặc biệt, cũng không phải ký tự trường hợp trên.
+ErrorFieldCanNotContainSpecialNorUpperCharacters=Field <b>%s</b> must not contain special characters, nor upper case characters and cannot contain only numbers.
 ErrorNoAccountancyModuleLoaded=Không có mô-đun kế toán kích hoạt
 ErrorExportDuplicateProfil=Tên hồ sơ này đã tồn tại cho bộ xuất khẩu này.
 ErrorLDAPSetupNotComplete=Dolibarr-LDAP phù hợp là không đầy đủ.
@@ -79,7 +77,7 @@ ErrorModuleRequireJavascript=Javascript không được vô hiệu hóa để l�
 ErrorPasswordsMustMatch=Cả hai mật khẩu gõ phải phù hợp với nhau
 ErrorContactEMail=Một lỗi kỹ thuật xảy ra. Xin vui lòng liên hệ với quản trị viên để sau <b>email% s</b> en cung cấp các mã <b>lỗi% s</b> trong thông điệp của bạn, hoặc thậm chí tốt hơn bằng cách thêm một bản sao màn hình của trang này.
 ErrorWrongValueForField=Giá trị sai số cho lĩnh <b>vực% s</b> (giá trị <b>'% s'</b> không phù hợp với quy tắc <b>regex% s)</b>
-ErrorFieldValueNotIn=Wrong value for field number <b>%s</b> (value '<b>%s</b>' is not a value available into field <b>%s</b> of table <b>%s</b> = <b>%s</b>)
+ErrorFieldValueNotIn=Wrong value for field number <b>%s</b> (value '<b>%s</b>' is not a value available into field <b>%s</b> of table <b>%s</b>)
 ErrorFieldRefNotIn=Giá trị sai số cho lĩnh <b>vực% s</b> (giá trị <b>'% s'</b> không phải là ref <b>hiện% s)</b>
 ErrorsOnXLines=Lỗi được ghi nhận <b>nguồn% s</b> (s)
 ErrorFileIsInfectedWithAVirus=Các chương trình chống virus đã không thể xác nhận các tập tin (tập tin có thể bị nhiễm bởi một loại virus)
@@ -100,7 +98,7 @@ ErrorProdIdAlreadyExist=% S được gán cho một phần ba
 ErrorFailedToSendPassword=Không gửi mật khẩu
 ErrorFailedToLoadRSSFile=Không có nguồn cấp dữ liệu RSS. Cố gắng thêm MAIN_SIMPLEXMLLOAD_DEBUG liên tục nếu các thông báo lỗi không cung cấp đủ thông tin.
 ErrorPasswordDiffers=Mật khẩu có khác nhau, vui lòng nhập lại.
-ErrorForbidden=Truy cập bị từ chối. <br> Bạn cố gắng truy cập vào một trang, khu vực hoặc tính năng mà không cần là một phiên chứng thực hoặc không được phép sử dụng của bạn.
+ErrorForbidden=Access denied.<br>You try to access to a page, area or feature of a disabled module or without being in an authenticated session or that is not allowed to your user.
 ErrorForbidden2=Cho phép đăng nhập này có thể được xác định bởi người quản trị Dolibarr của bạn từ trình đơn% s ->% s.
 ErrorForbidden3=Dường như Dolibarr không được sử dụng thông qua một phiên chứng thực. Hãy xem tài liệu hướng dẫn thiết lập Dolibarr biết làm thế nào để quản lý xác thực (htaccess, mod_auth hay khác ...).
 ErrorNoImagickReadimage=Lớp Imagick không tìm thấy trong PHP này. Không có xem trước có thể có sẵn. Quản trị có thể vô hiệu hóa tab này từ menu Setup - Hiển thị.
@@ -170,8 +168,15 @@ ErrorGlobalVariableUpdater4=SOAP client failed with error '%s'
 ErrorGlobalVariableUpdater5=No global variable selected
 ErrorFieldMustBeANumeric=Field <b>%s</b> must be a numeric value
 ErrorFieldMustBeAnInteger=Field <b>%s</b> must be an integer
+ErrorMandatoryParametersNotProvided=Mandatory parameter(s) not provided
+ErrorOppStatusRequiredIfAmount=You set an estimated amount for this opportunity/lead. So you must also enter its status
+ErrorBadDefinitionOfMenuArrayInModuleDescriptor=Bad Definition Of Menu Array In Module Descriptor (bad value for key fk_menu)
+ErrorSavingChanges=An error has ocurred when saving the changes
+ErrorWarehouseRequiredIntoShipmentLine=Warehouse is required on the line to ship
+ErrorFileMustHaveFormat=File must have format %s
 
 # Warnings
+WarningPasswordSetWithNoAccount=A password was set for this member. However, no user account was created. So this password is stored but can't be used to login to Dolibarr. It may be used by an external module/interface but if you don't need to define any login nor password for a member, you can disable option "Manage a login for each member" from Member module setup. If you need to manage a login but don't need any password, you can keep this field empty to avoid this warning. Note: Email can also be used as a login if the member is linked to a user.
 WarningMandatorySetupNotComplete=Thiết lập các thông số bắt buộc chưa được xác định
 WarningSafeModeOnCheckExecDir=Cảnh báo, PHP <b>safe_mode</b> lựa chọn là do đó, lệnh phải được lưu trữ bên trong một thư mục tuyên bố tham số php <b>safe_mode_exec_dir.</b>
 WarningAllowUrlFopenMustBeOn=Thông số <b>allow_url_fopen</b> phải được đặt <b>vào</b> trong filer <b>php.ini</b> để có mô-đun này làm việc hoàn toàn. Bạn phải thay đổi tập tin này bằng tay.
@@ -189,4 +194,5 @@ WarningClickToDialUserSetupNotComplete=Thiết lập các thông tin ClickToDial
 WarningNotRelevant=Hoạt động không thích hợp cho dữ liệu này
 WarningFeatureDisabledWithDisplayOptimizedForBlindNoJs=Tính năng bị vô hiệu hóa khi thiết lập hiển thị được tối ưu hóa cho người mù hoặc văn bản trình duyệt.
 WarningPaymentDateLowerThanInvoiceDate=Payment date (%s) is earlier than invoice date (%s) for invoice %s.
-WarningTooManyDataPleaseUseMoreFilters=Too many data. Please use more filters
+WarningTooManyDataPleaseUseMoreFilters=Too many data (more than %s lines). Please use more filters or set the constant %s to a higher limit.
+WarningSomeLinesWithNullHourlyRate=Some times were recorded by users when their hourly rate was not defined. A value of 0 was used but this may result in wrong valuation of time spent.

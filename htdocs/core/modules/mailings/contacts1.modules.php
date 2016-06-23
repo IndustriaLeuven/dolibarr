@@ -60,7 +60,7 @@ class mailing_contacts1 extends MailingTargets
 	 *	array of SQL request that returns two field:
 	 *	One called "label", One called "nb".
 	 *
-	 *	@return		array		Array with SQL requests
+	 *	@return		string[]		Array with SQL requests
 	 */
 	function getSqlArrayForStats()
 	{
@@ -75,6 +75,7 @@ class mailing_contacts1 extends MailingTargets
 		$statssql[0].= " WHERE c.entity IN (".getEntity('societe', 1).")";
 		$statssql[0].= " AND c.email != ''";      // Note that null != '' is false
 		$statssql[0].= " AND c.no_email = 0";
+		$statssql[0].= " AND c.statut = 1";
 
 		return $statssql;
 	}
@@ -85,7 +86,7 @@ class mailing_contacts1 extends MailingTargets
 	 *	For example if this selector is used to extract 500 different
 	 *	emails from a text file, this function must return 500.
 	 *
-	 *  @param	string	$sql		Requete sql de comptage
+	 *  @param		string	$sql		Requete sql de comptage
 	 *	@return		int
 	 */
 	function getNbOfRecipients($sql='')
@@ -98,6 +99,7 @@ class mailing_contacts1 extends MailingTargets
 		$sql.= " WHERE c.entity IN (".getEntity('societe', 1).")";
 		$sql.= " AND c.email != ''"; // Note that null != '' is false
 		$sql.= " AND c.no_email = 0";
+		$sql.= " AND c.statut = 1";
 
 		// La requete doit retourner un champ "nb" pour etre comprise
 		// par parent::getNbOfRecipients
@@ -204,6 +206,7 @@ class mailing_contacts1 extends MailingTargets
 		$sql.= " WHERE c.entity IN (".getEntity('societe', 1).")";
 		$sql.= " AND c.email <> ''";
 		$sql.= " AND c.no_email = 0";
+		$sql.= " AND c.statut = 1";
 		$sql.= " AND c.email NOT IN (SELECT email FROM ".MAIN_DB_PREFIX."mailing_cibles WHERE fk_mailing=".$mailing_id.")";
 		foreach($filtersarray as $key)
 		{

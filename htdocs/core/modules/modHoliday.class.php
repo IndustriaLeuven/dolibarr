@@ -53,6 +53,7 @@ class modHoliday extends DolibarrModules
 		// Family can be 'crm','financial','hr','projects','products','ecm','technic','other'
 		// It is used to group modules in module setup page
 		$this->family = "hr";
+		$this->module_position = 30;
 		// Module label (no space allowed), used if translation string 'ModuleXXXName' not found (where XXX is value of numeric property 'numero' of module)
 		$this->name = preg_replace('/^mod/i','',get_class($this));
 		// Module description, used if translation string 'ModuleXXXDesc' not found (where XXX is value of numeric property 'numero' of module)
@@ -76,11 +77,8 @@ class modHoliday extends DolibarrModules
 		$this->dirs = array();
 		$r=0;
 
-		// Relative path to module style sheet if exists. Example: '/mymodule/css/mycss.css'.
-		//$this->style_sheet = '/mymodule/mymodule.css.php';
-
 		// Config pages. Put here list of php page names stored in admmin directory used to setup module.
-		$this->config_page_url = array("holiday.php?leftmenu=setup@holiday");
+		// $this->config_page_url = array("holiday.php?leftmenu=setup@holiday");
 
 		// Dependencies
 		$this->depends = array();		// List of modules id that must be enabled if this module is enabled
@@ -115,7 +113,7 @@ class modHoliday extends DolibarrModules
 		// 'group'            to add a tab in group view
 		// 'contact'          to add a tab in contact view
 		// 'categories_x'	  to add a tab in category view (replace 'x' by type of category (0=product, 1=supplier, 2=customer, 3=member)
-		$this->tabs = array('user:+paidholidays:CPTitreMenu:holiday:$user->rights->holiday->write:/holiday/index.php?mainmenu=holiday&id=__ID__');
+		$this->tabs = array('user:+paidholidays:CPTitreMenu:holiday:$user->rights->holiday->read:/holiday/list.php?mainmenu=holiday&id=__ID__');
 
 		// Boxes
 		$this->boxes = array();			// List of boxes
@@ -134,16 +132,16 @@ class modHoliday extends DolibarrModules
 		$r=0;
 
 		$this->rights[$r][0] = 20001; 				// Permission id (must not be already used)
-		$this->rights[$r][1] = 'Create/modify your own holidays';	// Permission label
+		$this->rights[$r][1] = 'Read your own holidays';	// Permission label
 		$this->rights[$r][3] = 1; 					// Permission by default for new user (0/1)
-		$this->rights[$r][4] = 'write';				// In php code, permission will be checked by test if ($user->rights->permkey->level1->level2)
+		$this->rights[$r][4] = 'read';				// In php code, permission will be checked by test if ($user->rights->permkey->level1->level2)
 		$this->rights[$r][5] = '';				// In php code, permission will be checked by test if ($user->rights->permkey->level1->level2)
 		$r++;
 
 		$this->rights[$r][0] = 20002; 				// Permission id (must not be already used)
-		$this->rights[$r][1] = 'Create/modify hollidays for everybody';	// Permission label
-		$this->rights[$r][3] = 0; 					// Permission by default for new user (0/1)
-		$this->rights[$r][4] = 'write_all';				// In php code, permission will be checked by test if ($user->rights->permkey->level1->level2)
+		$this->rights[$r][1] = 'Create/modify your own holidays';	// Permission label
+		$this->rights[$r][3] = 1; 					// Permission by default for new user (0/1)
+		$this->rights[$r][4] = 'write';				// In php code, permission will be checked by test if ($user->rights->permkey->level1->level2)
 		$this->rights[$r][5] = '';				// In php code, permission will be checked by test if ($user->rights->permkey->level1->level2)
 		$r++;
 
@@ -155,23 +153,23 @@ class modHoliday extends DolibarrModules
 		$r++;
 
 		$this->rights[$r][0] = 20004; 				// Permission id (must not be already used)
-		$this->rights[$r][1] = 'Setup holidays of users';	// Permission label
+		$this->rights[$r][1] = 'Read holidays for everybody';	// Permission label
 		$this->rights[$r][3] = 0; 					// Permission by default for new user (0/1)
-		$this->rights[$r][4] = 'define_holiday';				// In php code, permission will be checked by test if ($user->rights->permkey->level1->level2)
+		$this->rights[$r][4] = 'read_all';				// In php code, permission will be checked by test if ($user->rights->permkey->level1->level2)
 		$this->rights[$r][5] = '';				// In php code, permission will be checked by test if ($user->rights->permkey->level1->level2)
 		$r++;
 
 		$this->rights[$r][0] = 20005; 				// Permission id (must not be already used)
-		$this->rights[$r][1] = 'See logs for holidays requests';	// Permission label
+		$this->rights[$r][1] = 'Create/modify holidays for everybody';	// Permission label
 		$this->rights[$r][3] = 0; 					// Permission by default for new user (0/1)
-		$this->rights[$r][4] = 'view_log';				// In php code, permission will be checked by test if ($user->rights->permkey->level1->level2)
+		$this->rights[$r][4] = 'write_all';				// In php code, permission will be checked by test if ($user->rights->permkey->level1->level2)
 		$this->rights[$r][5] = '';				// In php code, permission will be checked by test if ($user->rights->permkey->level1->level2)
 		$r++;
 
 		$this->rights[$r][0] = 20006; 				// Permission id (must not be already used)
-		$this->rights[$r][1] = 'Read holidays monthly report';	// Permission label
+		$this->rights[$r][1] = 'Setup holidays of users (setup and update balance)';	// Permission label
 		$this->rights[$r][3] = 0; 					// Permission by default for new user (0/1)
-		$this->rights[$r][4] = 'month_report';				// In php code, permission will be checked by test if ($user->rights->permkey->level1->level2)
+		$this->rights[$r][4] = 'define_holiday';				// In php code, permission will be checked by test if ($user->rights->permkey->level1->level2)
 		$this->rights[$r][5] = '';				// In php code, permission will be checked by test if ($user->rights->permkey->level1->level2)
 		$r++;
 
@@ -179,88 +177,6 @@ class modHoliday extends DolibarrModules
 		$this->menus = array();			// List of menus to add
 		$r=0;
 
-
-		/* Move to HRM menu
-		// Add here entries to declare new menus
-		$this->menu[$r]=array(	'fk_menu'=>0,			// Put 0 if this is a top menu
-								'type'=>'top',			// This is a Top menu entry
-								'titre'=>'CPTitreMenu',
-								'mainmenu'=>'holiday',
-								'leftmenu'=>'holiday',
-								'url'=>'/holiday/index.php',
-								'langs'=>'holiday',	// Lang file to use (without .lang) by module. File must be in langs/code_CODE/ directory.
-								'position'=>100,
-								'enabled'=>'1',			// Define condition to show or hide menu entry. Use '$conf->mymodule->enabled' if entry must be visible if module is enabled.
-								'perms'=>'$user->rights->holiday->write',			// Use 'perms'=>'$user->rights->mymodule->level1->level2' if you want your menu with a permission rules
-								'target'=>'',
-								'user'=>2);				// 0=Menu for internal users, 1=external users, 2=both
-		$r++;
-		$this->menu[$r]=array(	'fk_menu'=>'fk_mainmenu=holiday',			// Put 0 if this is a top menu
-								'type'=>'left',			// This is a Top menu entry
-								'titre'=>'CPTitreMenu',
-								'mainmenu'=>'holiday',
-								'leftmenu'=>'holiday',
-								'url'=>'/holiday/index.php?mainmenu=holiday&leftmenu=holiday',
-								'langs'=>'holiday',	// Lang file to use (without .lang) by module. File must be in langs/code_CODE/ directory.
-								'position'=>100,
-								'enabled'=>'1',			// Define condition to show or hide menu entry. Use '$conf->mymodule->enabled' if entry must be visible if module is enabled.
-								'perms'=>'$user->rights->holiday->write',			// Use 'perms'=>'$user->rights->mymodule->level1->level2' if you want your menu with a permission rules
-								'target'=>'',
-								'user'=>2);				// 0=Menu for internal users, 1=external users, 2=both
-		$r++;
-		$this->menu[$r]=array(	'fk_menu'=>'fk_mainmenu=holiday,fk_leftmenu=holiday',		// Use r=value where r is index key used for the parent menu entry (higher parent must be a top menu entry)
-								'type'=>'left',			// This is a Left menu entry
-								'titre'=>'MenuAddCP',
-								'mainmenu'=>'holiday',
-								'leftmenu'=>'holiday_add',
-								'url'=>'/holiday/card.php?mainmenu=holiday&action=request',
-								'langs'=>'holiday',	// Lang file to use (without .lang) by module. File must be in langs/code_CODE/ directory.
-								'position'=>101,
-								'enabled'=>'$conf->holiday->enabled',			// Define condition to show or hide menu entry. Use '$conf->mymodule->enabled' if entry must be visible if module is enabled.
-								'perms'=>'$user->rights->holiday->write',		// Use 'perms'=>'$user->rights->mymodule->level1->level2' if you want your menu with a permission rules
-								'target'=>'',
-								'user'=>2);				// 0=Menu for internal users, 1=external users, 2=both
-		$r++;
-		$this->menu[$r]=array(	'fk_menu'=>'fk_mainmenu=holiday,fk_leftmenu=holiday',		// Use r=value where r is index key used for the parent menu entry (higher parent must be a top menu entry)
-								'type'=>'left',			// This is a Left menu entry
-								'titre'=>'MenuConfCP',
-								'mainmenu'=>'holiday',
-								'leftmenu'=>'holiday_conf',
-								'url'=>'/holiday/define_holiday.php?mainmenu=holiday&action=request',
-								'langs'=>'holiday',	// Lang file to use (without .lang) by module. File must be in langs/code_CODE/ directory.
-								'position'=>102,
-								'enabled'=>'$conf->holiday->enabled',			// Define condition to show or hide menu entry. Use '$conf->mymodule->enabled' if entry must be visible if module is enabled.
-								'perms'=>'$user->rights->holiday->define_holiday',		// Use 'perms'=>'$user->rights->mymodule->level1->level2' if you want your menu with a permission rules
-								'target'=>'',
-								'user'=>2);				// 0=Menu for internal users, 1=external users, 2=both
-		$r++;
-		$this->menu[$r]=array(	'fk_menu'=>'fk_mainmenu=holiday,fk_leftmenu=holiday',		// Use r=value where r is index key used for the parent menu entry (higher parent must be a top menu entry)
-								'type'=>'left',			// This is a Left menu entry
-								'titre'=>'MenuLogCP',
-								'mainmenu'=>'holiday_def',
-								'url'=>'/holiday/view_log.php?mainmenu=holiday&action=request',
-								'leftmenu'=>'holiday',
-								'langs'=>'holiday',	// Lang file to use (without .lang) by module. File must be in langs/code_CODE/ directory.
-								'position'=>103,
-								'enabled'=>'$conf->holiday->enabled',			// Define condition to show or hide menu entry. Use '$conf->mymodule->enabled' if entry must be visible if module is enabled.
-								'perms'=>'$user->rights->holiday->view_log',		// Use 'perms'=>'$user->rights->mymodule->level1->level2' if you want your menu with a permission rules
-								'target'=>'',
-								'user'=>2);				// 0=Menu for internal users, 1=external users, 2=both
-		$r++;
-		$this->menu[$r]=array(	'fk_menu'=>'fk_mainmenu=holiday,fk_leftmenu=holiday',		// Use r=value where r is index key used for the parent menu entry (higher parent must be a top menu entry)
-								'type'=>'left',			// This is a Left menu entry
-								'titre'=>'MenuReportMonth',
-								'mainmenu'=>'holiday',
-								'leftmenu'=>'holiday_report',
-								'url'=>'/holiday/month_report.php?mainmenu=holiday&action=request',
-								'langs'=>'holiday',	// Lang file to use (without .lang) by module. File must be in langs/code_CODE/ directory.
-								'position'=>104,
-								'enabled'=>'$conf->holiday->enabled',			// Define condition to show or hide menu entry. Use '$conf->mymodule->enabled' if entry must be visible if module is enabled.
-								'perms'=>'$user->rights->holiday->view_log',		// Use 'perms'=>'$user->rights->mymodule->level1->level2' if you want your menu with a permission rules
-								'target'=>'',
-								'user'=>2);				// 0=Menu for internal users, 1=external users, 2=both
-		$r++;
-*/
 
 		// Exports
 		$r=1;
@@ -278,36 +194,5 @@ class modHoliday extends DolibarrModules
 		// $this->export_sql_end[$r] .=' WHERE f.fk_soc = s.rowid AND f.rowid = fd.fk_facture';
 		// $r++;
 	}
-
-	/**
-	 *	Function called when module is enabled.
-	 *	The init function add constants, boxes, permissions and menus (defined in constructor) into Dolibarr database.
-	 *	It also creates data directories.
-	 *
-	 *	@return     int             1 if OK, 0 if KO
-	 */
-	function init()
-	{
-		$sql = array();
-
-		//$result=$this->_load_tables('');
-
-		return $this->_init($sql);
-	}
-
-	/**
-	 *	Function called when module is disabled.
-	 *  Remove from database constants, boxes and permissions from Dolibarr database.
-	 *	Data directories are not deleted.
-	 *
-	 *  @return     int             1 if OK, 0 if KO
-	 */
-	function remove()
-	{
-		$sql = array();
-
-		return $this->_remove($sql);
-	}
-
 }
 

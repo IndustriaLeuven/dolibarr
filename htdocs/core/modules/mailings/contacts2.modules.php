@@ -86,6 +86,7 @@ class mailing_contacts2 extends MailingTargets
         $sql.= " WHERE sp.entity IN (".getEntity('societe', 1).")";
     	$sql.= " AND sp.email <> ''";  // Note that null != '' is false
     	$sql.= " AND sp.no_email = 0";
+    	$sql.= " AND sp.statut = 1";
     	//$sql.= " AND sp.poste != ''";
     	$sql.= " AND sp.email NOT IN (SELECT email FROM ".MAIN_DB_PREFIX."mailing_cibles WHERE fk_mailing=".$mailing_id.")";
     	if ($filtersarray[0]<>'all') $sql.= " AND sp.poste ='".$this->db->escape($filtersarray[0])."'";
@@ -152,7 +153,7 @@ class mailing_contacts2 extends MailingTargets
     /**
      * 		Return here number of distinct emails returned by your selector.
      *
-     *		@param	string	$sql		Requete sql de comptage
+     *		@param		string	$sql		Requete sql de comptage
      * 		@return		int
      */
     function getNbOfRecipients($sql='')
@@ -168,6 +169,7 @@ class mailing_contacts2 extends MailingTargets
         $sql.= " WHERE sp.entity IN (".getEntity('societe', 1).")";
     	$sql.= " AND sp.email != ''";  // Note that null != '' is false
     	$sql.= " AND sp.no_email = 0";
+    	$sql.= " AND sp.statut = 1";
     	//$sql.= " AND sp.poste != ''";
     	// La requete doit retourner un champ "nb" pour etre comprise
     	// par parent::getNbOfRecipients
@@ -191,6 +193,7 @@ class mailing_contacts2 extends MailingTargets
         $sql.= " WHERE sp.entity IN (".getEntity('societe', 1).")";
         $sql.= " AND sp.email != ''";    // Note that null != '' is false
         $sql.= " AND sp.no_email = 0";
+        $sql.= " AND sp.statut = 1";
         $sql.= " AND (sp.poste IS NOT NULL AND sp.poste != '')";
         $sql.= " GROUP BY sp.poste";
         $sql.= " ORDER BY sp.poste";

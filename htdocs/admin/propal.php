@@ -59,11 +59,11 @@ if ($action == 'updateMask')
 
  	if (! $error)
 	{
-		setEventMessage($langs->trans("SetupSaved"));
+		setEventMessages($langs->trans("SetupSaved"), null, 'mesgs');
 	}
 	else
 	{
-		setEventMessage($langs->trans("Error"),'errors');
+		setEventMessages($langs->trans("Error"), null, 'errors');
 	}
 }
 
@@ -101,13 +101,13 @@ if ($action == 'specimen')
 		}
 		else
 		{
-			setEventMessage($module->error,'errors');
+			setEventMessages($module->error, $module->errors, 'errors');
 			dol_syslog($module->error, LOG_ERR);
 		}
 	}
 	else
 	{
-		setEventMessage($langs->trans("ErrorModuleNotFound"),'errors');
+		setEventMessages($langs->trans("ErrorModuleNotFound"), null, 'errors');
 		dol_syslog($langs->trans("ErrorModuleNotFound"), LOG_ERR);
 	}
 }
@@ -121,29 +121,29 @@ if ($action == 'set_PROPALE_DRAFT_WATERMARK')
 
  	if (! $error)
 	{
-		setEventMessage($langs->trans("SetupSaved"));
+		setEventMessages($langs->trans("SetupSaved"), null, 'mesgs');
 	}
 	else
 	{
-		setEventMessage($langs->trans("Error"),'errors');
+		setEventMessages($langs->trans("Error"), null, 'errors');
 	}
 }
 
-if ($action == 'set_PROPALE_FREE_TEXT')
+if ($action == 'set_PROPOSAL_FREE_TEXT')
 {
-	$freetext = GETPOST('PROPALE_FREE_TEXT');	// No alpha here, we want exact string
+	$freetext = GETPOST('PROPOSAL_FREE_TEXT');	// No alpha here, we want exact string
 
-	$res = dolibarr_set_const($db, "PROPALE_FREE_TEXT",$freetext,'chaine',0,'',$conf->entity);
+	$res = dolibarr_set_const($db, "PROPOSAL_FREE_TEXT",$freetext,'chaine',0,'',$conf->entity);
 
 	if (! $res > 0) $error++;
 
  	if (! $error)
 	{
-		setEventMessage($langs->trans("SetupSaved"));
+		setEventMessages($langs->trans("SetupSaved"), null, 'mesgs');
 	}
 	else
 	{
-		setEventMessage($langs->trans("Error"),'errors');
+		setEventMessages($langs->trans("Error"), null, 'errors');
 	}
 }
 
@@ -155,11 +155,11 @@ if ($action == 'setdefaultduration')
 
  	if (! $error)
 	{
-		setEventMessage($langs->trans("SetupSaved"));
+		setEventMessages($langs->trans("SetupSaved"), null, 'mesgs');
 	}
 	else
 	{
-		setEventMessage($langs->trans("Error"),'errors');
+		setEventMessages($langs->trans("Error"), null, 'errors');
 	}
 }
 
@@ -171,11 +171,11 @@ if ($action == 'set_BANK_ASK_PAYMENT_BANK_DURING_PROPOSAL')
 
     if (! $error)
     {
-        setEventMessage($langs->trans("SetupSaved"));
+        setEventMessages($langs->trans("SetupSaved"), null, 'mesgs');
     }
     else
     {
-        setEventMessage($langs->trans("Error"),'errors');
+        setEventMessages($langs->trans("Error"), null, 'errors');
     }
 }
 
@@ -199,12 +199,12 @@ if ($action == 'setModuleOptions')
 	if (! $error)
 	{
 		$db->commit();
-		setEventMessage($langs->trans("SetupSaved"));
+		setEventMessages($langs->trans("SetupSaved"), null, 'mesgs');
 	}
 	else
 	{
 		$db->rollback();
-		setEventMessage($langs->trans("Error"),'errors');
+		setEventMessages($langs->trans("Error"), null, 'errors');
 	}
 }
 
@@ -261,7 +261,7 @@ $form=new Form($db);
 //if ($mesg) print $mesg;
 
 $linkback='<a href="'.DOL_URL_ROOT.'/admin/modules.php">'.$langs->trans("BackToModuleList").'</a>';
-print_fiche_titre($langs->trans("PropalSetup"),$linkback,'setup');
+print load_fiche_titre($langs->trans("PropalSetup"),$linkback,'title_setup');
 
 $head = propal_admin_prepare_head();
 
@@ -270,7 +270,7 @@ dol_fiche_head($head, 'general', $langs->trans("Proposals"), 0, 'propal');
 /*
  *  Module numerotation
  */
-print_titre($langs->trans("ProposalsNumberingModules"));
+print load_fiche_titre($langs->trans("ProposalsNumberingModules"),'','');
 
 print '<table class="noborder" width="100%">';
 print '<tr class="liste_titre">';
@@ -344,18 +344,16 @@ foreach ($dirmodels as $reldir)
 						$htmltooltip.=''.$langs->trans("Version").': <b>'.$module->getVersion().'</b><br>';
 						$propal->type=0;
 						$nextval=$module->getNextValue($mysoc,$propal);
-						if ("$nextval" != $langs->trans("NotAvailable"))	// Keep " on nextval
-						{
-							$htmltooltip.=''.$langs->trans("NextValue").': ';
-							if ($nextval)
-							{
-								$htmltooltip.=$nextval.'<br>';
-							}
-							else
-							{
-								$htmltooltip.=$langs->trans($module->error).'<br>';
-							}
-						}
+                        if ("$nextval" != $langs->trans("NotAvailable")) {  // Keep " on nextval
+                            $htmltooltip.=''.$langs->trans("NextValue").': ';
+                            if ($nextval) {
+                                if (preg_match('/^Error/',$nextval) || $nextval=='NotConfigured')
+                                    $nextval = $langs->trans($nextval);
+                                $htmltooltip.=$nextval.'<br>';
+                            } else {
+                                $htmltooltip.=$langs->trans($module->error).'<br>';
+                            }
+                        }
 
 						print '<td align="center">';
 						print $form->textwithpicto('',$htmltooltip,1,0);
@@ -376,7 +374,7 @@ print "</table><br>\n";
  * Document templates generators
  */
 
-print_titre($langs->trans("ProposalsPDFModules"));
+print load_fiche_titre($langs->trans("ProposalsPDFModules"),'','');
 
 // Load array def with activated templates
 $def = array();
@@ -538,7 +536,7 @@ print '<br>';
  * Other options
  *
  */
-print_titre($langs->trans("OtherOptions"));
+print load_fiche_titre($langs->trans("OtherOptions"),'','');
 
 $var=true;
 print "<table class=\"noborder\" width=\"100%\">";
@@ -577,10 +575,20 @@ print '</form>';
 $var=! $var;
 print '<form action="'.$_SERVER["PHP_SELF"].'" method="post">';
 print '<input type="hidden" name="token" value="'.$_SESSION['newtoken'].'">';
-print '<input type="hidden" name="action" value="set_PROPALE_FREE_TEXT">';
+print '<input type="hidden" name="action" value="set_PROPOSAL_FREE_TEXT">';
 print '<tr '.$bc[$var].'><td colspan="2">';
 print $langs->trans("FreeLegalTextOnProposal").' ('.$langs->trans("AddCRIfTooLong").')<br>';
-print '<textarea name="PROPALE_FREE_TEXT" class="flat" cols="120">'.$conf->global->PROPALE_FREE_TEXT.'</textarea>';
+$variablename='PROPOSAL_FREE_TEXT';
+if (empty($conf->global->PDF_ALLOW_HTML_FOR_FREE_TEXT))
+{
+    print '<textarea name="'.$variablename.'" class="flat" cols="120">'.$conf->global->$variablename.'</textarea>';
+}
+else
+{
+    include_once DOL_DOCUMENT_ROOT.'/core/class/doleditor.class.php';
+    $doleditor=new DolEditor($variablename, $conf->global->$variablename,'',80,'dolibarr_details');
+    print $doleditor->Create();
+}
 print '</td><td align="right">';
 print '<input type="submit" class="button" value="'.$langs->trans("Modify").'">';
 print "</td></tr>\n";
@@ -635,7 +643,7 @@ print '</table>';
  *  Directory
  */
 print '<br>';
-print_titre($langs->trans("PathToDocuments"));
+print load_fiche_titre($langs->trans("PathToDocuments"),'','');
 
 print "<table class=\"noborder\" width=\"100%\">\n";
 print "<tr class=\"liste_titre\">\n";
@@ -645,6 +653,27 @@ print "</tr>\n";
 print "<tr ".$bc[false].">\n  <td width=\"140\">".$langs->trans("PathDirectory")."</td>\n  <td>".$conf->propal->dir_output."</td>\n</tr>\n";
 print "</table>\n<br>";
 
-$db->close();
+
+/*
+ * Notifications
+ */
+
+print load_fiche_titre($langs->trans("Notifications"),'','');
+print '<table class="noborder" width="100%">';
+print '<tr class="liste_titre">';
+print '<td>'.$langs->trans("Parameter").'</td>';
+print '<td align="center" width="60"></td>';
+print '<td width="80">&nbsp;</td>';
+print "</tr>\n";
+
+print '<tr '.$bc[$var].'><td colspan="2">';
+print $langs->trans("YouMayFindNotificationsFeaturesIntoModuleNotification").'<br>';
+print '</td><td align="right">';
+print "</td></tr>\n";
+
+print '</table>';
+
 
 llxFooter();
+
+$db->close();

@@ -1,5 +1,4 @@
 # Dolibarr language file - Source file is en_US - ecm
-MenuECM=文档
 DocsMine=我的文档
 DocsGenerated=生成的文件
 DocsElements=元素文件
@@ -35,7 +34,7 @@ ECMSearchByEntity=搜索对象
 ECMSectionOfDocuments=目录中的文件
 ECMTypeManual=手册
 ECMTypeAuto=自动
-ECMDocsBySocialContributions=文件关联到社会的贡献
+ECMDocsBySocialContributions=Documents linked to social or fiscal taxes
 ECMDocsByThirdParties=文件链接到第三方
 ECMDocsByProposals=文件与建议
 ECMDocsByOrders=文件链接到客户的订单

@@ -1,5 +1,4 @@
 # Dolibarr language file - Source file is en_US - ecm
-MenuECM=Dokument
 DocsMine=Mina dokument
 DocsGenerated=Skapade dokument
 DocsElements=Elements dokument
@@ -35,7 +34,7 @@ ECMSearchByEntity=Sök på objektet
 ECMSectionOfDocuments=Register över handlingar
 ECMTypeManual=Manuell
 ECMTypeAuto=Automatisk
-ECMDocsBySocialContributions=Handlingar som är kopplade till sociala avgifter
+ECMDocsBySocialContributions=Documents linked to social or fiscal taxes
 ECMDocsByThirdParties=Dokument med koppling till tredje part
 ECMDocsByProposals=Dokument med koppling till förslagen
 ECMDocsByOrders=Dokument med koppling till kunderna order

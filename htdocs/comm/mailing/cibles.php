@@ -1,6 +1,6 @@
 <?php
 /* Copyright (C) 2004      Rodolphe Quiedeville <rodolphe@quiedeville.org>
- * Copyright (C) 2005-2013 Laurent Destailleur  <eldy@uers.sourceforge.net>
+ * Copyright (C) 2005-2015 Laurent Destailleur  <eldy@uers.sourceforge.net>
  * Copyright (C) 2005-2010 Regis Houssin        <regis.houssin@capnetworks.com>
  * Copyright (C) 2014	   Florian Henry        <florian.henry@open-concept.pro>
  *
@@ -80,7 +80,7 @@ if ($action == 'add')
 	    //print $dir."\n<br>";
 	    dol_syslog("Scan directory ".$dir." for modules");
 
-	    // Chargement de la classe
+	    // Loading Class
 	    $file = $dir."/".$module.".modules.php";
 	    $classname = "mailing_".$module;
 
@@ -95,29 +95,30 @@ if ($action == 'add')
 
 			// Add targets into database
 			$obj = new $classname($db);
+			dol_syslog("Call add_to_target on class ".$classname);
 			$result=$obj->add_to_target($id,$filtersarray);
 		}
 	}
 	if ($result > 0)
 	{
-		setEventMessage($langs->trans("XTargetsAdded",$result),'mesgs');
+		setEventMessages($langs->trans("XTargetsAdded",$result), null, 'mesgs');
 
 		header("Location: ".$_SERVER['PHP_SELF']."?id=".$id);
 		exit;
 	}
 	if ($result == 0)
 	{
-		setEventMessage($langs->trans("WarningNoEMailsAdded"),'warnings');
+		setEventMessages($langs->trans("WarningNoEMailsAdded"), null, 'warnings');
 	}
 	if ($result < 0)
 	{
-		setEventMessage($langs->trans("Error").($obj->error?' '.$obj->error:''),'errors');
+		setEventMessages($langs->trans("Error").($obj->error?' '.$obj->error:''), null, 'errors');
 	}
 }
 
 if (GETPOST('clearlist'))
 {
-	// Chargement de la classe
+	// Loading Class
 	$obj = new MailingTargets($db);
 	$obj->clear_target($id);
 
@@ -223,7 +224,7 @@ if ($object->fetch($id) >= 0)
 	// Show email selectors
 	if ($allowaddtarget && $user->rights->mailing->creer)
 	{
-		print_fiche_titre($langs->trans("ToAddRecipientsChooseHere"),($user->admin?info_admin($langs->trans("YouCanAddYourOwnPredefindedListHere"),1):''),'');
+		print load_fiche_titre($langs->trans("ToAddRecipientsChooseHere"),($user->admin?info_admin($langs->trans("YouCanAddYourOwnPredefindedListHere"),1):''),'');
 
 		print '<table class="noborder" width="100%">';
 		print '<tr class="liste_titre">';
@@ -267,7 +268,7 @@ if ($object->fetch($id) >= 0)
 			// Loop on each submodule
             foreach($modulenames as $modulename)
             {
-				// Chargement de la classe
+				// Loading Class
 				$file = $dir.$modulename.".modules.php";
 				$classname = "mailing_".$modulename;
 				require_once $file;
@@ -408,25 +409,17 @@ if ($object->fetch($id) >= 0)
 		print_liste_field_titre($langs->trans("Firstname"),$_SERVER["PHP_SELF"],"mc.firstname",$param,"","",$sortfield,$sortorder);
 		print_liste_field_titre($langs->trans("OtherInformations"),$_SERVER["PHP_SELF"],"",$param,"","",$sortfield,$sortorder);
 		print_liste_field_titre($langs->trans("Source"),$_SERVER["PHP_SELF"],"",$param,"",'align="center"',$sortfield,$sortorder);
-
 		// Date sending
 		if ($object->statut < 2)
 		{
-			print '<td class="liste_titre">&nbsp;</td>';
+			print_liste_field_titre('');
 		}
 		else
 		{
 			print_liste_field_titre($langs->trans("DateSending"),$_SERVER["PHP_SELF"],"mc.date_envoi",$param,'','align="center"',$sortfield,$sortorder);
 		}
-
-		// Statut
 		print_liste_field_titre($langs->trans("Status"),$_SERVER["PHP_SELF"],"mc.statut",$param,'','align="right"',$sortfield,$sortorder);
-
-		//Search Icon
-		print '<td class="liste_titre">';
-		print '&nbsp';
-		print '</td>';
-
+		print_liste_field_titre('',$_SERVER["PHP_SELF"],"",'','','',$sortfield,$sortorder,'maxwidthsearch ');
 		print '</tr>';
 
 		// Ligne des champs de filtres
@@ -463,8 +456,7 @@ if ($object->fetch($id) >= 0)
 		//Search Icon
 		print '<td class="liste_titre" align="right">';
 		print '<input type="image" class="liste_titre" src="'.img_picto($langs->trans("Search"),'search.png','','',1).'" name="button_search" value="'.dol_escape_htmltag($langs->trans("Search")).'" title="'.dol_escape_htmltag($langs->trans("Search")).'">';
-		print '&nbsp; ';
-		print '<input type="image" class="liste_titre" src="'.img_picto($langs->trans("Search"),'searchclear.png','','',1).'" name="button_removefilter" value="'.dol_escape_htmltag($langs->trans("RemoveFilter")).'" title="'.dol_escape_htmltag($langs->trans("RemoveFilter")).'">';
+		print '<input type="image" class="liste_titre" src="'.img_picto($langs->trans("Reset"),'searchclear.png','','',1).'" name="button_removefilter" value="'.dol_escape_htmltag($langs->trans("RemoveFilter")).'" title="'.dol_escape_htmltag($langs->trans("RemoveFilter")).'">';
 		print '</td>';
 		print '</tr>';
 
@@ -493,23 +485,24 @@ if ($object->fetch($id) >= 0)
                     if ($obj->source_type == 'member')
                     {
                         include_once DOL_DOCUMENT_ROOT.'/adherents/class/adherent.class.php';
-                        $m=new Adherent($db);
-                        $m->id=$obj->source_id;
-                        print $m->getNomUrl(2);
+                        $objectstatic=new Adherent($db);
+						$objectstatic->fetch($obj->source_id);
+                        print $objectstatic->getNomUrl(2);
                     }
                     else if ($obj->source_type == 'user')
                     {
                         include_once DOL_DOCUMENT_ROOT.'/user/class/user.class.php';
-                        $m=new User($db);
-                        $m->id=$obj->source_id;
-                        print $m->getNomUrl(2);
+                        $objectstatic=new User($db);
+						$objectstatic->fetch($obj->source_id);
+                        $objectstatic->id=$obj->source_id;
+                        print $objectstatic->getNomUrl(2);
                     }
                     else if ($obj->source_type == 'thirdparty')
                     {
                         include_once DOL_DOCUMENT_ROOT.'/societe/class/societe.class.php';
-                        $m=new Societe($db);
-                        $m->id=$obj->source_id;
-                        print $m->getNomUrl(2);
+                        $objectstatic=new Societe($db);
+						$objectstatic->fetch($obj->source_id);
+                        print $objectstatic->getNomUrl(2);
                     }
                     else
                     {
@@ -523,9 +516,6 @@ if ($object->fetch($id) >= 0)
 				{
 					print '<td align="center">&nbsp;</td>';
 					print '<td align="right" class="nowrap">'.$langs->trans("MailingStatusNotSent");
-					if ($user->rights->mailing->creer && $allowaddtarget) {
-						print '<a href="'.$_SERVER['PHP_SELF'].'?action=delete&rowid='.$obj->rowid.$param.'">'.img_delete($langs->trans("RemoveRecipient"));
-					}
 					print '</td>';
 				}
 				else
@@ -537,7 +527,14 @@ if ($object->fetch($id) >= 0)
 				}
 
 				//Sreach Icon
-				print '<td></td>';
+				print '<td align="right">';
+				if ($obj->statut == 0)
+				{
+					if ($user->rights->mailing->creer && $allowaddtarget) {
+						print '<a href="'.$_SERVER['PHP_SELF'].'?action=delete&rowid='.$obj->rowid.$param.'">'.img_delete($langs->trans("RemoveRecipient"));
+					}
+				}
+				print '</td>';
 				print '</tr>';
 
 				$i++;
@@ -545,7 +542,7 @@ if ($object->fetch($id) >= 0)
 		}
 		else
 		{
-			print '<tr '.$bc[false].'><td colspan="7">'.$langs->trans("NoTargetYet").'</td></tr>';
+			print '<tr '.$bc[false].'><td colspan="8">'.$langs->trans("NoTargetYet").'</td></tr>';
 		}
 		print "</table><br>";
 

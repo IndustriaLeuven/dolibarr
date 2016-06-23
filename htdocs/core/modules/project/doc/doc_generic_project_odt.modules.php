@@ -105,7 +105,7 @@ class doc_generic_project_odt extends ModelePDFProjects
 	/**
 	 * Define array with couple substitution key => substitution value
 	 *
-	 * @param   Object			$object             Main object to use as data source
+	 * @param   Project			$object             Main object to use as data source
 	 * @param   Translate		$outputlangs        Lang object to use for output
 	 * @return	array								Array of substitution
 	 */
@@ -449,7 +449,9 @@ class doc_generic_project_odt extends ModelePDFProjects
 				$newfileformat=substr($newfile, strrpos($newfile, '.')+1);
 				if ( ! empty($conf->global->MAIN_DOC_USE_TIMING))
 				{
-					$filename=$newfiletmp.'.'.dol_print_date(dol_now(),'%Y%m%d%H%M%S').'.'.$newfileformat;
+				    $format=$conf->global->MAIN_DOC_USE_TIMING;
+				    if ($format == '1') $format='%Y%m%d%H%M%S';
+					$filename=$newfiletmp.'-'.dol_print_date(dol_now(),$format).'.'.$newfileformat;
 				}
 				else
 				{

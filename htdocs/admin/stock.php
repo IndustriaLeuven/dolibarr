@@ -87,18 +87,21 @@ if($action)
 	if($action == 'STOCK_MUST_BE_ENOUGH_FOR_SHIPMENT') {
 	    $res = dolibarr_set_const($db, "STOCK_MUST_BE_ENOUGH_FOR_SHIPMENT", GETPOST('STOCK_MUST_BE_ENOUGH_FOR_SHIPMENT','alpha'),'chaine',0,'',$conf->entity);
 	}
+	if($action == 'INDEPENDANT_SUBPRODUCT_STOCK') {
+	    $res = dolibarr_set_const($db, "INDEPENDANT_SUBPRODUCT_STOCK", GETPOST('INDEPENDANT_SUBPRODUCT_STOCK','alpha'),'chaine',0,'',$conf->entity);
+	}
 
 	if (! $res > 0) $error++;
 
  	if (! $error)
     {
     	$db->commit();
-        setEventMessage($langs->trans("SetupSaved"));
+        setEventMessages($langs->trans("SetupSaved"), null, 'mesgs');
     }
     else
     {
     	$db->rollback();
-        setEventMessage($langs->trans("Error"),'errors');
+        setEventMessages($langs->trans("Error"), null, 'errors');
     }
 }
 
@@ -110,7 +113,7 @@ if($action)
 llxHeader('',$langs->trans("StockSetup"));
 
 $linkback='<a href="'.DOL_URL_ROOT.'/admin/modules.php">'.$langs->trans("BackToModuleList").'</a>';
-print_fiche_titre($langs->trans("StockSetup"),$linkback,'setup');
+print load_fiche_titre($langs->trans("StockSetup"),$linkback,'title_setup');
 
 $form=new Form($db);
 
@@ -119,7 +122,7 @@ $disabled='';
 if (! empty($conf->productbatch->enabled))
 {
 	$langs->load("productbatch");
-	$disabled=' disabled="disabled"';
+	$disabled=' disabled';
 	print info_admin($langs->trans("WhenProductBatchModuleOnOptionAreForced"));
 }
 
@@ -138,58 +141,75 @@ $var=true;
 
 $found=0;
 
+$var=!$var;
+print "<tr ".$bc[$var].">";
+print '<td width="60%">'.$langs->trans("DeStockOnBill").'</td>';
+print '<td width="160" align="right">';
 if (! empty($conf->facture->enabled))
 {
-	$var=!$var;
-	print "<tr ".$bc[$var].">";
-	print '<td width="60%">'.$langs->trans("DeStockOnBill").'</td>';
-	print '<td width="160" align="right">';
-	print "<form method=\"post\" action=\"stock.php\">";
+    print "<form method=\"post\" action=\"stock.php\">";
 	print '<input type="hidden" name="token" value="'.$_SESSION['newtoken'].'">';
 	print "<input type=\"hidden\" name=\"action\" value=\"STOCK_CALCULATE_ON_BILL\">";
 	print $form->selectyesno("STOCK_CALCULATE_ON_BILL",$conf->global->STOCK_CALCULATE_ON_BILL,1,$disabled);
 	print '<input type="submit" class="button" value="'.$langs->trans("Modify").'"'.$disabled.'>';
-	print "</form>\n</td>\n</tr>\n";
-	$found++;
+	print "</form>\n";
 }
+else
+{
+    print $langs->trans("ModuleMustBeEnabledFirst", $langs->transnoentitiesnoconv("Module30Name")); 
+}
+print "</td>\n</tr>\n";
+$found++;
 
+$var=!$var;
+print "<tr ".$bc[$var].">";
+print '<td width="60%">'.$langs->trans("DeStockOnValidateOrder").'</td>';
+print '<td width="160" align="right">';
 if (! empty($conf->commande->enabled))
 {
-	$var=!$var;
-	print "<tr ".$bc[$var].">";
-	print '<td width="60%">'.$langs->trans("DeStockOnValidateOrder").'</td>';
-	print '<td width="160" align="right">';
-	print "<form method=\"post\" action=\"stock.php\">";
+    print "<form method=\"post\" action=\"stock.php\">";
 	print '<input type="hidden" name="token" value="'.$_SESSION['newtoken'].'">';
 	print "<input type=\"hidden\" name=\"action\" value=\"STOCK_CALCULATE_ON_VALIDATE_ORDER\">";
 	print $form->selectyesno("STOCK_CALCULATE_ON_VALIDATE_ORDER",$conf->global->STOCK_CALCULATE_ON_VALIDATE_ORDER,1,$disabled);
 	print '<input type="submit" class="button" value="'.$langs->trans("Modify").'"'.$disabled.'>';
-	print "</form>\n</td>\n</tr>\n";
-	$found++;
+	print "</form>\n";
 }
+else
+{
+    print $langs->trans("ModuleMustBeEnabledFirst", $langs->transnoentitiesnoconv("Module25Name")); 
+}
+print "</td>\n</tr>\n";
+$found++;
 
+//if (! empty($conf->expedition->enabled))
+//{
+$var=!$var;
+print "<tr ".$bc[$var].">";
+print '<td width="60%">'.$langs->trans("DeStockOnShipment").'</td>';
+print '<td width="160" align="right">';
 if (! empty($conf->expedition->enabled))
 {
-	$var=!$var;
-	print "<tr ".$bc[$var].">";
-	print '<td width="60%">'.$langs->trans("DeStockOnShipment").'</td>';
-	print '<td width="160" align="right">';
 	print "<form method=\"post\" action=\"stock.php\">";
 	print '<input type="hidden" name="token" value="'.$_SESSION['newtoken'].'">';
 	print "<input type=\"hidden\" name=\"action\" value=\"STOCK_CALCULATE_ON_SHIPMENT\">";
 	print $form->selectyesno("STOCK_CALCULATE_ON_SHIPMENT",$conf->global->STOCK_CALCULATE_ON_SHIPMENT,1,$disabled);
 	print '<input type="submit" class="button" value="'.$langs->trans("Modify").'"'.$disabled.'>';
-	print "</form>\n</td>\n</tr>\n";
-	$found++;
+	print "</form>\n";
 }
+else
+{
+    print $langs->trans("ModuleMustBeEnabledFirst", $langs->transnoentitiesnoconv("Module80Name")); 
+}
+print "</td>\n</tr>\n";
+$found++;
 
-if (! $found)
+/*if (! $found)
 {
 	$var=!$var;
 	print "<tr ".$bc[$var].">";
-	print '<td colspan="2">'.$langs->trans("NoModueToManageStockDecrease").'</td>';
+	print '<td colspan="2">'.$langs->trans("NoModuleToManageStockDecrease").'</td>';
 	print "</tr>\n";
-}
+}*/
 
 print '</table>';
 
@@ -205,57 +225,74 @@ $var=true;
 
 $found=0;
 
+$var=!$var;
+print "<tr ".$bc[$var].">";
+print '<td width="60%">'.$langs->trans("ReStockOnBill").'</td>';
+print '<td width="160" align="right">';
 if (! empty($conf->fournisseur->enabled))
 {
-	$var=!$var;
-	print "<tr ".$bc[$var].">";
-	print '<td width="60%">'.$langs->trans("ReStockOnBill").'</td>';
-	print '<td width="160" align="right">';
-	print "<form method=\"post\" action=\"stock.php\">";
+    print "<form method=\"post\" action=\"stock.php\">";
 	print '<input type="hidden" name="token" value="'.$_SESSION['newtoken'].'">';
 	print "<input type=\"hidden\" name=\"action\" value=\"STOCK_CALCULATE_ON_SUPPLIER_BILL\">";
 	print $form->selectyesno("STOCK_CALCULATE_ON_SUPPLIER_BILL",$conf->global->STOCK_CALCULATE_ON_SUPPLIER_BILL,1,$disabled);
 	print '<input type="submit" class="button" value="'.$langs->trans("Modify").'"'.$disabled.'>';
-	print "</form>\n</td>\n</tr>\n";
-	$found++;
+	print "</form>\n";
 }
+else
+{
+    print $langs->trans("ModuleMustBeEnabledFirst", $langs->transnoentitiesnoconv("Module40Name")); 
+}
+print "</td>\n</tr>\n";
+$found++;
 
+
+$var=!$var;
+print "<tr ".$bc[$var].">";
+print '<td width="60%">'.$langs->trans("ReStockOnValidateOrder").'</td>';
+print '<td width="160" align="right">';
 if (! empty($conf->fournisseur->enabled))
 {
-	$var=!$var;
-	print "<tr ".$bc[$var].">";
-	print '<td width="60%">'.$langs->trans("ReStockOnValidateOrder").'</td>';
-	print '<td width="160" align="right">';
-	print "<form method=\"post\" action=\"stock.php\">";
+    print "<form method=\"post\" action=\"stock.php\">";
 	print '<input type="hidden" name="token" value="'.$_SESSION['newtoken'].'">';
 	print "<input type=\"hidden\" name=\"action\" value=\"STOCK_CALCULATE_ON_SUPPLIER_VALIDATE_ORDER\">";
 	print $form->selectyesno("STOCK_CALCULATE_ON_SUPPLIER_VALIDATE_ORDER",$conf->global->STOCK_CALCULATE_ON_SUPPLIER_VALIDATE_ORDER,1,$disabled);
 	print '<input type="submit" class="button" value="'.$langs->trans("Modify").'"'.$disabled.'>';
-	print "</form>\n</td>\n</tr>\n";
-	$found++;
+	print "</form>\n";
 }
+else
+{
+    print $langs->trans("ModuleMustBeEnabledFirst", $langs->transnoentitiesnoconv("Module40Name")); 
+}
+print "</td>\n</tr>\n";
+$found++;
+
+$var=!$var;
+print "<tr ".$bc[$var].">";
+print '<td width="60%">'.$langs->trans("ReStockOnDispatchOrder").'</td>';
+print '<td width="160" align="right">';
 if (! empty($conf->fournisseur->enabled))
 {
-	$var=!$var;
-	print "<tr ".$bc[$var].">";
-	print '<td width="60%">'.$langs->trans("ReStockOnDispatchOrder").'</td>';
-	print '<td width="160" align="right">';
-	print "<form method=\"post\" action=\"stock.php\">";
+    print "<form method=\"post\" action=\"stock.php\">";
 	print '<input type="hidden" name="token" value="'.$_SESSION['newtoken'].'">';
 	print "<input type=\"hidden\" name=\"action\" value=\"STOCK_CALCULATE_ON_SUPPLIER_DISPATCH_ORDER\">";
 	print $form->selectyesno("STOCK_CALCULATE_ON_SUPPLIER_DISPATCH_ORDER",$conf->global->STOCK_CALCULATE_ON_SUPPLIER_DISPATCH_ORDER,1,$disabled);
 	print '<input type="submit" class="button" value="'.$langs->trans("Modify").'"'.$disabled.'>';
-	print "</form>\n</td>\n</tr>\n";
-	$found++;
+	print "</form>\n";
 }
+else
+{
+    print $langs->trans("ModuleMustBeEnabledFirst", $langs->transnoentitiesnoconv("Module40Name")); 
+}
+print "</td>\n</tr>\n";
+$found++;
 
-if (! $found)
+/*if (! $found)
 {
 	$var=!$var;
 	print "<tr ".$bc[$var].">";
 	print '<td colspan="2">'.$langs->trans("NoModueToManageStockIncrease").'</td>';
 	print "</tr>\n";
-}
+}*/
 
 print '</table>';
 
@@ -368,9 +405,29 @@ print '</form>';
 print "</td>\n";
 print "</tr>\n";
 print '<br>';
-print '</table>';
-print '<br>';
 
+/* I keep the option/feature, but hidden to end users for the moment. If feature is used by module, no need to have users see it.
+If not used by a module, I still need to understand in which case user may need this now we can set rule on product page.
+if ($conf->global->PRODUIT_SOUSPRODUITS) 
+{
+	$var=!$var;
+	
+	print "<tr ".$bc[$var].">";
+	print '<td width="60%">'.$langs->trans("IndependantSubProductStock").'</td>';
+	
+	print '<td width="160" align="right">';
+	print "<form method=\"post\" action=\"stock.php\">";
+	print '<input type="hidden" name="token" value="'.$_SESSION['newtoken'].'">';
+	print "<input type=\"hidden\" name=\"action\" value=\"INDEPENDANT_SUBPRODUCT_STOCK\">";
+	print $form->selectyesno("INDEPENDANT_SUBPRODUCT_STOCK",$conf->global->INDEPENDANT_SUBPRODUCT_STOCK,1);
+	print '<input type="submit" class="button" value="'.$langs->trans("Modify").'">';
+	print '</form>';
+	print "</td>\n";
+	print "</tr>\n";
+}
+*/
+
+print '</table>';
 
 llxFooter();
 

@@ -1,7 +1,7 @@
 <?php
 /* Copyright (C) 2010	Juanjo Menent	<jmenent@2byte.es>
  * Copyright (C) 2012	Regis Houssin	<regis.houssin@capnetworks.com>
- * Copyright (C) 2013   Philippe Grand  <philippe.grand@atoo-net.com>
+ * Copyright (C) 2013-2016   Philippe Grand  <philippe.grand@atoo-net.com>
  * Copyright (C) 2014   Marcos García   <marcosgdf@gmail.com>
  *
  * This program is free software; you can redistribute it and/or modify
@@ -26,7 +26,7 @@
  *					and parent class for supplier invoices numbering models
  */
 require_once DOL_DOCUMENT_ROOT.'/core/class/commondocgenerator.class.php';
-require_once DOL_DOCUMENT_ROOT.'/compta/bank/class/account.class.php';	// requis car utilise par les classes qui heritent
+require_once DOL_DOCUMENT_ROOT.'/compta/bank/class/account.class.php';	// required for use by classes that inherit
 
 
 /**
@@ -41,7 +41,7 @@ abstract class ModelePDFSuppliersInvoices extends CommonDocGenerator
 	 *  Return list of active generation models
 	 *
      *  @param	DoliDB	$db     			Database handler
-     *  @param  string	$maxfilenamelength  Max length of value to show
+     *  @param  integer	$maxfilenamelength  Max length of value to show
      *  @return	array						List of numbers
 	 */
 	static function liste_modeles($db,$maxfilenamelength=0)

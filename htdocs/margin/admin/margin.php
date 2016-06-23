@@ -31,6 +31,7 @@ require_once(DOL_DOCUMENT_ROOT."/compta/facture/class/facture.class.php");
 $langs->load("admin");
 $langs->load("bills");
 $langs->load("margins");
+$langs->load("stocks");
 
 if (! $user->admin) accessforbidden();
 
@@ -72,8 +73,7 @@ if ($action == 'remises')
 {
     if (dolibarr_set_const($db, 'MARGIN_METHODE_FOR_DISCOUNT', $_POST['MARGIN_METHODE_FOR_DISCOUNT'], 'chaine', 0, '', $conf->entity) > 0)
     {
-          $conf->global->MARGIN_METHODE_FOR_DISCOUNT = $_POST['MARGIN_METHODE_FOR_DISCOUNT'];
-          setEventMessage($langs->trans("RecordModifiedSuccessfully"));
+          setEventMessages($langs->trans("RecordModifiedSuccessfully"), null, 'mesgs');
     }
     else
     {
@@ -85,8 +85,7 @@ if ($action == 'typemarges')
 {
     if (dolibarr_set_const($db, 'MARGIN_TYPE', $_POST['MARGIN_TYPE'], 'chaine', 0, '', $conf->entity) > 0)
     {
-          $conf->global->MARGIN_METHODE_FOR_DISCOUNT = $_POST['MARGIN_TYPE'];
-          setEventMessage($langs->trans("RecordModifiedSuccessfully"));
+          setEventMessages($langs->trans("RecordModifiedSuccessfully"), null, 'mesgs');
     }
     else
     {
@@ -98,8 +97,7 @@ if ($action == 'contact')
 {
     if (dolibarr_set_const($db, 'AGENT_CONTACT_TYPE', $_POST['AGENT_CONTACT_TYPE'], 'chaine', 0, '', $conf->entity) > 0)
     {
-          $conf->global->AGENT_CONTACT_TYPE = $_POST['AGENT_CONTACT_TYPE'];
-          setEventMessage($langs->trans("RecordModifiedSuccessfully"));
+          setEventMessages($langs->trans("RecordModifiedSuccessfully"), null, 'mesgs');
     }
     else
     {
@@ -115,14 +113,14 @@ llxHeader('',$langs->trans("margesSetup"));
 
 
 $linkback='<a href="'.DOL_URL_ROOT.'/admin/modules.php">'.$langs->trans("BackToModuleList").'</a>';
-print_fiche_titre($langs->trans("margesSetup"),$linkback,'setup');
+print load_fiche_titre($langs->trans("margesSetup"),$linkback,'title_setup');
 
 
 $head = marges_admin_prepare_head();
 
 dol_fiche_head($head, 'parameters', $langs->trans("Margins"), 0, 'margin');
 
-print_fiche_titre($langs->trans("MemberMainOptions"),'','');
+print load_fiche_titre($langs->trans("MemberMainOptions"),'','');
 print '<table class="noborder" width="100%">';
 print '<tr class="liste_titre">';
 print '<td width=300>'.$langs->trans("Description").'</td>';
@@ -140,20 +138,33 @@ print '<input type="hidden" name="token" value="'.$_SESSION['newtoken'].'">';
 print "<input type=\"hidden\" name=\"action\" value=\"typemarges\">";
 print '<tr '.$bc[$var].'>';
 print '<td>'.$langs->trans("MARGIN_TYPE").'</td>';
-print '<td align="right">'.$langs->trans('MargeBrute');
+print '<td>';
 print ' <input type="radio" name="MARGIN_TYPE" value="1" ';
 if (isset($conf->global->MARGIN_TYPE) && $conf->global->MARGIN_TYPE == '1')
 	print 'checked ';
-print '/><br/>'.$langs->trans('MargeNette');
+print '/> ';
+print $langs->trans('MargeType1');
+print '<br>';
+/*print $langs->trans('MargeNette');
 print ' <input type="radio" name="MARGIN_TYPE" value="2" ';
 if (isset($conf->global->MARGIN_TYPE) && $conf->global->MARGIN_TYPE == '2')
 	print 'checked ';
-print '/>';
+print '/>';*/
+// TODO Check that PMP is available when stock module is not enabled. If not, make this choice greyed when stock module disabled.
+//if (! empty($conf->stock->enabled))
+//{
+	print ' <input type="radio" name="MARGIN_TYPE" value="pmp" ';
+	if (isset($conf->global->MARGIN_TYPE) && $conf->global->MARGIN_TYPE == 'pmp')
+		print 'checked ';
+	print '/> ';
+	print $langs->trans('MargeType2');
+//}
 print '</td>';
 print '<td>';
 print '<input type="submit" class="button" value="'.$langs->trans("Modify").'" class="button">';
 print '</td>';
-print '<td>'.$langs->trans('MARGIN_TYPE_DETAILS').'</td>';
+print '<td>'.$langs->trans('MarginTypeDesc');
+print '</td>';
 print '</tr>';
 print '</form>';
 

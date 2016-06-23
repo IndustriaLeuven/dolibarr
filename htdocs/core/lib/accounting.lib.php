@@ -1,6 +1,6 @@
 <?php
 /* Copyright (C) 2013-2014 Olivier Geffroy      <jeff@jeffinfo.com>
- * Copyright (C) 2013-2014 Alexandre Spangaro   <alexandre.spangaro@gmail.com>
+ * Copyright (C) 2013-2014 Alexandre Spangaro   <aspangaro.dolibarr@gmail.com>
  * Copyright (C) 2014 	   Florian Henry        <florian.henry@open-concept.pro>
  *
  * This program is free software; you can redistribute it and/or modify
@@ -47,12 +47,12 @@ function admin_accounting_prepare_head(AccountingAccount $object=null)
 	// $this->tabs = array('entity:-tabname); to remove a tab
 	complete_head_from_modules($conf, $langs, $object, $head, $h, 'accounting_admin');
 
-	$head[$h][0] = dol_buildpath('/accountancy/admin/journaux.php', 1);
+	$head[$h][0] = DOL_URL_ROOT.'/accountancy/admin/journal.php';
 	$head[$h][1] = $langs->trans("Journaux");
 	$head[$h][2] = 'journal';
 	$h ++;
 
-	$head[$h][0] = dol_buildpath('/accountancy/admin/export.php', 1);
+	$head[$h][0] = DOL_URL_ROOT.'/accountancy/admin/export.php';
 	$head[$h][1] = $langs->trans("Export");
 	$head[$h][2] = 'export';
 	$h ++;
@@ -75,7 +75,7 @@ function accounting_prepare_head(AccountingAccount $object)
 	$h = 0;
 	$head = array ();
 
-	$head[$h][0] = dol_buildpath('/accountancy/admin/card.php', 1) . '?id=' . $object->id;
+	$head[$h][0] = DOL_URL_ROOT.'/accountancy/admin/card.php?id=' . $object->id;
 	$head[$h][1] = $langs->trans("Card");
 	$head[$h][2] = 'card';
 	$h ++;
@@ -89,6 +89,19 @@ function accounting_prepare_head(AccountingAccount $object)
 	complete_head_from_modules($conf, $langs, $object, $head, $h, 'accounting_account', 'remove');
 
 	return $head;
+}
+
+/**
+ * Return accounting account without zero on the right
+ *
+ * @param 	string	$account		Accounting account
+ * @return	string          		String without zero on the right
+ */
+function clean_account($account)
+{
+	$account = rtrim($account,"0");
+	
+	return $account;
 }
 
 /**
@@ -131,7 +144,7 @@ function length_accountg($account)
  */
 function length_accounta($accounta)
 {
-	global $conf, $langs;
+	global $conf;
 
 	$a = $conf->global->ACCOUNTING_LENGTH_AACCOUNT;
 

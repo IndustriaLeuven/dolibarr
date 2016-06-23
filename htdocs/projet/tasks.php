@@ -1,6 +1,6 @@
 <?php
 /* Copyright (C) 2005      Rodolphe Quiedeville <rodolphe@quiedeville.org>
- * Copyright (C) 2004-2014 Laurent Destailleur  <eldy@users.sourceforge.net>
+ * Copyright (C) 2004-2015 Laurent Destailleur  <eldy@users.sourceforge.net>
  * Copyright (C) 2005-2012 Regis Houssin        <regis.houssin@capnetworks.com>
  *
  * This program is free software; you can redistribute it and/or modify
@@ -38,6 +38,7 @@ $action = GETPOST('action', 'alpha');
 $id = GETPOST('id', 'int');
 $ref = GETPOST('ref', 'alpha');
 $backtopage=GETPOST('backtopage','alpha');
+$cancel=GETPOST('cancel');
 
 $mode = GETPOST('mode', 'alpha');
 $mine = ($mode == 'mine' ? 1 : 0);
@@ -47,16 +48,15 @@ $object = new Project($db);
 $taskstatic = new Task($db);
 $extrafields_project = new ExtraFields($db);
 $extrafields_task = new ExtraFields($db);
+
+include DOL_DOCUMENT_ROOT.'/core/actions_fetchobject.inc.php';  // Must be include, not include_once
+
 if ($id > 0 || ! empty($ref))
 {
-	$object->fetch($id,$ref);
-	$id=$object->id;
-	$ref=$object->ref;
-
 	// fetch optionals attributes and labels
 	$extralabels_projet=$extrafields_project->fetch_name_optionals_label($object->table_element);
-	$extralabels_task=$extrafields_task->fetch_name_optionals_label($taskstatic->table_element);
 }
+$extralabels_task=$extrafields_task->fetch_name_optionals_label($taskstatic->table_element);
 
 // Security check
 $socid=0;
@@ -86,17 +86,17 @@ if ($action == 'createtask' && $user->rights->projet->creer)
 	$date_start = dol_mktime($_POST['dateohour'],$_POST['dateomin'],0,$_POST['dateomonth'],$_POST['dateoday'],$_POST['dateoyear'],'user');
 	$date_end = dol_mktime($_POST['dateehour'],$_POST['dateemin'],0,$_POST['dateemonth'],$_POST['dateeday'],$_POST['dateeyear'],'user');
 
-	if (empty($_POST["cancel"]))
+	if (! $cancel)
 	{
 		if (empty($label))
 		{
-			setEventMessage($langs->trans("ErrorFieldRequired",$langs->transnoentities("Label")), 'errors');
+			setEventMessages($langs->trans("ErrorFieldRequired", $langs->transnoentities("Label")), null, 'errors');
 			$action='create';
 			$error++;
 		}
 		else if (empty($_POST['task_parent']))
 		{
-			setEventMessage($langs->trans("ErrorFieldRequired",$langs->transnoentities("ChildOfTask")), 'errors');
+			setEventMessages($langs->trans("ErrorFieldRequired", $langs->transnoentities("ChildOfTask")), null, 'errors');
 			$action='create';
 			$error++;
 		}
@@ -146,7 +146,7 @@ if ($action == 'createtask' && $user->rights->projet->creer)
 			}
 			else if (empty($projectid))
 			{
-				header("Location: ".DOL_URL_ROOT.'/projet/tasks/index.php'.(empty($mode)?'':'?mode='.$mode));
+				header("Location: ".DOL_URL_ROOT.'/projet/tasks/list.php'.(empty($mode)?'':'?mode='.$mode));
 				exit;
 			}
 			$id = $projectid;
@@ -162,7 +162,7 @@ if ($action == 'createtask' && $user->rights->projet->creer)
 		else if (empty($id))
 		{
 			// We go back on task list
-			header("Location: ".DOL_URL_ROOT.'/projet/tasks/index.php'.(empty($mode)?'':'?mode='.$mode));
+			header("Location: ".DOL_URL_ROOT.'/projet/tasks/list.php'.(empty($mode)?'':'?mode='.$mode));
 			exit;
 		}
 	}
@@ -178,8 +178,10 @@ $formother=new FormOther($db);
 $taskstatic = new Task($db);
 $userstatic=new User($db);
 
+$title=$langs->trans("Project").' - '.$langs->trans("Tasks").' - '.$object->ref.' '.$object->name;
+if (! empty($conf->global->MAIN_HTML_TITLE) && preg_match('/projectnameonly/',$conf->global->MAIN_HTML_TITLE) && $object->name) $title=$object->ref.' '.$object->name.' - '.$langs->trans("Tasks");
 $help_url="EN:Module_Projects|FR:Module_Projets|ES:M&oacute;dulo_Proyectos";
-llxHeader("",$langs->trans("Tasks"),$help_url);
+llxHeader("",$title,$help_url);
 
 if ($id > 0 || ! empty($ref))
 {
@@ -213,7 +215,7 @@ if ($id > 0 || ! empty($ref))
 	// Define a complementary filter for search of next/prev ref.
 	if (! $user->rights->projet->all->lire)
 	{
-		$projectsListId = $object->getProjectsAuthorizedForUser($user,$mine,0);
+		$projectsListId = $object->getProjectsAuthorizedForUser($user,0,0);
 		$object->next_prev_filter=" rowid in (".(count($projectsListId)?join(',',array_keys($projectsListId)):'0').")";
 	}
 	print $form->showrefnav($object, 'ref', $linkback, 1, 'ref', 'ref', '', $param);
@@ -264,15 +266,16 @@ if ($action == 'create' && $user->rights->projet->creer && (empty($object->third
 {
 	if ($id > 0 || ! empty($ref)) print '<br>';
 
-	print_fiche_titre($langs->trans("NewTask"));
+	print load_fiche_titre($langs->trans("NewTask"), '', 'title_project');
 
 	print '<form action="'.$_SERVER['PHP_SELF'].'" method="POST">';
 	print '<input type="hidden" name="token" value="'.$_SESSION['newtoken'].'">';
 	print '<input type="hidden" name="action" value="createtask">';
 	print '<input type="hidden" name="backtopage" value="'.$backtopage.'">';
-
 	if (! empty($object->id)) print '<input type="hidden" name="id" value="'.$object->id.'">';
 	if (! empty($mode)) print '<input type="hidden" name="mode" value="'.$mode.'">';
+
+	dol_fiche_head('');
 
 	print '<table class="border" width="100%">';
 
@@ -302,17 +305,24 @@ if ($action == 'create' && $user->rights->projet->creer && (empty($object->third
 
 	print '<tr><td>'.$langs->trans("AffectedTo").'</td><td>';
 	$contactsofproject=(! empty($object->id)?$object->getListContactId('internal'):'');
-	$form->select_users($user->id,'userid',0,'',0,'',$contactsofproject);
+	if (count($contactsofproject))
+	{
+		print $form->select_dolusers($user->id, 'userid', 0, '', 0, '', $contactsofproject, 0, 0, 0, '', 0, '', 'maxwidth300');
+	}
+	else
+	{
+		print $langs->trans("NoUserAssignedToTheProject");
+	}
 	print '</td></tr>';
 
 	// Date start
 	print '<tr><td>'.$langs->trans("DateStart").'</td><td>';
-	print $form->select_date(($date_start?$date_start:''),'dateo',1,1,0,'',1,1);
+	print $form->select_date(($date_start?$date_start:''),'dateo',1,1,0,'',1,1,1);
 	print '</td></tr>';
 
 	// Date end
 	print '<tr><td>'.$langs->trans("DateEnd").'</td><td>';
-	print $form->select_date(($date_end?$date_end:-1),'datee',1,1,0,'',1,1);
+	print $form->select_date(($date_end?$date_end:-1),'datee',1,1,0,'',1,1,1);
 	print '</td></tr>';
 
 	// planned workload
@@ -341,7 +351,9 @@ if ($action == 'create' && $user->rights->projet->creer && (empty($object->third
 
 	print '</table>';
 
-	print '<div align="center"><br>';
+	dol_fiche_end();
+
+	print '<div align="center">';
 	print '<input type="submit" class="button" name="add" value="'.$langs->trans("Add").'">';
 	print ' &nbsp; &nbsp; ';
 	print '<input type="submit" class="button" name="cancel" value="'.$langs->trans("Cancel").'">';
@@ -432,7 +444,7 @@ else if ($id > 0 || ! empty($ref))
 	}
 	else
 	{
-		print '<tr><td colspan="9">'.$langs->trans("NoTasks").'</td></tr>';
+		print '<tr '.$bc[false].'><td colspan="9">'.$langs->trans("NoTasks").'</td></tr>';
 	}
 	print "</table>";
 

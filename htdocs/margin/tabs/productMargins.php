@@ -77,36 +77,21 @@ if ($id > 0 || ! empty($ref))
 	 */
 	if ($result > 0)
 	{
-		$head=product_prepare_head($object, $user);
+		$head=product_prepare_head($object);
 		$titre=$langs->trans("CardProduct".$object->type);
-		$picto=($object->type==1?'service':'product');
+		$picto=($object->type== Product::TYPE_SERVICE?'service':'product');
 		dol_fiche_head($head, 'margin', $titre, 0, $picto);
 
-		print '<table class="border" width="100%">';
-
-		// Reference
-		print '<tr>';
-		print '<td width="30%">'.$langs->trans("Ref").'</td><td colspan="3">';
-		print $form->showrefnav($object,'ref','',1,'ref');
-		print '</td>';
-		print '</tr>';
-
-		// Libelle
-		print '<tr><td>'.$langs->trans("Label").'</td><td colspan="3">'.$object->libelle.'</td>';
-		print '</tr>';
-
-		// Status (to sell)
-		print '<tr><td>'.$langs->trans("Status").' ('.$langs->trans("Sell").')</td><td colspan="3">';
-		print $object->getLibStatut(2,0);
-		print '</td></tr>';
-
-		// Status (to buy)
-		print '<tr><td>'.$langs->trans("Status").' ('.$langs->trans("Buy").')</td><td colspan="3">';
-		print $object->getLibStatut(2,1);
-		print '</td></tr>';
+        dol_banner_tab($object, 'ref', '', ($user->societe_id?0:1), 'ref');
+        
+        
+        print '<div class="fichecenter">';
+        
+        print '<div class="underbanner clearboth"></div>';
+        print '<table class="border tableforfield" width="100%">';
 
 		// Total Margin
-		print '<tr><td>'.$langs->trans("TotalMargin").'</td><td colspan="3">';
+		print '<tr><td class="titlefield">'.$langs->trans("TotalMargin").'</td><td colspan="3">';
 		print '<span id="totalMargin"></span>'; // set by jquery (see below)
 		print '</td></tr>';
 
@@ -125,7 +110,11 @@ if ($id > 0 || ! empty($ref))
 		}
 
 		print "</table>";
-		print '</div>';
+		
+        print '</div>';
+        print '<div style="clear:both"></div>';
+		
+		dol_fiche_end();
 
 
         if ($user->rights->facture->lire) {
@@ -259,14 +248,15 @@ if ($id > 0 || ! empty($ref))
     dol_print_error();
 }
 
+print '
+    <script type="text/javascript">
+    $(document).ready(function() {
+        $("#totalMargin").html("'. price($totalMargin, null, null, null, null, $rounding).'");
+        $("#marginRate").html("'.(($marginRate === '')?'n/a':price($marginRate, null, null, null, null, $rounding)."%").'");
+        $("#markRate").html("'.(($markRate === '')?'n/a':price($markRate, null, null, null, null, $rounding)."%").'");
+    });
+    </script>
+';
 
 llxFooter();
 $db->close();
-?>
-<script type="text/javascript">
-$(document).ready(function() {
-	$("#totalMargin").html("<?php echo price($totalMargin, null, null, null, null, $rounding); ?>");
-	$("#marginRate").html("<?php echo (($marginRate === '')?'n/a':price($marginRate, null, null, null, null, $rounding)."%"); ?>");
-	$("#markRate").html("<?php echo (($markRate === '')?'n/a':price($markRate, null, null, null, null, $rounding)."%"); ?>");
-});
-</script>

@@ -1,6 +1,6 @@
 <?php
 /* Copyright (C) 2003		Rodolphe Quiedeville <rodolphe@quiedeville.org>
- * Copyright (C) 2004-2011	Laurent Destailleur  <eldy@users.sourceforge.net>
+ * Copyright (C) 2004-2015	Laurent Destailleur  <eldy@users.sourceforge.net>
  * Copyright (C) 2004		Eric Seigne          <eric.seigne@ryxeo.com>
  * Copyright (C) 2005-2011	Regis Houssin        <regis.houssin@capnetworks.com>
  *
@@ -45,7 +45,7 @@ $pageprev = $page - 1;
 $pagenext = $page + 1;
 if (! $sortorder) $sortorder="DESC";
 if (! $sortfield) $sortfield="d.dated";
-$limit = $conf->liste_limit;
+$limit = GETPOST('limit')?GETPOST('limit','int'):$conf->liste_limit;
 
 
 /*
@@ -91,14 +91,14 @@ if ($result)
 }
 
 
-print_fiche_titre($langs->trans("ExpensesArea"));
+print load_fiche_titre($langs->trans("ExpensesArea"));
 
 
 print '<div class="fichecenter"><div class="fichethirdleft">';
 
 
 // Statistics
-print '<table class="noborder" width="100%">';
+print '<table class="noborder nohover" width="100%">';
 print '<tr class="liste_titre">';
 print '<td colspan="4">'.$langs->trans("Statistics").'</td>';
 print "</tr>\n";
@@ -111,7 +111,7 @@ foreach ($listoftype as $code => $label)
 
 if ($conf->use_javascript_ajax)
 {
-    print '<tr><td align="center" colspan="4">';
+    print '<tr '.$bc[false].'><td align="center" colspan="4">';
     $data=array('series'=>$dataseries);
     dol_print_graph('stats',300,180,$data,1,'pie',1);
     print '</td></tr>';

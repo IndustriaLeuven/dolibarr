@@ -1,10 +1,16 @@
 # Dolibarr language file - en_US - Accounting Expert
-CHARSET=UTF-8
+ACCOUNTING_EXPORT_SEPARATORCSV=Dışaaktarma dosyası için sütun ayırıcısı
+ACCOUNTING_EXPORT_DATE=Dışaaktarma dosyası için tarih biçimi
+ACCOUNTING_EXPORT_PIECE=Parça sayısını dışaaktar
+ACCOUNTING_EXPORT_GLOBAL_ACCOUNT=Genel hesapla birlikte dışaaktar
+ACCOUNTING_EXPORT_LABEL=Etiketi dışaaktar
+ACCOUNTING_EXPORT_AMOUNT=Tutarı dışaaktar
+ACCOUNTING_EXPORT_DEVISE=Cihazı dışaaktar
+Selectformat=Dosya için biçimi seçin
+ACCOUNTING_EXPORT_PREFIX_SPEC=Dosya adı için öneki belirtin
 
 Accounting=Muhasebe
 Globalparameters=Genel parametreler
-Chartofaccounts=Hesap planı
-Fiscalyear=Mali yıllar
 Menuaccount=Muhasebe hesapları
 Menuthirdpartyaccount=Üçüncü parti hesapları
 MenuTools=Araçlar
@@ -20,49 +26,44 @@ Selectmodelcsv=Bir dışaaktarım modeli seç
 Modelcsv_normal=Klasik dışaaktarım
 Modelcsv_CEGID=CEGID Uzmanına yönelik dışaaktarım
 BackToChartofaccounts=Hesap planı cirosu
-Back=Ciro
 
 Definechartofaccounts=Hesap planı tanımla
 Selectchartofaccounts=Hesap planı seç
-Validate=Doğrula
 Addanaccount=Muhasebe hesabı ekle
 AccountAccounting=Muhasebe hesabı
+AccountAccountingSuggest=Accounting account suggest
 Ventilation=Analiz
-ToDispatch=Gönderilecek
-Dispatched=Gönderilmiş
 
+MenuAccountancy=Muhasebe
 CustomersVentilation=Müşteri analizi
-SuppliersVentilation=Tedarikç analizi
-TradeMargin=Ticaret oranı
+SuppliersVentilation=Tedarikçi analizi
+TradeMargin=Ticaret kar oranı
 Reports=Raporlar
 ByCustomerInvoice=Müşteri faturalarına göre
-ByMonth=Aya göre
 NewAccount=Yeni muhasebe hesabı
-Update=Güncelle
-List=Liste
 Create=Oluştur
+CreateMvts=Hareket oluştur
 UpdateAccount=Bir muhasebe hesabının değiştirilmesi
 UpdateMvts=Bir hareketin değiştirilmesi
 WriteBookKeeping=Büyük defter hesap kayıtları
 Bookkeeping=Büyük Defter
-AccountBalanceByMonth=Aylık hesap bakiyesi
+AccountBalance=Hesap bakiyesi
 
 AccountingVentilation=Analiz muhasebesi
 AccountingVentilationSupplier=Tedarikçi hesabı analizi
 AccountingVentilationCustomer=Müşteri hesabı analizi
-Line=Satır
 
-CAHTF=Tedarikçi HT toplam alışı
+CAHTF=Total purchase supplier before tax
 InvoiceLines=Analiz edilecek fatura kalemleri
 InvoiceLinesDone=Analiz edilen fatura kalemleri
-IntoAccount=Muhasebe hesabında
+IntoAccount=Muhasebe hesapları analizi
 
 Ventilate=Analiz
 VentilationAuto=Otomatik analiz
 
 Processing=İşleme
 EndProcessing=İşleme sonu
-AnyLineVentilate=Analiz edilecek herhangi bir kalem
+AnyLineVentilate=Analiz edilecek herhangi bir satır
 SelectedLines=Seçilen satırlar
 Lineofinvoice=Fatura satırı
 VentilatedinAccount=Muhasebe hesabında başarıyla analiz edildi
@@ -76,14 +77,15 @@ ACCOUNTING_LIST_SORT_VENTILATION_DONE=Analiz sayfalarında "Analiz edilmişlerin
 
 AccountLength=Dolibarr'da gösterilen muhasebe hesapları uzunluğu
 AccountLengthDesc=Boşlukların sıfır figürü ile değiştirilmesiyle muhasebe hesap uzunluğunun uydurulmasını sağlayan işlevdir. Bu işlev yalnızca görüntüyü değiştirir, Dolibarr'da kayıtlı muhasebe hesaplarını değiştirmez. Dışaaktarma için bu fonksiyonun belirli yazılımla uyumlu olması gerekir.
+ACCOUNTING_LENGTH_DESCRIPTION=Listelemede ürün & hizmet tanımlaması için yer uzunluğu (En iyi = 50)
+ACCOUNTING_LENGTH_DESCRIPTION_ACCOUNT=Listelemede ürün & hizmet hesap tanımlama formu için yer uzunluğu (En iyi = 50)
 ACCOUNTING_LENGTH_GACCOUNT=Genel hesapların uzunluğu
 ACCOUNTING_LENGTH_AACCOUNT=Üçüncü parti hesaplarının uzunluğu
 
 ACCOUNTING_SELL_JOURNAL=Satış günlüğü
 ACCOUNTING_PURCHASE_JOURNAL=Alış günlüğü
-ACCOUNTING_BANK_JOURNAL=Banka günlüğü
-ACCOUNTING_CASH_JOURNAL=Kasa günlüğü
 ACCOUNTING_MISCELLANEOUS_JOURNAL=Çeşitli günlük
+ACCOUNTING_EXPENSEREPORT_JOURNAL=Rapor günlüğü dışaaktarılsın mı?
 ACCOUNTING_SOCIAL_JOURNAL=Sosyal günlük
 
 ACCOUNTING_ACCOUNT_TRANSFER_CASH=Transfer hesabı
@@ -100,22 +102,16 @@ Docref=Referans
 Numerocompte=Hesap
 Code_tiers=Üçüncü parti
 Labelcompte=Hesap etiketi
-Debit=Borç
-Credit=Alacak
-Amount=Tutar
 Sens=Sens (borsa haberleri yayınlama günlüğü)
 Codejournal=Günlük
+NumPiece=Parça sayısı
 
 DelBookKeeping=Büyük defter kayıtlarını sil
 
-SellsJournal=Satış günlüğü
-PurchasesJournal=Alış günlüğü
 DescSellsJournal=Satış günlüğü
 DescPurchasesJournal=Alış günlüğü
-BankJournal=Banka günlüğü
-DescBankJournal=Nakit dışında her türlü ödemeyi içeren banka günlüğü
-CashJournal=Kasa günlüğü
-DescCashJournal=Nakit ödeme türünü içeren kasa günlüğü
+FinanceJournal=Finance journal
+DescFinanceJournal=Banka hesabından yapılan tüm ödeme türlerini içeren finans günlüğü
 
 CashPayment=Nakit ödeme
 
@@ -138,13 +134,10 @@ Pcgversion=Plan sürümü
 Pcgtype=Hesap sınıfı
 Pcgsubtype=Hesap sınıfı altında
 Accountparent=Hesabın kökü
-Active=Hesap özeti
-
-NewFiscalYear=Yeni mali yıl
 
 DescVentilCustomer=Müşteri faturalarınızın yıllık hesap analizi için buraya danışın
-TotalVente=Toplam ciro HT
-TotalMarge=Toplam satışlar oranı
+TotalVente=Vergi öncesi toplam gelir
+TotalMarge=Toplam satışlar kar oranı
 DescVentilDoneCustomer=Burada müşteri faturaları satırlarına ve onların muhasebe hesaplarının listesine bakın.
 DescVentilTodoCustomer=Bir muhasebe hesabıyla müşteri faturanızın kalemlerini analiz edin
 ChangeAccount=Muhasebe hesabını, hesap tarafından seçilen satırlar için değiştirin:
@@ -156,5 +149,31 @@ DescVentilDoneSupplier=Burada tedarikçi faturaları ve muhasebe hesapları sat�
 ValidateHistory=Otomatikman doğrula
 
 ErrorAccountancyCodeIsAlreadyUse=Hata, kullanıldığı için bu muhasebe hesabını silemezsiniz
-
+MvtNotCorrectlyBalanced=Hareket doğru denkleştirilmemiş. Alacak = %s. Borç = %s
 FicheVentilation=Analiz kartı
+GeneralLedgerIsWritten=İşlemler büyük deftere yazılır
+
+MvtNotCorrectlyBalanced=Hareket doğru denkleştirilmemiş. Alacak = %s. Borç = %s
+
+##Export Journal Feature
+ExportFormat=Dışaktarım biçimi
+Prefixname=Dışaktarım dosyası öneki
+Separate=Dışaaktarım ayırıcısı
+Textframe=Metin değeri çerçevesi
+Headercol=Dosya başlığındaki kolon adı
+Fieldname=Alan Adı
+Headername=Başlıktaki ad
+Type=Alan türü
+Param=Ek parametreler
+EnabledProduct=Ürünlerde
+EnabledTiers=Üçüncü partide
+EnabledVat=KDV nde
+
+## Tools - Init accounting account on product / service
+InitAccountancy=Muhasebe başlangıcı
+InitAccountancyDesc=Bu sayfa, satışlar ve satınalmalar için muhasebe hesabı tanımlanmamış ürünler ve hizmetlere muhasebe hesabı başlatmak üzere kullanılabilir.
+Options=Seçenekler
+OptionModeProductSell=Satış modu
+OptionModeProductBuy=Satınalma modu
+OptionModeProductSellDesc=Satışlar için muhasebe hesabı tanımlanmamış tüm ürünleri göster.
+OptionModeProductBuyDesc=Satınalmalar için muhasebe hesabı tanımlanmamış tüm ürünleri göster.

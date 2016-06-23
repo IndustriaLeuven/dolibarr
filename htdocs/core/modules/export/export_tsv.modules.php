@@ -69,7 +69,7 @@ class ExportTsv extends ModeleExports
 	/**
 	 * getDriverId
 	 *
-	 * @return int
+	 * @return string
 	 */
     function getDriverId()
     {
@@ -226,7 +226,14 @@ class ExportTsv extends ModeleExports
 			if (preg_match('/^\((.*)\)$/i',$newvalue,$reg)) $newvalue=$outputlangs->transnoentities($reg[1]);
 
 			$newvalue=$this->tsv_clean($newvalue,$outputlangs->charset_output);
-
+			
+			if (preg_match('/^Select:/i', $typefield, $reg) && $typefield = substr($typefield, 7))
+			{
+				$array = unserialize($typefield);
+				$array = $array['options'];
+				$newvalue = $array[$newvalue];
+			}
+			
 			fwrite($this->handle,$newvalue.$this->separator);
             $this->col++;
 		}

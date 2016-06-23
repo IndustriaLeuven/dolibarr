@@ -1,6 +1,6 @@
 <?php
 /* Copyright (C) 2003-2006 Rodolphe Quiedeville <rodolphe@quiedeville.org>
- * Copyright (C) 2004-2011 Laurent Destailleur  <eldy@users.sourceforge.net>
+ * Copyright (C) 2004-2016 Laurent Destailleur  <eldy@users.sourceforge.net>
  * Copyright (C) 2005-2009 Regis Houssin        <regis.houssin@capnetworks.com>
  *
  * This program is free software; you can redistribute it and/or modify
@@ -27,6 +27,7 @@ require '../../main.inc.php';
 require_once DOL_DOCUMENT_ROOT.'/product/stock/class/entrepot.class.php';
 
 $langs->load("stocks");
+$langs->load("productbatch");
 
 // Security check
 $result=restrictedArea($user,'stock');
@@ -39,7 +40,7 @@ $result=restrictedArea($user,'stock');
 $help_url='EN:Module_Stocks_En|FR:Module_Stock|ES:M&oacute;dulo_Stocks';
 llxHeader("",$langs->trans("Stocks"),$help_url);
 
-print_fiche_titre($langs->trans("StocksArea"));
+print load_fiche_titre($langs->trans("StocksArea"));
 
 
 //print '<table border="0" width="100%" class="notopnoleftnoright">';
@@ -56,14 +57,13 @@ print '<table class="noborder nohover" width="100%">';
 print "<tr class=\"liste_titre\">";
 print '<td colspan="3">'.$langs->trans("Search").'</td></tr>';
 print "<tr ".$bc[false]."><td>";
-print $langs->trans("Ref").':</td><td><input class="flat" type="text" size="18" name="sref"></td><td rowspan="2"><input type="submit" value="'.$langs->trans("Search").'" class="button"></td></tr>';
-print "<tr ".$bc[false]."><td>".$langs->trans("Other").':</td><td><input type="text" name="sall" class="flat" size="18"></td>';
+print $langs->trans("Warehouse").':</td><td><input class="flat" type="text" size="18" name="sall"></td><td rowspan="2"><input type="submit" value="'.$langs->trans("Search").'" class="button"></td></tr>';
 print "</table></form><br>";
 
 $sql = "SELECT e.label, e.rowid, e.statut";
 $sql.= " FROM ".MAIN_DB_PREFIX."entrepot as e";
 $sql.= " WHERE e.statut in (0,1)";
-$sql.= " AND e.entity = ".$conf->entity;
+$sql.= " AND e.entity IN (".getEntity('stock', 1).")";
 $sql.= $db->order('e.statut','DESC');
 $sql.= $db->plimit(15, 0);
 
@@ -112,13 +112,13 @@ print '</div><div class="fichetwothirdright"><div class="ficheaddleft">';
 $max=10;
 $sql = "SELECT p.rowid, p.label as produit,";
 $sql.= " e.label as stock, e.rowid as entrepot_id,";
-$sql.= " m.value, m.datem";
+$sql.= " m.value as qty, m.datem, m.batch, m.eatby, m.sellby";
 $sql.= " FROM ".MAIN_DB_PREFIX."entrepot as e";
 $sql.= ", ".MAIN_DB_PREFIX."stock_mouvement as m";
 $sql.= ", ".MAIN_DB_PREFIX."product as p";
 $sql.= " WHERE m.fk_product = p.rowid";
 $sql.= " AND m.fk_entrepot = e.rowid";
-$sql.= " AND e.entity = ".$conf->entity;
+$sql.= " AND e.entity IN (".getEntity('stock', 1).")";
 if (empty($conf->global->STOCK_SUPPORTS_SERVICES)) $sql.= " AND p.fk_product_type = 0";
 $sql.= $db->order("datem","DESC");
 $sql.= $db->plimit($max,0);
@@ -133,6 +133,12 @@ if ($resql)
 	print "<tr class=\"liste_titre\">";
 	print '<td>'.$langs->trans("LastMovements",min($num,$max)).'</td>';
 	print '<td>'.$langs->trans("Product").'</td>';
+	if (! empty($conf->productbatch->enabled))
+	{
+		print '<td>'.$langs->trans("Batch").'</td>';
+		print '<td>'.$langs->trans("l_eatby").'</td>';
+		print '<td>'.$langs->trans("l_sellby").'</td>';
+	}
 	print '<td>'.$langs->trans("Warehouse").'</td>';
 	print '<td align="right"><a href="'.DOL_URL_ROOT.'/product/stock/mouvement.php">'.$langs->trans("FullList").'</a></td>';
 	print "</tr>\n";
@@ -148,12 +154,18 @@ if ($resql)
 		print "<td><a href=\"../card.php?id=$objp->rowid\">";
 		print img_object($langs->trans("ShowProduct"),"product").' '.$objp->produit;
 		print "</a></td>\n";
+		if (! empty($conf->productbatch->enabled))
+		{
+			print '<td>'.$objp->batch.'</td>';
+			print '<td>'.dol_print_date($db->jdate($objp->eatby),'day').'</td>';
+			print '<td>'.dol_print_date($db->jdate($objp->sellby),'day').'</td>';
+		}
 		print '<td><a href="card.php?id='.$objp->entrepot_id.'">';
 		print img_object($langs->trans("ShowWarehouse"),"stock").' '.$objp->stock;
 		print "</a></td>\n";
 		print '<td align="right">';
-		if ($objp->value > 0) print '+';
-		print $objp->value.'</td>';
+		if ($objp->qty > 0) print '+';
+		print $objp->qty.'</td>';
 		print "</tr>\n";
 		$i++;
 	}

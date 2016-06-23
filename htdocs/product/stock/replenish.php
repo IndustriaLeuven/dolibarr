@@ -1,6 +1,6 @@
 <?php
 /* Copyright (C) 2013		Cédric Salvador		<csalvador@gpcsolutions.fr>
- * Copyright (C) 2013-2014	Laurent Destaileur	<ely@users.sourceforge.net>
+ * Copyright (C) 2013-2015	Laurent Destaileur	<ely@users.sourceforge.net>
  * Copyright (C) 2014		Regis Houssin		<regis.houssin@capnetworks.com>
  *
  * This program is free software: you can redistribute it and/or modify
@@ -57,6 +57,9 @@ $texte = '';
 $sortfield = GETPOST('sortfield','alpha');
 $sortorder = GETPOST('sortorder','alpha');
 $page = GETPOST('page','int');
+if ($page == -1) { $page = 0; }
+$limit = GETPOST('limit')?GETPOST('limit','int'):$conf->liste_limit;
+$offset = $limit * $page ;
 
 if (!$sortfield) {
     $sortfield = 'p.ref';
@@ -65,11 +68,6 @@ if (!$sortfield) {
 if (!$sortorder) {
     $sortorder = 'ASC';
 }
-$limit = $conf->liste_limit;
-$offset = $limit * $page ;
-
-// Force limit to no (currently solution to solve loosing selection when using pagination. No pagination on this page)
-$limit = 0;
 
 
 /*
@@ -148,29 +146,66 @@ if ($action == 'order' && isset($_POST['valid']))
         foreach ($suppliers as $supplier)
         {
             $order = new CommandeFournisseur($db);
-            $order->socid = $suppliersid[$i];
-            //trick to know which orders have been generated this way
-            $order->source = 42;
-            foreach ($supplier['lines'] as $line) {
-                $order->lines[] = $line;
+            // Check if an order for the supplier exists
+            $sql = "SELECT rowid FROM ".MAIN_DB_PREFIX."commande_fournisseur";
+            $sql.= " WHERE fk_soc = ".$suppliersid[$i];
+            $sql.= " AND source = 42 AND fk_statut = 0";
+            $sql.= " ORDER BY date_creation DESC";
+            $resql = $db->query($sql);
+            if($resql && $db->num_rows($resql) > 0) {
+                $obj = $db->fetch_object($resql);
+                $order->fetch($obj->rowid);
+                foreach ($supplier['lines'] as $line) {
+                    $result = $order->addline(
+                        $line->desc,
+                        $line->subprice,
+                        $line->qty,
+                        $line->tva_tx,
+                        $line->localtax1_tx,
+                        $line->localtax2_tx,
+                        $line->fk_product,
+                        0,
+                        $line->ref_fourn,
+                        $line->remise_percent,
+                        'HT',
+                        0,
+                        $line->info_bits
+                    );
+                }
+                if ($result < 0) {
+                    $fail++;
+                    $msg = $langs->trans('OrderFail') . "&nbsp;:&nbsp;";
+                    $msg .= $order->error;
+                    setEventMessages($msg, null, 'errors');
+                } else {
+                    $id = $result;
+                }
+            } else {
+                $order->socid = $suppliersid[$i];
+                $order->fetch_thirdparty();
+                //trick to know which orders have been generated this way
+                $order->source = 42;
+                foreach ($supplier['lines'] as $line) {
+                    $order->lines[] = $line;
+                }
+                $order->cond_reglement_id = $order->thirdparty->cond_reglement_supplier_id;
+                $order->mode_reglement_id = $order->thirdparty->mode_reglement_supplier_id;
+                $id = $order->create($user);
+                if ($id < 0) {
+                    $fail++;
+                    $msg = $langs->trans('OrderFail') . "&nbsp;:&nbsp;";
+                    $msg .= $order->error;
+                    setEventMessages($msg, null, 'errors');
+                }
+                $i++;
             }
-            $order->cond_reglement_id = 0;
-            $order->mode_reglement_id = 0;
-            $id = $order->create($user);
-            if ($id < 0) {
-                $fail++;
-                $msg = $langs->trans('OrderFail') . "&nbsp;:&nbsp;";
-                $msg .= $order->error;
-                setEventMessage($msg, 'errors');
-            }
-            $i++;
         }
 
         if (! $fail && $id)
         {
         	$db->commit();
 
-            setEventMessage($langs->trans('OrderCreated'), 'mesgs');
+            setEventMessages($langs->trans('OrderCreated'), null, 'mesgs');
             header('Location: replenishorders.php');
             exit;
         }
@@ -181,7 +216,7 @@ if ($action == 'order' && isset($_POST['valid']))
     }
     if ($box == 0)
     {
-        setEventMessage($langs->trans('SelectProductWithNotNullQty'), 'warnings');
+        setEventMessages($langs->trans('SelectProductWithNotNullQty'), null, 'warnings');
     }
 }
 
@@ -258,7 +293,7 @@ if ($usevirtualstock)
 	$sqlCommandesCli = "(SELECT ".$db->ifsql("SUM(cd.qty) IS NULL", "0", "SUM(cd.qty)")." as qty";
 	$sqlCommandesCli.= " FROM ".MAIN_DB_PREFIX."commandedet as cd";
 	$sqlCommandesCli.= " LEFT JOIN ".MAIN_DB_PREFIX."commande as c ON (c.rowid = cd.fk_commande)";
-	$sqlCommandesCli.= " WHERE c.entity = ".$conf->entity;
+	$sqlCommandesCli.= " WHERE c.entity IN (".getEntity('order', 1).")";
 	$sqlCommandesCli.= " AND cd.fk_product = p.rowid";
 	$sqlCommandesCli.= " AND c.fk_statut IN (1,2))";
 
@@ -267,7 +302,7 @@ if ($usevirtualstock)
 	$sqlExpeditionsCli.= " LEFT JOIN ".MAIN_DB_PREFIX."expeditiondet as ed ON (ed.fk_expedition = e.rowid)";
 	$sqlExpeditionsCli.= " LEFT JOIN ".MAIN_DB_PREFIX."commandedet as cd ON (cd.rowid = ed.fk_origin_line)";
 	$sqlExpeditionsCli.= " LEFT JOIN ".MAIN_DB_PREFIX."commande as c ON (c.rowid = cd.fk_commande)";
-	$sqlExpeditionsCli.= " WHERE e.entity = ".$conf->entity;
+	$sqlExpeditionsCli.= " WHERE e.entity IN (".getEntity('expedition', 1).")";
 	$sqlExpeditionsCli.= " AND cd.fk_product = p.rowid";
 	$sqlExpeditionsCli.= " AND c.fk_statut IN (1,2))";
 
@@ -275,14 +310,14 @@ if ($usevirtualstock)
 	$sqlCommandesFourn.= " FROM ".MAIN_DB_PREFIX."commande_fournisseurdet as cd";
 	$sqlCommandesFourn.= ", ".MAIN_DB_PREFIX."commande_fournisseur as c";
 	$sqlCommandesFourn.= " WHERE c.rowid = cd.fk_commande";
-	$sqlCommandesFourn.= " AND c.entity = ".$conf->entity;
+	$sqlCommandesFourn.= " AND c.entity IN (".getEntity('commande_fournisseur', 1).")";
 	$sqlCommandesFourn.= " AND cd.fk_product = p.rowid";
 	$sqlCommandesFourn.= " AND c.fk_statut IN (3,4))";
 
 	$sqlReceptionFourn = "(SELECT ".$db->ifsql("SUM(fd.qty) IS NULL", "0", "SUM(fd.qty)")." as qty";
 	$sqlReceptionFourn.= " FROM ".MAIN_DB_PREFIX."commande_fournisseur as cf";
 	$sqlReceptionFourn.= " LEFT JOIN ".MAIN_DB_PREFIX."commande_fournisseur_dispatch as fd ON (fd.fk_commande = cf.rowid)";
-	$sqlReceptionFourn.= " WHERE cf.entity = ".$conf->entity;
+	$sqlReceptionFourn.= " WHERE cf.entity IN (".getEntity('commande_fournisseur', 1).")";
 	$sqlReceptionFourn.= " AND fd.fk_product = p.rowid";
 	$sqlReceptionFourn.= " AND cf.fk_statut IN (3,4))";
 
@@ -295,7 +330,7 @@ if ($usevirtualstock)
 	{
 		$sql.= ' AND (p.seuil_stock_alerte > 0 AND (p.seuil_stock_alerte > SUM('.$db->ifsql("s.reel IS NULL", "0", "s.reel").')';
 		$sql.= ' - ('.$sqlCommandesCli.' - '.$sqlExpeditionsCli.') + ('.$sqlCommandesFourn.' - '.$sqlReceptionFourn.')))';
-		$alertchecked = 'checked="checked"';
+		$alertchecked = 'checked';
 	}
 } else {
 	$sql.= ' HAVING ((p.desiredstock > 0 AND (p.desiredstock > SUM('.$db->ifsql("s.reel IS NULL", "0", "s.reel").')))';
@@ -304,12 +339,12 @@ if ($usevirtualstock)
 	if ($salert == 'on')	// Option to see when stock is lower than alert
 	{
 		$sql.= ' AND (p.seuil_stock_alerte > 0 AND (p.seuil_stock_alerte > SUM('.$db->ifsql("s.reel IS NULL", "0", "s.reel").')))';
-		$alertchecked = 'checked="checked"';
+		$alertchecked = 'checked';
 	}
 }
 
 $sql.= $db->order($sortfield,$sortorder);
-$sql.= $db->plimit($limit, $offset);
+$sql.= $db->plimit($limit + 1, $offset);
 
 //print $sql;
 $resql = $db->query($sql);
@@ -337,6 +372,8 @@ $head[1][1] = $langs->trans("ReplenishmentOrders");
 $head[1][2] = 'replenishorders';
 
 
+print load_fiche_titre($langs->trans('Replenishment'), '', 'title_generic.png');
+
 
 print '<form action="'.$_SERVER["PHP_SELF"].'" method="POST" name="formulaire">'.
 	'<input type="hidden" name="token" value="' .$_SESSION['newtoken'] . '">'.
@@ -347,7 +384,7 @@ print '<form action="'.$_SERVER["PHP_SELF"].'" method="POST" name="formulaire">'
 	'<input type="hidden" name="action" value="order">'.
 	'<input type="hidden" name="mode" value="' . $mode . '">';
 
-dol_fiche_head($head, 'replenish', $langs->trans('Replenishment'), 0, 'stock');
+dol_fiche_head($head, 'replenish', '', 0, '');
 
 print $langs->trans("ReplenishmentStatusDesc").'<br>'."\n";
 if ($usevirtualstock == 1)
@@ -410,8 +447,8 @@ if ($usevirtualstock == 0) $stocklabel = $langs->trans('PhysicalStock');
 
 
 // Lines of title
-print '<tr class="liste_titre"><td><input type="checkbox" onClick="toggle(this)" /></td>';
-
+print '<tr class="liste_titre">';
+print_liste_field_titre('<input type="checkbox" onClick="toggle(this)" />', $_SERVER["PHP_SELF"], '');
 print_liste_field_titre($langs->trans('Ref'), $_SERVER["PHP_SELF"], 'p.ref', $param, '', '', $sortfield, $sortorder);
 print_liste_field_titre($langs->trans('Label'), $_SERVER["PHP_SELF"], 'p.label', $param, '', '', $sortfield, $sortorder);
 if (!empty($conf->service->enabled) && $type == 1) print_liste_field_titre($langs->trans('Duration'), $_SERVER["PHP_SELF"], 'p.duration', $param, '', 'align="center"', $sortfield, $sortorder);
@@ -421,8 +458,7 @@ print_liste_field_titre($stocklabel, $_SERVER["PHP_SELF"], 'stock_physique', $pa
 print_liste_field_titre($langs->trans('Ordered'), $_SERVER["PHP_SELF"], '', $param, '', 'align="right"', $sortfield, $sortorder);
 print_liste_field_titre($langs->trans('StockToBuy'), $_SERVER["PHP_SELF"], '', $param, '', 'align="right"', $sortfield, $sortorder);
 print_liste_field_titre($langs->trans('Supplier'), $_SERVER["PHP_SELF"], '', $param, '', 'align="right"', $sortfield, $sortorder);
-
-print '</tr>';
+print "</tr>\n";
 
 // Lignes des champs de filtre
 print '<tr class="liste_titre">'.
@@ -499,17 +535,20 @@ while ($i < ($limit ? min($num, $limit) : $num))
 		//virtual stock to compute the stock to buy value
 		$stocktobuy = max(max($objp->desiredstock, $objp->alertstock) - $stock - $ordered, 0);
 		$disabled = '';
-		if($ordered > 0) {
-			$compare = $usevirtualstock ? $stock : $stock + $ordered;
-			if($compare >= $objp->desiredstock) {
+		if ($ordered > 0)
+		{
+			$stockforcompare = $usevirtualstock ? $stock : $stock + $ordered;
+			if ($stockforcompare >= $objp->desiredstock)
+			{
 				$picto = img_picto('', './img/yes', '', 1);
-				$disabled = 'disabled="disabled"';
+				$disabled = 'disabled';
 			}
 			else {
 				$picto = img_picto('', './img/no', '', 1);
 			}
 		} else {
-			$picto = img_picto('', './img/no', '', 1);
+			//$picto = img_help('',$langs->trans("NoPendingReceptionOnSupplierOrder"));
+			$picto = img_picto($langs->trans("NoPendingReceptionOnSupplierOrder"), './img/no', '', 1);
 		}
 
 		print '<tr '.$bc[$var].'>';

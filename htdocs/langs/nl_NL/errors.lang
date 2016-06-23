@@ -3,8 +3,6 @@
 # No errors
 NoErrorCommitIsDone=Geen fout, wij bevestigen
 # Errors
-Error=Fout
-Errors=Fouten
 ErrorButCommitIsDone=Fouten gevonden maar we valideren toch
 ErrorBadEMail=Ongeldige e-mail %s
 ErrorBadUrl=Ongeldige Url %s
@@ -63,9 +61,9 @@ ErrorSizeTooLongForVarcharType=Grootte te lang voor string type (%s tekens maxim
 ErrorNoValueForSelectType=Vul waarde in voor selectielijst
 ErrorNoValueForCheckBoxType=Vul waarde in voor checkbox lijst
 ErrorNoValueForRadioType=Vul waarde in voor knoppen lijst
-ErrorBadFormatValueList=The list value cannot have more than one come : <u>%s</u>, but need at least one: llave,valores
+ErrorBadFormatValueList=The list value cannot have more than one comma: <u>%s</u>, but need at least one: key,value
 ErrorFieldCanNotContainSpecialCharacters=Veld <b>%s</b> mag geen speciale tekens bevat.
-ErrorFieldCanNotContainSpecialNorUpperCharacters=Veld <b>%s</b> mag geen speciale tekens bevatten, noch hoofdletters.
+ErrorFieldCanNotContainSpecialNorUpperCharacters=Field <b>%s</b> must not contain special characters, nor upper case characters and cannot contain only numbers.
 ErrorNoAccountancyModuleLoaded=Geen boekhoudingsmodule geactiveerd
 ErrorExportDuplicateProfil=Deze profile naam bestaat al voor deze export set.
 ErrorLDAPSetupNotComplete=De Dolibarr-LDAP installatie is niet compleet.
@@ -79,7 +77,7 @@ ErrorModuleRequireJavascript=Javascript dient niet uitgeschakeld te zijn voor de
 ErrorPasswordsMustMatch=De twee ingevoerde wachtwoorden komen niet overeen.
 ErrorContactEMail=Er is een technische fout opgetreden. Neemt u alstublieft contact op met de beheerder via het e-mailadres <b>%s</b> en vermeld de volgende foutcode <b>%s</b> in uw bericht, of nog beter voeg een schermafbeelding van de pagina toe.
 ErrorWrongValueForField=Foutiefe waarde voor het veld nummer <b>%s</b> (waarde <b>%s</b> voldoet niet aan de reguliere expressieregel <b>%s</b>)
-ErrorFieldValueNotIn=Wrong value for field number <b>%s</b> (value '<b>%s</b>' is not a value available into field <b>%s</b> of table <b>%s</b> = <b>%s</b>)
+ErrorFieldValueNotIn=Wrong value for field number <b>%s</b> (value '<b>%s</b>' is not a value available into field <b>%s</b> of table <b>%s</b>)
 ErrorFieldRefNotIn=Verkeerde waarde voor veldnummer <b>%s</b> (waarde <b>'%s'</b> is geen <b>%s</b> bestaande ref)
 ErrorsOnXLines=Fouten op bronregels <b>%s</b>
 ErrorFileIsInfectedWithAVirus=Het antivirusprogramma kon dit bestand niet valideren (het zou met een virus geïnfecteerd kunnen zijn)
@@ -100,7 +98,7 @@ ErrorProdIdAlreadyExist=%s is toegewezen aan een derde
 ErrorFailedToSendPassword=Mislukt om het wachtwoord te sturen
 ErrorFailedToLoadRSSFile=Niet in slaagt om RSS feed. Probeer een constante MAIN_SIMPLEXMLLOAD_DEBUG toe te voegen als foutmeldingen niet voldoende informatie.
 ErrorPasswordDiffers=Wachtwoorden verschillen, geef deze a.u.b opnieuw op.
-ErrorForbidden=Toegang geweigerd. <br>Je probeert toegang tot een pagina, scherm of functie te krijgen zonder een geverifieerde sessie, of zonder rechten voor uw gebruikersaccount.
+ErrorForbidden=Access denied.<br>You try to access to a page, area or feature of a disabled module or without being in an authenticated session or that is not allowed to your user.
 ErrorForbidden2=Toestemming voor deze aanmelding kan worden ingesteld door de Dolibarr-beheerder vanaf het menu %s -> %s.
 ErrorForbidden3=Het lijkt erop dat Dolibarr niet wordt gebruikt met een geverifieerde sessie. Kijk eens naar de Dolibarr installatiedocumentatie om te weten hoe het beheer van verificaties (htaccess, mod_auth of andere) werkt.
 ErrorNoImagickReadimage=Functie imagick_readimage is niet gevonden in deze PHP installatie. Er kunnen geen voorbeelden gemaakt worden. Beheerders kunnen dit tabblad uitschakelen vanaf het menu Home->Instellingen->Scherm.
@@ -170,8 +168,15 @@ ErrorGlobalVariableUpdater4=SOAP client failed with error '%s'
 ErrorGlobalVariableUpdater5=No global variable selected
 ErrorFieldMustBeANumeric=Field <b>%s</b> must be a numeric value
 ErrorFieldMustBeAnInteger=Field <b>%s</b> must be an integer
+ErrorMandatoryParametersNotProvided=Mandatory parameter(s) not provided
+ErrorOppStatusRequiredIfAmount=You set an estimated amount for this opportunity/lead. So you must also enter its status
+ErrorBadDefinitionOfMenuArrayInModuleDescriptor=Bad Definition Of Menu Array In Module Descriptor (bad value for key fk_menu)
+ErrorSavingChanges=An error has ocurred when saving the changes
+ErrorWarehouseRequiredIntoShipmentLine=Warehouse is required on the line to ship
+ErrorFileMustHaveFormat=File must have format %s
 
 # Warnings
+WarningPasswordSetWithNoAccount=A password was set for this member. However, no user account was created. So this password is stored but can't be used to login to Dolibarr. It may be used by an external module/interface but if you don't need to define any login nor password for a member, you can disable option "Manage a login for each member" from Member module setup. If you need to manage a login but don't need any password, you can keep this field empty to avoid this warning. Note: Email can also be used as a login if the member is linked to a user.
 WarningMandatorySetupNotComplete=Verplichte setup parameters zijn nog niet gedefinieerd
 WarningSafeModeOnCheckExecDir=Waarschuwing, de instelling <b>safe_mode</b> van PHP staat aan daarom moet het commando opgeslagen worden in een map die gedeclareerd is door de PHP instelling <b>safe_mode_exec_dir.</b>
 WarningAllowUrlFopenMustBeOn=De PHP-instelling <b>allow_url_fopen</b> moet ingesteld zijn op <b>aan</b> in het <b>php.ini</b> bestand, voordat deze module volledig werkt. U dient dit bestand handmatig wijzigen.
@@ -189,4 +194,5 @@ WarningClickToDialUserSetupNotComplete=Setup of ClickToDial information for your
 WarningNotRelevant=Irrelevant operation for this dataset
 WarningFeatureDisabledWithDisplayOptimizedForBlindNoJs=Feature disabled when display setup is optimized for blind person or text browsers.
 WarningPaymentDateLowerThanInvoiceDate=Payment date (%s) is earlier than invoice date (%s) for invoice %s.
-WarningTooManyDataPleaseUseMoreFilters=Too many data. Please use more filters
+WarningTooManyDataPleaseUseMoreFilters=Too many data (more than %s lines). Please use more filters or set the constant %s to a higher limit.
+WarningSomeLinesWithNullHourlyRate=Some times were recorded by users when their hourly rate was not defined. A value of 0 was used but this may result in wrong valuation of time spent.

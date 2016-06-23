@@ -45,7 +45,8 @@ class modCashDesk extends DolibarrModules
 		// Key text used to identify module (for permission, menus, etc...)
 		$this->rights_class = 'cashdesk';
 
-		$this->family = "products";
+		$this->family = "portal";
+		$this->module_position = 10;
 		// Module label (no space allowed), used if translation string 'ModuleXXXName' not found (where XXX is value of numeric property 'numero' of module)
 		$this->name = preg_replace('/^mod/i','',get_class($this));
 		$this->description = "CashDesk module";
@@ -70,7 +71,7 @@ class modCashDesk extends DolibarrModules
 		$this->need_dolibarr_version = array(2,4);	// Minimum version of Dolibarr required by module
 		$this->langfiles = array("cashdesk");
 
-		// Constantes
+		// Constants
 		$this->const = array();
 
 		// Boxes
@@ -139,20 +140,4 @@ class modCashDesk extends DolibarrModules
 
     	return $this->_init($sql,$options);
   	}
-
-    /**
-     *  Function called when module is disabled.
-     *  Remove from database constants, boxes and permissions from Dolibarr database.
-     *  Data directories are not deleted.
-     *
-     *  @param	string	$options	Options
-     *  @return int             	1 if OK, 0 if KO
-     */
-  	function remove($options='')
-	{
-    	$sql = array();
-
-    	return $this->_remove($sql,$options);
-  	}
-
 }

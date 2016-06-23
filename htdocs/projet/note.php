@@ -36,12 +36,8 @@ $mine = $_REQUEST['mode']=='mine' ? 1 : 0;
 //if (! $user->rights->projet->all->lire) $mine=1;	// Special for projects
 
 $object = new Project($db);
-if ($id > 0 || ! empty($ref))
-{
-    $object->fetch($id,$ref);
-    $object->fetch_thirdparty();
-    $id=$object->id;
-}
+
+include DOL_DOCUMENT_ROOT.'/core/actions_fetchobject.inc.php';  // Must be include, not include_once
 
 // Security check
 $socid=0;
@@ -62,8 +58,10 @@ include DOL_DOCUMENT_ROOT.'/core/actions_setnotes.inc.php';	// Must be include, 
  * View
  */
 
+$title=$langs->trans("Project").' - '.$langs->trans("Note").' - '.$object->ref.' '.$object->name;
+if (! empty($conf->global->MAIN_HTML_TITLE) && preg_match('/projectnameonly/',$conf->global->MAIN_HTML_TITLE) && $object->name) $title=$object->ref.' '.$object->name.' - '.$langs->trans("Note");
 $help_url="EN:Module_Projects|FR:Module_Projets|ES:M&oacute;dulo_Proyectos";
-llxHeader("",$langs->trans("Project"),$help_url);
+llxHeader("",$title,$help_url);
 
 $form = new Form($db);
 $userstatic=new User($db);
@@ -90,7 +88,7 @@ if ($id > 0 || ! empty($ref))
 	// Define a complementary filter for search of next/prev ref.
 	if (! $user->rights->projet->all->lire)
 	{
-		$projectsListId = $object->getProjectsAuthorizedForUser($user,$mine,0);
+		$projectsListId = $object->getProjectsAuthorizedForUser($user,0,0);
 		$object->next_prev_filter=" rowid in (".(count($projectsListId)?join(',',array_keys($projectsListId)):'0').")";
 	}
 	print $form->showrefnav($object, 'ref', $linkback, 1, 'ref', 'ref');
@@ -131,7 +129,7 @@ if ($id > 0 || ! empty($ref))
 	$colwidth=30;
 	include DOL_DOCUMENT_ROOT.'/core/tpl/notes.tpl.php';
 
-	dol_fiche_end();;
+	dol_fiche_end();
 }
 
 llxFooter();

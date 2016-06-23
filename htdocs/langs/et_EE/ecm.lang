@@ -1,5 +1,4 @@
 # Dolibarr language file - Source file is en_US - ecm
-MenuECM=Dokumendid
 DocsMine=Minu dokumendid
 DocsGenerated=Loodud dokumendid
 DocsElements=Elementide dokumendid
@@ -35,7 +34,7 @@ ECMSearchByEntity=Otsi objekti järgi
 ECMSectionOfDocuments=Dokumentide kaustad
 ECMTypeManual=Käsitsi
 ECMTypeAuto=Automaatne
-ECMDocsBySocialContributions=Sotsiaalmaksudega seotud dokumendid
+ECMDocsBySocialContributions=Documents linked to social or fiscal taxes
 ECMDocsByThirdParties=Kolmandate isikutega seotud dokumendid
 ECMDocsByProposals=Pakkumistega seotud dokumendid
 ECMDocsByOrders=Müügitellimustega seotud dokumendid

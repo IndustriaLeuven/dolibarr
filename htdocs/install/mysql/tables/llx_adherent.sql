@@ -35,6 +35,7 @@ create table llx_adherent
   firstname        varchar(50),
   login            varchar(50),          -- login
   pass             varchar(50),          -- password
+  pass_crypted     varchar(128),
   fk_adherent_type integer NOT NULL,
   morphy           varchar(3) NOT NULL, -- personne morale / personne physique
   societe          varchar(128),			-- company name (should be same lenght than societe.name)
@@ -54,7 +55,8 @@ create table llx_adherent
   statut           smallint NOT NULL DEFAULT 0,
   public           smallint NOT NULL DEFAULT 0, -- certain champ de la fiche sont ils public ou pas ?
   datefin          datetime,  -- date de fin de validite de la cotisation
-  note             text,
+  note_private     text DEFAULT NULL,
+  note_public      text DEFAULT NULL,
   datevalid        datetime,  -- date de validation
   datec            datetime,  -- date de creation
   tms              timestamp, -- date de modification

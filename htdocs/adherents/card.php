@@ -4,7 +4,8 @@
  * Copyright (C) 2004-2012 Laurent Destailleur  <eldy@users.sourceforge.net>
  * Copyright (C) 2005-2012 Regis Houssin        <regis.houssin@capnetworks.com>
  * Copyright (C) 2012      Marcos García        <marcosgdf@gmail.com>
- * Copyright (C) 2012-2013 Philippe Grand       <philippe.grand@atoo-net.com>
+ * Copyright (C) 2012-2015 Philippe Grand       <philippe.grand@atoo-net.com>
+ * Copyright (C) 2015      Alexandre Spangaro   <aspangaro.dolibarr@gmail.com>
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -33,9 +34,10 @@ require_once DOL_DOCUMENT_ROOT.'/core/lib/images.lib.php';
 require_once DOL_DOCUMENT_ROOT.'/core/lib/functions2.lib.php';
 require_once DOL_DOCUMENT_ROOT.'/adherents/class/adherent.class.php';
 require_once DOL_DOCUMENT_ROOT.'/adherents/class/adherent_type.class.php';
-require_once DOL_DOCUMENT_ROOT.'/core/class/extrafields.class.php';
 require_once DOL_DOCUMENT_ROOT.'/adherents/class/cotisation.class.php';
+require_once DOL_DOCUMENT_ROOT.'/categories/class/categorie.class.php';
 require_once DOL_DOCUMENT_ROOT.'/compta/bank/class/account.class.php';
+require_once DOL_DOCUMENT_ROOT.'/core/class/extrafields.class.php';
 require_once DOL_DOCUMENT_ROOT.'/core/class/html.formcompany.class.php';
 
 $langs->load("companies");
@@ -45,6 +47,7 @@ $langs->load("users");
 $langs->load('other');
 
 $action=GETPOST('action','alpha');
+$cancel=GETPOST('cancel');
 $backtopage=GETPOST('backtopage','alpha');
 $confirm=GETPOST('confirm','alpha');
 $rowid=GETPOST('rowid','int');
@@ -113,7 +116,8 @@ $hookmanager->initHooks(array('membercard','globalcard'));
 
 /*
  * 	Actions
-*/
+ */
+if ($cancel) $action='';
 
 $parameters=array('rowid'=>$rowid, 'objcanvas'=>$objcanvas);
 $reshook=$hookmanager->executeHooks('doActions',$parameters,$object,$action);    // Note that $action and $object may have been modified by some hooks
@@ -129,7 +133,7 @@ if (empty($reshook))
 			if ($userid != $user->id && $userid != $object->user_id)
 			{
 				$error++;
-				setEventMessage($langs->trans("ErrorUserPermissionAllowsToLinksToItselfOnly"), 'errors');
+				setEventMessages($langs->trans("ErrorUserPermissionAllowsToLinksToItselfOnly"), null, 'errors');
 			}
 		}
 
@@ -165,7 +169,7 @@ if (empty($reshook))
 						$thirdparty=new Societe($db);
 						$thirdparty->fetch($socid);
 						$error++;
-						setEventMessage($langs->trans("ErrorMemberIsAlreadyLinkedToThisThirdParty",$othermember->getFullName($langs),$othermember->login,$thirdparty->name), 'errors');
+						setEventMessages($langs->trans("ErrorMemberIsAlreadyLinkedToThisThirdParty",$othermember->getFullName($langs),$othermember->login,$thirdparty->name), null, 'errors');
 					}
 				}
 
@@ -191,12 +195,12 @@ if (empty($reshook))
 			if ($result < 0)
 			{
 				$langs->load("errors");
-				setEventMessage($langs->trans($nuser->error), 'errors');
+				setEventMessages($langs->trans($nuser->error), null, 'errors');
 			}
 		}
 		else
 		{
-			setEventMessage($object->error, 'errors');
+			setEventMessages($object->errors, $object->error, 'errors');
 		}
 	}
 
@@ -212,13 +216,13 @@ if (empty($reshook))
 			if ($result < 0)
 			{
 				$langs->load("errors");
-				setEventMessage($langs->trans($company->error), 'errors');
-				setEventMessage($company->errors, 'errors');
+				setEventMessages($langs->trans($company->error), null, 'errors');
+				setEventMessages($company->error, $company->errors, 'errors');
 			}
 		}
 		else
 		{
-			setEventMessage($object->error, 'errors');
+			setEventMessages($object->error, $object->errors, 'errors');
 		}
 	}
 
@@ -232,11 +236,11 @@ if (empty($reshook))
 			$result=$object->send_an_email($langs->transnoentitiesnoconv("ThisIsContentOfYourCard")."\n\n%INFOS%\n\n",$langs->transnoentitiesnoconv("CardContent"));
 
 			$langs->load("mails");
-			setEventMessage($langs->trans("MailSuccessfulySent", $from, $object->email));
+			setEventMessages($langs->trans("MailSuccessfulySent", $from, $object->email), null, 'mesgs');
 		}
 	}
 
-	if ($action == 'update' && ! $_POST["cancel"] && $user->rights->adherent->creer)
+	if ($action == 'update' && ! $cancel && $user->rights->adherent->creer)
 	{
 		require_once DOL_DOCUMENT_ROOT.'/core/lib/files.lib.php';
 
@@ -249,22 +253,22 @@ if (empty($reshook))
 		}
 		$lastname=$_POST["lastname"];
 		$firstname=$_POST["firstname"];
-		$morphy=$morphy=$_POST["morphy"];;
+		$morphy=$morphy=$_POST["morphy"];
 		if ($morphy != 'mor' && empty($lastname)) {
 			$error++;
 			$langs->load("errors");
-			setEventMessage($langs->trans("ErrorFieldRequired",$langs->transnoentities("Lastname")), 'errors');
+			setEventMessages($langs->trans("ErrorFieldRequired", $langs->transnoentities("Lastname")), null, 'errors');
 		}
 		if ($morphy != 'mor' && (!isset($firstname) || $firstname=='')) {
 			$error++;
 			$langs->load("errors");
-			setEventMessage($langs->trans("ErrorFieldRequired",$langs->transnoentities("Firstname")), 'errors');
+			setEventMessages($langs->trans("ErrorFieldRequired", $langs->transnoentities("Firstname")), null, 'errors');
 		}
 
 		// Create new object
 		if ($result > 0 && ! $error)
 		{
-			$object->oldcopy=dol_clone($object);
+			$object->oldcopy = clone $object;
 
 			// Change values
 			$object->civility_id = trim($_POST["civility_id"]);
@@ -319,18 +323,22 @@ if (empty($reshook))
 			}
 
 			$result=$object->update($user,0,$nosyncuser,$nosyncuserpass);
+
 			if ($result >= 0 && ! count($object->errors))
 			{
+				$categories = GETPOST('memcats', 'array');
+				$object->setCategories($categories);
+
 				// Logo/Photo save
-				$dir= $conf->adherent->dir_output . '/' . get_exdir($object->id,2,0,1).'/photos';
+				$dir= $conf->adherent->dir_output . '/' . get_exdir($object->id,2,0,1,$object,'member').'/photos';
 				$file_OK = is_uploaded_file($_FILES['photo']['tmp_name']);
 				if ($file_OK)
 				{
 					if (GETPOST('deletephoto'))
 					{
 						require_once DOL_DOCUMENT_ROOT . '/core/lib/files.lib.php';
-						$fileimg=$conf->adherent->dir_output.'/'.get_exdir($object->id,2,0,1).'/photos/'.$object->photo;
-						$dirthumbs=$conf->adherent->dir_output.'/'.get_exdir($object->id,2,0,1).'/photos/thumbs';
+						$fileimg=$conf->adherent->dir_output.'/'.get_exdir($object->id,2,0,1,$object,'member').'/photos/'.$object->photo;
+						$dirthumbs=$conf->adherent->dir_output.'/'.get_exdir($object->id,2,0,1,$object,'member').'/photos/thumbs';
 						dol_delete_file($fileimg);
 						dol_delete_dir_recursive($dirthumbs);
 					}
@@ -344,7 +352,7 @@ if (empty($reshook))
 							$newfile=$dir.'/'.dol_sanitizeFileName($_FILES['photo']['name']);
 							if (! dol_move_uploaded_file($_FILES['photo']['tmp_name'],$newfile,1,0,$_FILES['photo']['error']) > 0)
 							{
-								setEventMessage($langs->trans("ErrorFailedToSaveFile"), 'errors');
+								setEventMessages($langs->trans("ErrorFailedToSaveFile"), null, 'errors');
 							}
 							else
 							{
@@ -360,7 +368,7 @@ if (empty($reshook))
 					}
 					else
 					{
-						setEventMessage("ErrorBadImageFormat", 'errors');
+						setEventMessages("ErrorBadImageFormat", null, 'errors');
 					}
 				}
 				else
@@ -389,9 +397,9 @@ if (empty($reshook))
 			else
 			{
 				if ($object->error) {
-					setEventMessage($object->error, 'errors');
+					setEventMessages($object->error, $object->errors, 'errors');
 				} else {
-					setEventMessage($object->errors, 'errors');
+					setEventMessages($object->error, $object->errors, 'errors');
 				}
 				$action='';
 			}
@@ -477,14 +485,14 @@ if (empty($reshook))
 		// Check parameters
 		if (empty($morphy) || $morphy == "-1") {
 			$error++;
-			setEventMessage($langs->trans("ErrorFieldRequired",$langs->transnoentitiesnoconv("Nature")), 'errors');
+			setEventMessages($langs->trans("ErrorFieldRequired", $langs->transnoentitiesnoconv("Nature")), null, 'errors');
 		}
 		// Test si le login existe deja
 		if (empty($conf->global->ADHERENT_LOGIN_NOT_REQUIRED))
 		{
 			if (empty($login)) {
 				$error++;
-				setEventMessage($langs->trans("ErrorFieldRequired",$langs->trans("Login")), 'errors');
+				setEventMessages($langs->trans("ErrorFieldRequired", $langs->trans("Login")), null, 'errors');
 			}
 			else {
 				$sql = "SELECT login FROM ".MAIN_DB_PREFIX."adherent WHERE login='".$db->escape($login)."'";
@@ -495,32 +503,32 @@ if (empty($reshook))
 				if ($num) {
 					$error++;
 					$langs->load("errors");
-					setEventMessage($langs->trans("ErrorLoginAlreadyExists",$login), 'errors');
+					setEventMessages($langs->trans("ErrorLoginAlreadyExists",$login), null, 'errors');
 				}
 			}
 			if (empty($pass)) {
 				$error++;
-				setEventMessage($langs->trans("ErrorFieldRequired",$langs->transnoentities("Password")), 'errors');
+				setEventMessages($langs->trans("ErrorFieldRequired", $langs->transnoentities("Password")), null, 'errors');
 			}
 		}
 		if ($morphy != 'mor' && empty($lastname)) {
 			$error++;
 			$langs->load("errors");
-			setEventMessage($langs->trans("ErrorFieldRequired",$langs->transnoentities("Lastname")), 'errors');
+			setEventMessages($langs->trans("ErrorFieldRequired", $langs->transnoentities("Lastname")), null, 'errors');
 		}
 		if ($morphy != 'mor' && (!isset($firstname) || $firstname=='')) {
 			$error++;
 			$langs->load("errors");
-			setEventMessage($langs->trans("ErrorFieldRequired",$langs->transnoentities("Firstname")), 'errors');
+			setEventMessages($langs->trans("ErrorFieldRequired", $langs->transnoentities("Firstname")), null, 'errors');
 		}
 		if (! ($typeid > 0)) {	// Keep () before !
 			$error++;
-			setEventMessage($langs->trans("ErrorFieldRequired",$langs->transnoentitiesnoconv("Type")), 'errors');
+			setEventMessages($langs->trans("ErrorFieldRequired", $langs->transnoentitiesnoconv("Type")), null, 'errors');
 		}
 		if ($conf->global->ADHERENT_MAIL_REQUIRED && ! isValidEMail($email)) {
 			$error++;
 			$langs->load("errors");
-			setEventMessage($langs->trans("ErrorBadEMail",$email), 'errors');
+			setEventMessages($langs->trans("ErrorBadEMail",$email), null, 'errors');
 		}
 		$public=0;
 		if (isset($public)) $public=1;
@@ -533,6 +541,10 @@ if (empty($reshook))
 			$result=$object->create($user);
 			if ($result > 0)
 			{
+				// Categories association
+				$memcats = GETPOST('memcats', 'array');
+				$object->setCategories($memcats);
+
 				$db->commit();
 				$rowid=$object->id;
 				$action='';
@@ -542,9 +554,9 @@ if (empty($reshook))
 				$db->rollback();
 
 				if ($object->error) {
-					setEventMessage($object->error, 'errors');
+					setEventMessages($object->error, $object->errors, 'errors');
 				} else {
-					setEventMessage($object->errors, 'errors');
+					setEventMessages($object->error, $object->errors, 'errors');
 				}
 
 				$action = 'create';
@@ -597,7 +609,7 @@ if (empty($reshook))
 				if ($result < 0)
 				{
 					$error++;
-					setEventMessage($object->error, 'errors');
+					setEventMessages($object->error, $object->errors, 'errors');
 				}
 			}
 		}
@@ -605,9 +617,9 @@ if (empty($reshook))
 		{
 			$error++;
 			if ($object->error) {
-				setEventMessage($object->error, 'errors');
+				setEventMessages($object->error, $object->errors, 'errors');
 			} else {
-				setEventMessage($object->errors, 'errors');
+				setEventMessages($object->error, $object->errors, 'errors');
 			}
 		}
 
@@ -642,7 +654,7 @@ if (empty($reshook))
 				if ($result < 0)
 				{
 					$error++;
-					setEventMessage($object->error, 'errors');
+					setEventMessages($object->error, $object->errors, 'errors');
 				}
 			}
 			else
@@ -650,9 +662,9 @@ if (empty($reshook))
 				$error++;
 
 				if ($object->error) {
-					setEventMessage($object->error, 'errors');
+					setEventMessages($object->error, $object->errors, 'errors');
 				} else {
-					setEventMessage($object->errors, 'errors');
+					setEventMessages($object->error, $object->errors, 'errors');
 				}
 				$action='';
 			}
@@ -671,7 +683,7 @@ if (empty($reshook))
 		{
 			if (!$mailmanspip->del_to_spip($object))
 			{
-				setEventMessage($langs->trans('DeleteIntoSpipError').': '.$mailmanspip->error, 'errors');
+				setEventMessages($langs->trans('DeleteIntoSpipError').': '.$mailmanspip->error, null, 'errors');
 			}
 		}
 	}
@@ -682,7 +694,7 @@ if (empty($reshook))
 		{
 			if (!$mailmanspip->add_to_spip($object))
 			{
-				setEventMessage($langs->trans('AddIntoSpipError').': '.$mailmanspip->error, 'errors');
+				setEventMessages($langs->trans('AddIntoSpipError').': '.$mailmanspip->error, null, 'errors');
 			}
 		}
 	}
@@ -725,7 +737,7 @@ else
 	{
 		/* ************************************************************************** */
 		/*                                                                            */
-		/* Creation card                                                             */
+		/* Creation mode                                                              */
 		/*                                                                            */
 		/* ************************************************************************** */
 		$object->canvas=$canvas;
@@ -742,7 +754,7 @@ else
 
 		$adht = new AdherentType($db);
 
-		print_fiche_titre($langs->trans("NewMember"));
+		print load_fiche_titre($langs->trans("NewMember"));
 
 		if ($conf->use_javascript_ajax)
 		{
@@ -779,20 +791,16 @@ else
 		print '<input type="hidden" name="token" value="'.$_SESSION['newtoken'].'">';
 		print '<input type="hidden" name="action" value="add">';
 
+        dol_fiche_head('');
+
 		print '<table class="border" width="100%">';
+		print '<tbody>';
 
 		// Login
 		if (empty($conf->global->ADHERENT_LOGIN_NOT_REQUIRED))
 		{
 			print '<tr><td><span class="fieldrequired">'.$langs->trans("Login").' / '.$langs->trans("Id").'</span></td><td><input type="text" name="member_login" size="40" value="'.(isset($_POST["member_login"])?$_POST["member_login"]:$object->login).'"></td></tr>';
 		}
-
-		// Moral-Physique
-		$morphys["phy"] = $langs->trans("Physical");
-		$morphys["mor"] = $langs->trans("Moral");
-		print '<tr><td class="fieldrequired">'.$langs->trans("Nature")."</td><td>\n";
-		print $form->selectarray("morphy", $morphys, GETPOST('morphy','alpha')?GETPOST('morphy','alpha'):$object->morphy, 1);
-		print "</td>\n";
 
 		// Type
 		print '<tr><td class="fieldrequired">'.$langs->trans("MemberType").'</td><td>';
@@ -803,6 +811,13 @@ else
 		} else {
 			print '<font class="error">'.$langs->trans("NoTypeDefinedGoToSetup").'</font>';
 		}
+		print "</td>\n";
+
+		// Morphy
+		$morphys["phy"] = $langs->trans("Physical");
+		$morphys["mor"] = $langs->trans("Moral");
+		print '<tr><td class="fieldrequired">'.$langs->trans("Nature")."</td><td>\n";
+		print $form->selectarray("morphy", $morphys, GETPOST('morphy','alpha')?GETPOST('morphy','alpha'):$object->morphy, 1);
 		print "</td>\n";
 
 		// Company
@@ -868,13 +883,13 @@ else
 			print '</td></tr>';
 		}
 
-		// Tel pro
+		// Pro phone
 		print '<tr><td>'.$langs->trans("PhonePro").'</td><td><input type="text" name="phone" size="20" value="'.(GETPOST('phone','alpha')?GETPOST('phone','alpha'):$object->phone).'"></td></tr>';
 
-		// Tel perso
+		// Personal phone
 		print '<tr><td>'.$langs->trans("PhonePerso").'</td><td><input type="text" name="phone_perso" size="20" value="'.(GETPOST('phone_perso','alpha')?GETPOST('phone_perso','alpha'):$object->phone_perso).'"></td></tr>';
 
-		// Tel mobile
+		// Mobile phone
 		print '<tr><td>'.$langs->trans("PhoneMobile").'</td><td><input type="text" name="phone_mobile" size="20" value="'.(GETPOST('phone_mobile','alpha')?GETPOST('phone_mobile','alpha'):$object->phone_mobile).'"></td></tr>';
 
 	    // Skype
@@ -888,10 +903,19 @@ else
 		$form->select_date(($object->birth ? $object->birth : -1),'birth','','',1,'formsoc');
 		print "</td></tr>\n";
 
-		// Profil public
+		// Public profil
 		print "<tr><td>".$langs->trans("Public")."</td><td>\n";
 		print $form->selectyesno("public",$object->public,1);
 		print "</td></tr>\n";
+
+		// Categories
+		if (! empty($conf->categorie->enabled)  && ! empty($user->rights->categorie->lire))
+		{
+			print '<tr><td>' . fieldLabel('Categories', 'memcars') . '</td><td>';
+			$cate_arbo = $form->select_all_categories(Categorie::TYPE_MEMBER, null, 'parent', null, null, 1);
+			print $form->multiselectarray('memcats', $cate_arbo, GETPOST('memcats', 'array'), null, null, null, null, '100%');
+			print "</td></tr>";
+		}
 
 		// Other attributes
 		$parameters=array();
@@ -912,24 +936,28 @@ else
 
 		// Login Dolibarr
 		print '<tr><td>'.$langs->trans("LinkedToDolibarrUser").'</td><td class="valeur">';
-		print $form->select_dolusers($object->user_id,'userid',1);
+		print $form->select_dolusers($object->user_id, 'userid', 1, '', 0, '', '', 0, 0, 0, '', 0, '', 'maxwidth300');
 		print '</td></tr>';
 		*/
-
+        print '<tbody>';
 		print "</table>\n";
-		print '<br>';
 
-		print '<center><input type="submit" class="button" value="'.$langs->trans("AddMember").'"></center>';
+        dol_fiche_end();
+
+	    print '<div class="center">';
+	    print '<input type="submit" name="button" class="button" value="'.$langs->trans("AddMember").'">';
+	    print '&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;';
+	    print '<input type="submit" name="cancel" class="button" value="'.$langs->trans("Cancel").'" onclick="history.go(-1)" />';
+	    print '</div>';
 
 		print "</form>\n";
-
 	}
 
 	if ($action == 'edit')
 	{
 		/********************************************
-		 *
-		* Fiche en mode edition
+		*
+		* Edition mode
 		*
 		********************************************/
 
@@ -966,7 +994,6 @@ else
 
 		$head = member_prepare_head($object);
 
-		dol_fiche_head($head, 'general', $langs->trans("Member"), 0, 'user');
 
 		if ($conf->use_javascript_ajax)
 		{
@@ -1010,10 +1037,12 @@ else
 		print '<input type="hidden" name="statut" value="'.$object->statut.'" />';
 		if ($backtopage) print '<input type="hidden" name="backtopage" value="'.($backtopage != '1' ? $backtopage : $_SERVER["HTTP_REFERER"]).'">';
 
+		dol_fiche_head($head, 'general', $langs->trans("Member"), 0, 'user');
+
 		print '<table class="border" width="100%">';
 
 		// Ref
-		print '<tr><td>'.$langs->trans("Ref").'</td><td class="valeur" colspan="2">'.$object->id.'</td></tr>';
+		print '<tr><td width="20%">'.$langs->trans("Ref").'</td><td class="valeur" colspan="2">'.$object->id.'</td></tr>';
 
 		// Login
 		if (empty($conf->global->ADHERENT_LOGIN_NOT_REQUIRED))
@@ -1021,12 +1050,13 @@ else
 			print '<tr><td><span class="fieldrequired">'.$langs->trans("Login").' / '.$langs->trans("Id").'</span></td><td colspan="2"><input type="text" name="login" size="30" value="'.(isset($_POST["login"])?$_POST["login"]:$object->login).'"></td></tr>';
 		}
 
-		// Physique-Moral
+		// Morphy
 		$morphys["phy"] = $langs->trans("Physical");
 		$morphys["mor"] = $langs->trans("Morale");
 		print '<tr><td><span class="fieldrequired">'.$langs->trans("Nature").'</span></td><td>';
 		print $form->selectarray("morphy", $morphys, isset($_POST["morphy"])?$_POST["morphy"]:$object->morphy);
 		print "</td>";
+
 		// Photo
 		print '<td align="center" class="hideonsmartphone" valign="middle" width="25%" rowspan="'.$rowspan.'">';
 		print $form->showphoto('memberphoto',$object)."\n";
@@ -1034,7 +1064,7 @@ else
 		{
 			if ($object->photo) print "<br>\n";
 			print '<table class="nobordernopadding">';
-			if ($object->photo) print '<tr><td align="center"><input type="checkbox" class="flat" name="deletephoto" id="photodelete"> '.$langs->trans("Delete").'<br><br></td></tr>';
+			if ($object->photo) print '<tr><td align="center"><input type="checkbox" class="flat photodelete" name="deletephoto" id="photodelete"> '.$langs->trans("Delete").'<br><br></td></tr>';
 			print '<tr><td>'.$langs->trans("PhotoFile").'</td></tr>';
 			print '<tr><td><input type="file" class="flat" name="photo" id="photoinput"></td></tr>';
 			print '</table>';
@@ -1058,7 +1088,7 @@ else
 		print '<tr><td id="tdcompany">'.$langs->trans("Company").'</td><td><input type="text" name="societe" size="40" value="'.(isset($_POST["societe"])?$_POST["societe"]:$object->societe).'"></td></tr>';
 
 		// Civility
-		print '<tr><td width="20%">'.$langs->trans("UserTitle").'</td><td width="35%">';
+		print '<tr><td>'.$langs->trans("UserTitle").'</td><td>';
 		print $formcompany->select_civility(isset($_POST["civility_id"])?$_POST["civility_id"]:$object->civility_id)."\n";
 		print '</td>';
 		print '</tr>';
@@ -1107,13 +1137,13 @@ else
 			print '</td></tr>';
 		}
 
-		// Tel
+		// Pro phone
 		print '<tr><td>'.$langs->trans("PhonePro").'</td><td><input type="text" name="phone" size="20" value="'.(isset($_POST["phone"])?$_POST["phone"]:$object->phone).'"></td></tr>';
 
-		// Tel perso
+		// Personal phone
 		print '<tr><td>'.$langs->trans("PhonePerso").'</td><td><input type="text" name="phone_perso" size="20" value="'.(isset($_POST["phone_perso"])?$_POST["phone_perso"]:$object->phone_perso).'"></td></tr>';
 
-		// Tel mobile
+		// Mobile phone
 		print '<tr><td>'.$langs->trans("PhoneMobile").'</td><td><input type="text" name="phone_mobile" size="20" value="'.(isset($_POST["phone_mobile"])?$_POST["phone_mobile"]:$object->phone_mobile).'"></td></tr>';
 
 	    // Skype
@@ -1127,17 +1157,32 @@ else
 		$form->select_date(($object->birth ? $object->birth : -1),'birth','','',1,'formsoc');
 		print "</td></tr>\n";
 
-		// Profil public
+		// Public profil
 		print "<tr><td>".$langs->trans("Public")."</td><td>\n";
 		print $form->selectyesno("public",(isset($_POST["public"])?$_POST["public"]:$object->public),1);
 		print "</td></tr>\n";
 
+		// Categories
+		if (! empty( $conf->categorie->enabled ) && !empty( $user->rights->categorie->lire ))
+		{
+			print '<tr><td>' . fieldLabel('Categories', 'memcats') . '</td>';
+			print '<td colspan="2">';
+			$cate_arbo = $form->select_all_categories(Categorie::TYPE_MEMBER, null, null, null, null, 1);
+			$c = new Categorie($db);
+			$cats = $c->containing($object->id, Categorie::TYPE_MEMBER);
+			foreach ($cats as $cat) {
+				$arrayselected[] = $cat->id;
+			}
+			print $form->multiselectarray('memcats', $cate_arbo, $arrayselected, '', 0, '', 0, '100%');
+			print "</td></tr>";
+		}
+
 		// Other attributes
-		$parameters=array();
+		$parameters=array("colspan"=>2);
 		$reshook=$hookmanager->executeHooks('formObjectOptions',$parameters,$object,$action);    // Note that $action and $object may have been modified by hook
 		if (empty($reshook) && ! empty($extrafields->attribute_label))
 		{
-			print $object->showOptionals($extrafields,'edit');
+			print $object->showOptionals($extrafields,'edit',$parameters);
 		}
 
 		// Third party Dolibarr
@@ -1168,22 +1213,23 @@ else
 
 		print '</table>';
 
-		print '<br><center>';
+		dol_fiche_end();
+
+		print '<div class="center">';
 		print '<input type="submit" class="button" name="save" value="'.$langs->trans("Save").'">';
-		print ' &nbsp; &nbsp; &nbsp; ';
-		print '<input type="submit" class="button" name="cancel" value="'.$langs->trans("Cancel").'">';
-		print '</center';
+		print '&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;';
+		print '<input type="submit" class="button" name="cancel" value="'.$langs->trans("Cancel").'" onclick="history.go(-1)" />';
+		print '</div>';
 
 		print '</form>';
 
-		print '</div>';
 	}
 
 	if ($rowid && $action != 'edit')
 	{
 		/* ************************************************************************** */
 		/*                                                                            */
-		/* Mode affichage                                                             */
+		/* View mode                                                                  */
 		/*                                                                            */
 		/* ************************************************************************** */
 
@@ -1204,8 +1250,8 @@ else
 
 
 		/*
-		 * Affichage onglets
-		*/
+		 * Show tabs
+		 */
 		$head = member_prepare_head($object);
 
 		dol_fiche_head($head, 'general', $langs->trans("Member"), 0, 'user');
@@ -1266,7 +1312,7 @@ else
 			$texttosend=$object->makeSubstitution($adht->getMailOnValid());
 
 			$tmp=$langs->trans("SendAnEMailToMember");
-			$tmp.=' ('.$langs->trans("MailFrom").': <b>'.$conf->global->ADHERENT_MAIL_FROM.'</b>, ';
+			$tmp.='<br>('.$langs->trans("MailFrom").': <b>'.$conf->global->ADHERENT_MAIL_FROM.'</b>, ';
 			$tmp.=$langs->trans("MailRecipient").': <b>'.$object->email.'</b>)';
 			$helpcontent='';
 			$helpcontent.='<b>'.$langs->trans("MailFrom").'</b>: '.$conf->global->ADHERENT_MAIL_FROM.'<br>'."\n";
@@ -1278,7 +1324,7 @@ else
 			$helpcontent.=dol_htmlentitiesbr($texttosend)."\n";
 			$label=$form->textwithpicto($tmp,$helpcontent,1,'help');
 
-			// Cree un tableau formulaire
+			// Create form popup
 			$formquestion=array();
 			if ($object->email) $formquestion[]=array('type' => 'checkbox', 'name' => 'send_mail', 'label' => $label,  'value' => ($conf->global->ADHERENT_DEFAULT_SENDINFOBYMAIL?true:false));
 			if (! empty($conf->mailman->enabled) && ! empty($conf->global->ADHERENT_USE_MAILMAN)) {
@@ -1287,7 +1333,7 @@ else
 			if (! empty($conf->mailman->enabled) && ! empty($conf->global->ADHERENT_USE_SPIP))    {
 				$formquestion[]=array('type'=>'other','label'=>$langs->transnoentitiesnoconv("SynchroSpipEnabled"),'value'=>'');
 			}
-			print $form->formconfirm("card.php?rowid=".$rowid,$langs->trans("ValidateMember"),$langs->trans("ConfirmValidateMember"),"confirm_valid",$formquestion,1);
+			print $form->formconfirm("card.php?rowid=".$rowid,$langs->trans("ValidateMember"),$langs->trans("ConfirmValidateMember"),"confirm_valid",$formquestion,1,1);
 		}
 
 		// Confirm send card by mail
@@ -1296,7 +1342,7 @@ else
 			print $form->formconfirm("card.php?rowid=".$rowid,$langs->trans("SendCardByMail"),$langs->trans("ConfirmSendCardByMail",$object->email),"confirm_sendinfo",'',0,1);
 		}
 
-		// Confirm resiliate
+		// Confirm terminate
 		if ($action == 'resign')
 		{
 			$langs->load("mails");
@@ -1308,7 +1354,7 @@ else
 			$texttosend=$object->makeSubstitution($adht->getMailOnResiliate());
 
 			$tmp=$langs->trans("SendAnEMailToMember");
-			$tmp.=' ('.$langs->trans("MailFrom").': <b>'.$conf->global->ADHERENT_MAIL_FROM.'</b>, ';
+			$tmp.='<br>('.$langs->trans("MailFrom").': <b>'.$conf->global->ADHERENT_MAIL_FROM.'</b>, ';
 			$tmp.=$langs->trans("MailRecipient").': <b>'.$object->email.'</b>)';
 			$helpcontent='';
 			$helpcontent.='<b>'.$langs->trans("MailFrom").'</b>: '.$conf->global->ADHERENT_MAIL_FROM.'<br>'."\n";
@@ -1324,7 +1370,7 @@ else
 			$formquestion=array();
 			if ($object->email) $formquestion[]=array('type' => 'checkbox', 'name' => 'send_mail', 'label' => $label, 'value' => (! empty($conf->global->ADHERENT_DEFAULT_SENDINFOBYMAIL)?'true':'false'));
 			if ($backtopage)    $formquestion[]=array('type' => 'hidden', 'name' => 'backtopage', 'value' => ($backtopage != '1' ? $backtopage : $_SERVER["HTTP_REFERER"]));
-			print $form->formconfirm("card.php?rowid=".$rowid,$langs->trans("ResiliateMember"),$langs->trans("ConfirmResiliateMember"),"confirm_resign",$formquestion);
+			print $form->formconfirm("card.php?rowid=".$rowid,$langs->trans("ResiliateMember"),$langs->trans("ConfirmResiliateMember"),"confirm_resign",$formquestion,'no',1);
 		}
 
 		// Confirm remove member
@@ -1335,17 +1381,12 @@ else
 			print $form->formconfirm("card.php?rowid=".$rowid,$langs->trans("DeleteMember"),$langs->trans("ConfirmDeleteMember"),"confirm_delete",$formquestion,0,1);
 		}
 
-		/*
-		 * Confirm add in spip
-		 */
+		// Confirm add in spip
 		if ($action == 'add_spip')
 		{
 			print $form->formconfirm("card.php?rowid=".$rowid, $langs->trans('AddIntoSpip'), $langs->trans('AddIntoSpipConfirmation'), 'confirm_add_spip');
 		}
-
-		/*
-		 * Confirm removed from spip
-		 */
+		// Confirm removed from spip
 		if ($action == 'del_spip')
 		{
 			print $form->formconfirm("card.php?rowid=$rowid", $langs->trans('DeleteIntoSpip'), $langs->trans('DeleteIntoSpipConfirmation'), 'confirm_del_spip');
@@ -1354,38 +1395,29 @@ else
 		$rowspan=17;
 		if (empty($conf->global->ADHERENT_LOGIN_NOT_REQUIRED)) $rowspan++;
 		if (! empty($conf->societe->enabled)) $rowspan++;
-		if (! empty($conf->skype->enabled)) $rowspan++;
-
-		print '<table class="border" width="100%">';
 
 		$linkback = '<a href="'.DOL_URL_ROOT.'/adherents/list.php">'.$langs->trans("BackToList").'</a>';
-
-		// Ref
-		print '<tr><td width="20%">'.$langs->trans("Ref").'</td>';
-		print '<td class="valeur" colspan="2">';
-		print $form->showrefnav($object, 'rowid', $linkback);
-		print '</td></tr>';
-
-		$showphoto='<td rowspan="'.$rowspan.'" align="center" class="hideonsmartphone" valign="middle" width="25%">';
-		$showphoto.=$form->showphoto('memberphoto',$object);
-		$showphoto.='</td>';
+		
+		dol_banner_tab($object, 'rowid', $linkback);
+        
+        print '<div class="fichecenter">';
+        print '<div class="fichehalfleft">';
+        
+        print '<div class="underbanner clearboth"></div>';
+		print '<table class="border centpercent">';
 
 		// Login
 		if (empty($conf->global->ADHERENT_LOGIN_NOT_REQUIRED))
 		{
-			print '<tr><td>'.$langs->trans("Login").' / '.$langs->trans("Id").'</td><td class="valeur">'.$object->login.'&nbsp;</td>';
-			// Photo
-			print $showphoto; $showphoto='';
-			print '</tr>';
+			print '<tr><td>'.$langs->trans("Login").' / '.$langs->trans("Id").'</td><td class="valeur">'.$object->login.'&nbsp;</td></tr>';
 		}
-
-		// Morphy
-		print '<tr><td>'.$langs->trans("Nature").'</td><td class="valeur" >'.$object->getmorphylib().'</td>';
-		print $showphoto; $showphoto='';
-		print '</tr>';
 
 		// Type
 		print '<tr><td>'.$langs->trans("Type").'</td><td class="valeur">'.$adht->getNomUrl(1)."</td></tr>\n";
+
+		// Morphy
+		print '<tr><td>'.$langs->trans("Nature").'</td><td class="valeur" >'.$object->getmorphylib().'</td>';
+		print '</tr>';
 
 		// Company
 		print '<tr><td>'.$langs->trans("Company").'</td><td class="valeur">'.$object->societe.'</td></tr>';
@@ -1394,70 +1426,48 @@ else
 		print '<tr><td>'.$langs->trans("UserTitle").'</td><td class="valeur">'.$object->getCivilityLabel().'&nbsp;</td>';
 		print '</tr>';
 
-		// Lastname
-		print '<tr><td>'.$langs->trans("Lastname").'</td><td class="valeur">'.$object->lastname.'&nbsp;</td>';
-		print '</tr>';
-
-		// Firstname
-		print '<tr><td>'.$langs->trans("Firstname").'</td><td class="valeur">'.$object->firstname.'&nbsp;</td></tr>';
-
-		// EMail
-		print '<tr><td>'.$langs->trans("EMail").'</td><td class="valeur">'.dol_print_email($object->email,0,$object->fk_soc,1).'</td></tr>';
-
 		// Password
 		if (empty($conf->global->ADHERENT_LOGIN_NOT_REQUIRED))
 		{
-			print '<tr><td>'.$langs->trans("Password").'</td><td>'.preg_replace('/./i','*',$object->pass).'</td></tr>';
+			print '<tr><td>'.$langs->trans("Password").'</td><td>'.preg_replace('/./i','*',$object->pass);
+			if ((! empty($object->pass) || ! empty($object->pass_crypted)) && empty($object->user_id))
+			{
+			    $langs->load("errors");
+			    $htmltext=$langs->trans("WarningPasswordSetWithNoAccount");
+			    print ' '.$form->textwithpicto('', $htmltext,1,'warning');
+			}
+			print '</td></tr>';
 		}
 
-		// Address
-		print '<tr><td>'.$langs->trans("Address").'</td><td class="valeur">';
-		dol_print_address($object->address,'gmap','member',$object->id);
-		print '</td></tr>';
-
-		// Zip / Town
-		print '<tr><td class="nowrap">'.$langs->trans("Zip").' / '.$langs->trans("Town").'</td><td class="valeur">'.$object->zip.(($object->zip && $object->town)?' / ':'').$object->town.'</td></tr>';
-
-		// Country
-		print '<tr><td>'.$langs->trans("Country").'</td><td class="valeur">';
-		$img=picto_from_langcode($object->country_code);
-		if ($img) print $img.' ';
-		print getCountry($object->country_code);
-		print '</td></tr>';
-
-		// State
-		print '<tr><td>'.$langs->trans('State').'</td><td class="valeur">'.$object->state.'</td>';
-
-		// Tel pro.
-		print '<tr><td>'.$langs->trans("PhonePro").'</td><td class="valeur">'.dol_print_phone($object->phone,$object->country_code,0,$object->fk_soc,1).'</td></tr>';
-
-		// Tel perso
-		print '<tr><td>'.$langs->trans("PhonePerso").'</td><td class="valeur">'.dol_print_phone($object->phone_perso,$object->country_code,0,$object->fk_soc,1).'</td></tr>';
-
-		// Tel mobile
-		print '<tr><td>'.$langs->trans("PhoneMobile").'</td><td class="valeur">'.dol_print_phone($object->phone_mobile,$object->country_code,0,$object->fk_soc,1).'</td></tr>';
-
-    	// Skype
-		if (! empty($conf->skype->enabled))
-		{
-			print '<tr><td>'.$langs->trans("Skype").'</td><td class="valeur">'.dol_print_skype($object->skype,0,$object->fk_soc,1).'</td></tr>';
-		}
-
+        print '</table>';
+        
+        print '</div>';
+        print '<div class="fichehalfright"><div class="ficheaddleft">';
+       
+        print '<div class="underbanner clearboth"></div>';
+        print '<table class="border tableforfield" width="100%">';
+		
 		// Birthday
 		print '<tr><td>'.$langs->trans("Birthday").'</td><td class="valeur">'.dol_print_date($object->birth,'day').'</td></tr>';
 
 		// Public
 		print '<tr><td>'.$langs->trans("Public").'</td><td class="valeur">'.yn($object->public).'</td></tr>';
 
-		// Status
-		print '<tr><td>'.$langs->trans("Status").'</td><td class="valeur">'.$object->getLibStatut(4).'</td></tr>';
+		// Categories
+		if (! empty($conf->categorie->enabled)  && ! empty($user->rights->categorie->lire))
+		{
+			print '<tr><td>' . $langs->trans("Categories") . '</td>';
+			print '<td colspan="2">';
+			print $form->showCategories($object->id, 'member', 1);
+			print '</td></tr>';
+		}
 
 		// Other attributes
-		$parameters=array();
+		$parameters=array('colspan'=>2);
 		$reshook=$hookmanager->executeHooks('formObjectOptions',$parameters,$object,$action);    // Note that $action and $object may have been modified by hook
 		if (empty($reshook) && ! empty($extrafields->attribute_label))
 		{
-			print $object->showOptionals($extrafields);
+			print $object->showOptionals($extrafields, 'view', $parameters);
 		}
 
 		// Third party Dolibarr
@@ -1530,141 +1540,170 @@ else
 		}
 		print '</td></tr>';
 
+        // Date end subscription
+        print '<tr><td>'.$langs->trans("SubscriptionEndDate").'</td><td class="valeur">';
+        if ($object->datefin)
+        {
+            print dol_print_date($object->datefin,'day');
+            if ($object->hasDelay()) {
+                print " ".img_warning($langs->trans("Late"));
+            }
+        }
+        else
+        {
+	        if (! $adht->cotisation)
+	        {
+	        	print $langs->trans("SubscriptionNotRecorded");
+		        if ($object->statut > 0) print " ".img_warning($langs->trans("Late")); // Affiche picto retard uniquement si non brouillon et non resilie
+	        }
+	        else
+	        {
+	            print $langs->trans("SubscriptionNotReceived");
+	            if ($object->statut > 0) print " ".img_warning($langs->trans("Late")); // Affiche picto retard uniquement si non brouillon et non resilie
+	        }
+        }
+        print '</td></tr>';
+
 		print "</table>\n";
 
-		print "</div>\n";
+		print "</div></div></div>\n";
+        print '<div style="clear:both"></div>';
 
-
+        dol_fiche_end();
+        
+        
 		/*
-		 * Barre d'actions
-		*
-		*/
+		 * Hotbar
+		 */
+        
 		print '<div class="tabsAction">';
-
-		if ($action != 'valid' && $action != 'editlogin' && $action != 'editthirdparty')
-		{
-			// Modify
-			if ($user->rights->adherent->creer)
+		$parameters = array();
+		$reshook = $hookmanager->executeHooks('addMoreActionsButtons', $parameters, $object, $action); // Note that $action and $object may have been
+		if (empty($reshook)) {
+			if ($action != 'valid' && $action != 'editlogin' && $action != 'editthirdparty')
 			{
-				print '<div class="inline-block divButAction"><a class="butAction" href="card.php?rowid='.$rowid.'&action=edit">'.$langs->trans("Modify")."</a></div>";
-			}
-			else
-			{
-				print '<div class="inline-block divButAction"><font class="butActionRefused" href="#" title="'.dol_escape_htmltag($langs->trans("NotEnoughPermissions")).'">'.$langs->trans("Modify").'</font></div>';
-			}
-
-			// Valider
-			if ($object->statut == -1)
-			{
+				// Modify
 				if ($user->rights->adherent->creer)
 				{
-					print '<div class="inline-block divButAction"><a class="butAction" href="card.php?rowid='.$rowid.'&action=valid">'.$langs->trans("Validate")."</a></div>\n";
+					print '<div class="inline-block divButAction"><a class="butAction" href="card.php?rowid='.$rowid.'&action=edit">'.$langs->trans("Modify")."</a></div>";
 				}
 				else
 				{
-					print '<div class="inline-block divButAction"><font class="butActionRefused" href="#" title="'.dol_escape_htmltag($langs->trans("NotEnoughPermissions")).'">'.$langs->trans("Validate").'</font></div>';
+					print '<div class="inline-block divButAction"><font class="butActionRefused" href="#" title="'.dol_escape_htmltag($langs->trans("NotEnoughPermissions")).'">'.$langs->trans("Modify").'</font></div>';
 				}
-			}
-
-			// Reactiver
-			if ($object->statut == 0)
-			{
+	
+				// Validate
+				if ($object->statut == -1)
+				{
+					if ($user->rights->adherent->creer)
+					{
+						print '<div class="inline-block divButAction"><a class="butAction" href="card.php?rowid='.$rowid.'&action=valid">'.$langs->trans("Validate")."</a></div>\n";
+					}
+					else
+					{
+						print '<div class="inline-block divButAction"><font class="butActionRefused" href="#" title="'.dol_escape_htmltag($langs->trans("NotEnoughPermissions")).'">'.$langs->trans("Validate").'</font></div>';
+					}
+				}
+	
+				// Reactivate
+				if ($object->statut == 0)
+				{
+					if ($user->rights->adherent->creer)
+					{
+						print '<div class="inline-block divButAction"><a class="butAction" href="card.php?rowid='.$rowid.'&action=valid">'.$langs->trans("Reenable")."</a></div>\n";
+					}
+					else
+					{
+						print '<div class="inline-block divButAction"><font class="butActionRefused" href="#" title="'.dol_escape_htmltag($langs->trans("NotEnoughPermissions")).'">'.$langs->trans("Reenable")."</font></div>";
+					}
+				}
+	
+				// Send card by email
 				if ($user->rights->adherent->creer)
 				{
-					print '<div class="inline-block divButAction"><a class="butAction" href="card.php?rowid='.$rowid.'&action=valid">'.$langs->trans("Reenable")."</a></div>\n";
+					if ($object->statut >= 1)
+					{
+						if ($object->email) print '<div class="inline-block divButAction"><a class="butAction" href="card.php?rowid='.$object->id.'&action=sendinfo">'.$langs->trans("SendCardByMail")."</a></div>\n";
+						else print '<div class="inline-block divButAction"><a class="butActionRefused" href="#" title="'.dol_escape_htmltag($langs->trans("NoEMail")).'">'.$langs->trans("SendCardByMail")."</a></div>\n";
+					}
+					else
+					{
+						print '<div class="inline-block divButAction"><font class="butActionRefused" href="#" title="'.dol_escape_htmltag($langs->trans("ValidateBefore")).'">'.$langs->trans("SendCardByMail")."</font></div>";
+					}
 				}
 				else
 				{
-					print '<div class="inline-block divButAction"><font class="butActionRefused" href="#" title="'.dol_escape_htmltag($langs->trans("NotEnoughPermissions")).'">'.$langs->trans("Reenable")."</font></div>";
+					print '<div class="inline-block divButAction"><font class="butActionRefused" href="#" title="'.dol_escape_htmltag($langs->trans("NotEnoughPermissions")).'">'.$langs->trans("SendCardByMail")."</font></div>";
 				}
-			}
-
-			// Send card by email
-			if ($user->rights->adherent->creer)
-			{
+	
+				// Terminate
 				if ($object->statut >= 1)
 				{
-					if ($object->email) print '<div class="inline-block divButAction"><a class="butAction" href="card.php?rowid='.$object->id.'&action=sendinfo">'.$langs->trans("SendCardByMail")."</a></div>\n";
-					else print '<div class="inline-block divButAction"><a class="butActionRefused" href="#" title="'.dol_escape_htmltag($langs->trans("NoEMail")).'">'.$langs->trans("SendCardByMail")."</a></div>\n";
+					if ($user->rights->adherent->supprimer)
+					{
+						print '<div class="inline-block divButAction"><a class="butAction" href="card.php?rowid='.$rowid.'&action=resign">'.$langs->trans("Resiliate")."</a></div>\n";
+					}
+					else
+					{
+						print '<div class="inline-block divButAction"><font class="butActionRefused" href="#" title="'.dol_escape_htmltag($langs->trans("NotEnoughPermissions")).'">'.$langs->trans("Resiliate")."</font></div>";
+					}
 				}
-				else
+	
+				// Create third party
+				if (! empty($conf->societe->enabled) && ! $object->fk_soc)
 				{
-					print '<div class="inline-block divButAction"><font class="butActionRefused" href="#" title="'.dol_escape_htmltag($langs->trans("ValidateBefore")).'">'.$langs->trans("SendCardByMail")."</font></div>";
+					if ($user->rights->societe->creer)
+					{
+						if ($object->statut != -1) print '<div class="inline-block divButAction"><a class="butAction" href="'.$_SERVER["PHP_SELF"].'?rowid='.$object->id.'&amp;action=create_thirdparty">'.$langs->trans("CreateDolibarrThirdParty").'</a></div>';
+						else print '<div class="inline-block divButAction"><a class="butActionRefused" href="#" title="'.dol_escape_htmltag($langs->trans("ValidateBefore")).'">'.$langs->trans("CreateDolibarrThirdParty").'</a></div>';
+					}
+					else
+					{
+						print '<div class="inline-block divButAction"><font class="butActionRefused" href="#" title="'.dol_escape_htmltag($langs->trans("NotEnoughPermissions")).'">'.$langs->trans("CreateDolibarrThirdParty")."</font></div>";
+					}
 				}
-			}
-			else
-			{
-				print '<div class="inline-block divButAction"><font class="butActionRefused" href="#" title="'.dol_escape_htmltag($langs->trans("NotEnoughPermissions")).'">'.$langs->trans("SendCardByMail")."</font></div>";
-			}
-
-			// Resilier
-			if ($object->statut >= 1)
-			{
+	
+				// Create user
+				if (! $user->societe_id && ! $object->user_id)
+				{
+					if ($user->rights->user->user->creer)
+					{
+						if ($object->statut != -1) print '<div class="inline-block divButAction"><a class="butAction" href="'.$_SERVER["PHP_SELF"].'?rowid='.$object->id.'&amp;action=create_user">'.$langs->trans("CreateDolibarrLogin").'</a></div>';
+						else print '<div class="inline-block divButAction"><a class="butActionRefused" href="#" title="'.dol_escape_htmltag($langs->trans("ValidateBefore")).'">'.$langs->trans("CreateDolibarrLogin").'</a></div>';
+					}
+					else
+					{
+						print '<div class="inline-block divButAction"><font class="butActionRefused" href="#" title="'.dol_escape_htmltag($langs->trans("NotEnoughPermissions")).'">'.$langs->trans("CreateDolibarrLogin")."</font></div>";
+					}
+				}
+	
+				// Delete
 				if ($user->rights->adherent->supprimer)
 				{
-					print '<div class="inline-block divButAction"><a class="butAction" href="card.php?rowid='.$rowid.'&action=resign">'.$langs->trans("Resiliate")."</a></div>\n";
+					print '<div class="inline-block divButAction"><a class="butActionDelete" href="card.php?rowid='.$object->id.'&action=delete">'.$langs->trans("Delete")."</a></div>\n";
 				}
 				else
 				{
-					print '<div class="inline-block divButAction"><font class="butActionRefused" href="#" title="'.dol_escape_htmltag($langs->trans("NotEnoughPermissions")).'">'.$langs->trans("Resiliate")."</font></div>";
+					print '<div class="inline-block divButAction"><font class="butActionRefused" href="#" title="'.dol_escape_htmltag($langs->trans("NotEnoughPermissions")).'">'.$langs->trans("Delete")."</font></div>";
 				}
-			}
-
-			// Create third party
-			if (! empty($conf->societe->enabled) && ! $object->fk_soc)
-			{
-				if ($user->rights->societe->creer)
+	
+				// Action SPIP
+				if (! empty($conf->mailmanspip->enabled) && ! empty($conf->global->ADHERENT_USE_SPIP))
 				{
-					if ($object->statut != -1) print '<div class="inline-block divButAction"><a class="butAction" href="'.$_SERVER["PHP_SELF"].'?rowid='.$object->id.'&amp;action=create_thirdparty">'.$langs->trans("CreateDolibarrThirdParty").'</a></div>';
-					else print '<div class="inline-block divButAction"><a class="butActionRefused" href="#" title="'.dol_escape_htmltag($langs->trans("ValidateBefore")).'">'.$langs->trans("CreateDolibarrThirdParty").'</a></div>';
+					$isinspip = $mailmanspip->is_in_spip($object);
+	
+					if ($isinspip == 1)
+					{
+						print '<div class="inline-block divButAction"><a class="butAction" href="card.php?rowid='.$object->id.'&action=del_spip">'.$langs->trans("DeleteIntoSpip")."</a></div>\n";
+					}
+					if ($isinspip == 0)
+					{
+						print '<div class="inline-block divButAction"><a class="butAction" href="card.php?rowid='.$object->id.'&action=add_spip">'.$langs->trans("AddIntoSpip")."</a></div>\n";
+					}
 				}
-				else
-				{
-					print '<div class="inline-block divButAction"><font class="butActionRefused" href="#" title="'.dol_escape_htmltag($langs->trans("NotEnoughPermissions")).'">'.$langs->trans("CreateDolibarrThirdParty")."</font></div>";
-				}
+	
 			}
-
-			// Create user
-			if (! $user->societe_id && ! $object->user_id)
-			{
-				if ($user->rights->user->user->creer)
-				{
-					if ($object->statut != -1) print '<div class="inline-block divButAction"><a class="butAction" href="'.$_SERVER["PHP_SELF"].'?rowid='.$object->id.'&amp;action=create_user">'.$langs->trans("CreateDolibarrLogin").'</a></div>';
-					else print '<div class="inline-block divButAction"><a class="butActionRefused" href="#" title="'.dol_escape_htmltag($langs->trans("ValidateBefore")).'">'.$langs->trans("CreateDolibarrLogin").'</a></div>';
-				}
-				else
-				{
-					print '<div class="inline-block divButAction"><font class="butActionRefused" href="#" title="'.dol_escape_htmltag($langs->trans("NotEnoughPermissions")).'">'.$langs->trans("CreateDolibarrLogin")."</font></div>";
-				}
-			}
-
-			// Delete
-			if ($user->rights->adherent->supprimer)
-			{
-				print '<div class="inline-block divButAction"><a class="butActionDelete" href="card.php?rowid='.$object->id.'&action=delete">'.$langs->trans("Delete")."</a></div>\n";
-			}
-			else
-			{
-				print '<div class="inline-block divButAction"><font class="butActionRefused" href="#" title="'.dol_escape_htmltag($langs->trans("NotEnoughPermissions")).'">'.$langs->trans("Delete")."</font></div>";
-			}
-
-			// Action SPIP
-			if (! empty($conf->mailmanspip->enabled) && ! empty($conf->global->ADHERENT_USE_SPIP))
-			{
-				$isinspip = $mailmanspip->is_in_spip($object);
-
-				if ($isinspip == 1)
-				{
-					print '<div class="inline-block divButAction"><a class="butAction" href="card.php?rowid='.$object->id.'&action=del_spip">'.$langs->trans("DeleteIntoSpip")."</a></div>\n";
-				}
-				if ($isinspip == 0)
-				{
-					print '<div class="inline-block divButAction"><a class="butAction" href="card.php?rowid='.$object->id.'&action=add_spip">'.$langs->trans("AddIntoSpip")."</a></div>\n";
-				}
-			}
-
 		}
-
 		print '</div>';
 
 		if ($isinspip == -1)

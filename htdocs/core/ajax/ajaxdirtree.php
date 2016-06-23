@@ -188,7 +188,7 @@ if (file_exists($fullpathselecteddir))
     				$userstatic->lastname=isset($val['login_c'])?$val['login_c']:0;
     				$htmltooltip='<b>'.$langs->trans("ECMSection").'</b>: '.$val['label'].'<br>';
     				$htmltooltip='<b>'.$langs->trans("Type").'</b>: '.$langs->trans("ECMSectionManual").'<br>';
-    				$htmltooltip.='<b>'.$langs->trans("ECMCreationUser").'</b>: '.$userstatic->getNomUrl(1).'<br>';
+    				$htmltooltip.='<b>'.$langs->trans("ECMCreationUser").'</b>: '.$userstatic->getNomUrl(1, '', false, 1).'<br>';
     				$htmltooltip.='<b>'.$langs->trans("ECMCreationDate").'</b>: '.(isset($val['date_c'])?dol_print_date($val['date_c'],"dayhour"):$langs->trans("NeedRefresh")).'<br>';
     				$htmltooltip.='<b>'.$langs->trans("Description").'</b>: '.$val['description'].'<br>';
     				$htmltooltip.='<b>'.$langs->trans("ECMNbOfFilesInDir").'</b>: '.((isset($val['cachenbofdoc']) && $val['cachenbofdoc'] >= 0)?$val['cachenbofdoc']:$langs->trans("NeedRefresh")).'<br>';
@@ -207,7 +207,7 @@ if (file_exists($fullpathselecteddir))
 
     		// Enable jquery handlers on new generated HTML objects
             print '<script type="text/javascript">';
-            print 'jQuery(".classfortooltip").tipTip({ maxWidth: "600px", edgeOffset: 10, delay: 50, fadeIn: 50, fadeOut: 50});';
+            print 'jQuery(".classfortooltip").tipTip({ maxWidth: "'.dol_size(600,'width').'px", edgeOffset: 10, delay: 50, fadeIn: 50, fadeOut: 50});';
 			// TODO Remove this. Is replaced with function as 3rd parameter of fileTree
             print 'jQuery(".fmdirlia").click(function(e) {
             			id=jQuery(this).attr(\'id\').substr(12);

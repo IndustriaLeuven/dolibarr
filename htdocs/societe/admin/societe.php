@@ -77,11 +77,11 @@ if ($action == 'updateoptions')
 		if (! $res > 0) $error++;
 		if (! $error)
 	    {
-		    setEventMessage($langs->trans("SetupSaved"));
+		    setEventMessages($langs->trans("SetupSaved"), null, 'mesgs');
 	    }
 	    else
 	    {
-		    setEventMessage($langs->trans("Error"), 'errors');
+		    setEventMessages($langs->trans("Error"), null, 'errors');
 		}
 	}
 
@@ -92,11 +92,11 @@ if ($action == 'updateoptions')
 		if (! $res > 0) $error++;
 		if (! $error)
 		{
-			setEventMessage($langs->trans("SetupSaved"));
+			setEventMessages($langs->trans("SetupSaved"), null, 'mesgs');
 		}
 		else
 		{
-			setEventMessage($langs->trans("Error"), 'errors');
+			setEventMessages($langs->trans("Error"), null, 'errors');
 		}
 	}
 }
@@ -121,12 +121,12 @@ if ($action == 'setModuleOptions')
 	if (! $error)
     {
         $db->commit();
-	    setEventMessage($langs->trans("SetupSaved"));
+	    setEventMessages($langs->trans("SetupSaved"), null, 'mesgs');
     }
     else
     {
         $db->rollback();
-	    setEventMessage($langs->trans("Error"), 'errors');
+	    setEventMessages($langs->trans("Error"), null, 'errors');
 	}
 }
 
@@ -165,10 +165,7 @@ if ($action == 'setdoc')
 
 	$db->begin();
 
-	if (dolibarr_set_const($db, "COMPANY_ADDON_PDF",$value,'chaine',0,'',$conf->entity))
-	{
-		$conf->global->COMPANY_ADDON_PDF = $value;
-	}
+	dolibarr_set_const($db, "COMPANY_ADDON_PDF",$value,'chaine',0,'',$conf->entity);
 
 	// On active le modele
 	$type='company';
@@ -220,11 +217,11 @@ if ($action=="setaddrefinlist") {
 	if (! $res > 0) $error++;
 	if (! $error)
 	{
-		setEventMessage($langs->trans("SetupSaved"));
+		setEventMessages($langs->trans("SetupSaved"), null, 'mesgs');
 	}
 	else
 	{
-		setEventMessage($langs->trans("Error"), 'errors');
+		setEventMessages($langs->trans("Error"), null, 'errors');
 	}
 }
 
@@ -291,10 +288,10 @@ $help_url='EN:Module Third Parties setup|FR:Paramétrage_du_module_Tiers|ES:Conf
 llxHeader('',$langs->trans("CompanySetup"),$help_url);
 
 $linkback='<a href="'.DOL_URL_ROOT.'/admin/modules.php">'.$langs->trans("BackToModuleList").'</a>';
-print_fiche_titre($langs->trans("CompanySetup"),$linkback,'setup');
+print load_fiche_titre($langs->trans("CompanySetup"),$linkback,'title_setup');
 
 
-$head = societe_admin_prepare_head(null);
+$head = societe_admin_prepare_head();
 
 dol_fiche_head($head, 'general', $langs->trans("ThirdParties"), 0, 'company');
 
@@ -302,7 +299,7 @@ $dirsociete=array_merge(array('/core/modules/societe/'),$conf->modules_parts['so
 
 // Module to manage customer/supplier code
 
-print_titre($langs->trans("CompanyCodeChecker"));
+print load_fiche_titre($langs->trans("CompanyCodeChecker"),'','');
 
 print '<table class="noborder" width="100%">'."\n";
 print '<tr class="liste_titre">'."\n";
@@ -384,7 +381,7 @@ print "<br>";
 
 // Select accountancy code numbering module
 
-print_titre($langs->trans("AccountCodeManager"));
+print load_fiche_titre($langs->trans("AccountCodeManager"),'','');
 
 print '<table class="noborder" width="100%">';
 print '<tr class="liste_titre">';
@@ -455,7 +452,7 @@ print "</table>\n";
  *  Document templates generators
  */
 print '<br>';
-print_titre($langs->trans("ModelModules"));
+print load_fiche_titre($langs->trans("ModelModules"),'','');
 
 // Load array def with activated templates
 $def = array();
@@ -601,7 +598,7 @@ print '</table>';
 print '<br>';
 
 //IDProf
-print_titre($langs->trans("CompanyIdProfChecker"));
+print load_fiche_titre($langs->trans("CompanyIdProfChecker"),'','');
 
 print '<table class="noborder" width="100%">';
 print '<tr class="liste_titre">';
@@ -694,7 +691,7 @@ while ($i < $nbofloop)
 print "</table><br>\n";
 
 
-print_titre($langs->trans("Other"));
+print load_fiche_titre($langs->trans("Other"),'','');
 
 // Autres options
 $form=new Form($db);
@@ -713,7 +710,7 @@ print '<td width="80">&nbsp;</td></tr>'."\n";
 // Utilisation formulaire Ajax sur choix societe
 $var=!$var;
 print "<tr ".$bc[$var].">";
-print '<td width="80%">'.$form->textwithpicto($langs->trans("UseSearchToSelectCompany"),$langs->trans('UseSearchToSelectCompanyTooltip'),1).' </td>';
+print '<td width="80%">'.$form->textwithpicto($langs->trans("DelaiedFullListToSelectCompany"),$langs->trans('UseSearchToSelectCompanyTooltip'),1).' </td>';
 if (! $conf->use_javascript_ajax)
 {
 	print '<td class="nowrap" align="right" colspan="2">';
@@ -728,7 +725,7 @@ else
     '2'=>$langs->trans("Yes").' ('.$langs->trans("NumberOfKeyToSearch",2).')',
     '3'=>$langs->trans("Yes").' ('.$langs->trans("NumberOfKeyToSearch",3).')',
 	);
-	print $form->selectarray("activate_COMPANY_USE_SEARCH_TO_SELECT",$arrval,$conf->global->COMPANY_USE_SEARCH_TO_SELECT);
+	print $form->selectarray("activate_COMPANY_USE_SEARCH_TO_SELECT", $arrval, $conf->global->COMPANY_USE_SEARCH_TO_SELECT);
 	print '</td><td align="right">';
 	print '<input type="submit" class="button" name="COMPANY_USE_SEARCH_TO_SELECT" value="'.$langs->trans("Modify").'">';
 	print "</td>";
@@ -737,7 +734,7 @@ print '</tr>';
 
 $var=!$var;
 print "<tr ".$bc[$var].">";
-print '<td width="80%">'.$form->textwithpicto($langs->trans("UseSearchToSelectContact"),$langs->trans('UseSearchToSelectContactTooltip'),1).'</td>';
+print '<td width="80%">'.$form->textwithpicto($langs->trans("DelaiedFullListToSelectContact"),$langs->trans('UseSearchToSelectContactTooltip'),1).'</td>';
 if (! $conf->use_javascript_ajax)
 {
 	print '<td class="nowrap" align="right" colspan="2">';
@@ -752,7 +749,7 @@ else
 	'2'=>$langs->trans("Yes").' ('.$langs->trans("NumberOfKeyToSearch",2).')',
 	'3'=>$langs->trans("Yes").' ('.$langs->trans("NumberOfKeyToSearch",3).')',
 	);
-	print $form->selectarray("activate_CONTACT_USE_SEARCH_TO_SELECT",$arrval,$conf->global->CONTACT_USE_SEARCH_TO_SELECT);
+	print $form->selectarray("activate_CONTACT_USE_SEARCH_TO_SELECT", $arrval, $conf->global->CONTACT_USE_SEARCH_TO_SELECT);
 	print '</td><td align="right">';
 	print '<input type="submit" class="button" name="CONTACT_USE_SEARCH_TO_SELECT" value="'.$langs->trans("Modify").'">';
 	print "</td>";
@@ -807,6 +804,7 @@ print '</form>';
 
 dol_fiche_end();
 
-$db->close();
 
 llxFooter();
+
+$db->close();

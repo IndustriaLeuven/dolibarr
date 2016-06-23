@@ -3,8 +3,6 @@
 # No errors
 NoErrorCommitIsDone=Inget fel
 # Errors
-Error=Fel
-Errors=Fel
 ErrorButCommitIsDone=Fel hittades men vi validera trots detta
 ErrorBadEMail=EMail %s är fel
 ErrorBadUrl=Url %s är fel
@@ -63,9 +61,9 @@ ErrorSizeTooLongForVarcharType=Storlek för lång för sträng typ (%s tecken ma
 ErrorNoValueForSelectType=Vänligen fyll i värde för utvald lista
 ErrorNoValueForCheckBoxType=Vänligen fyll i värde för krysslista
 ErrorNoValueForRadioType=Vänligen fyll i värde för radiolista
-ErrorBadFormatValueList=Listans värd kan inte ha mer än ett komma: <u>%s</u>,  men behöver åtminstone en: Llave, valores
+ErrorBadFormatValueList=The list value cannot have more than one comma: <u>%s</u>, but need at least one: key,value
 ErrorFieldCanNotContainSpecialCharacters=Fält <b>%s</b> inte innehåller specialtecken.
-ErrorFieldCanNotContainSpecialNorUpperCharacters=Fältet <b>%s</b> får inte innehåller specialtecken eller versaler.
+ErrorFieldCanNotContainSpecialNorUpperCharacters=Field <b>%s</b> must not contain special characters, nor upper case characters and cannot contain only numbers.
 ErrorNoAccountancyModuleLoaded=Ingen bokföring modul aktiverad
 ErrorExportDuplicateProfil=Detta profilnamn finns redan för denna export.
 ErrorLDAPSetupNotComplete=Dolibarr-LDAP matchning inte är fullständig.
@@ -79,7 +77,7 @@ ErrorModuleRequireJavascript=Javascript måste inte avaktiveras att ha denna fun
 ErrorPasswordsMustMatch=Båda skrivit lösenord måste matcha varandra
 ErrorContactEMail=Ett tekniskt fel uppstod. Vänligen kontakta administratören att följa <b>e-%s</b> en ge <b>%s</b> felkod i ditt meddelande, eller ännu bättre genom att lägga till en skärm kopia av denna sida.
 ErrorWrongValueForField=Felaktigt värde för antalet <b>%s</b> området (värde <b>&quot;%s&quot;</b> inte matchar regex regel <b>%s)</b>
-ErrorFieldValueNotIn=Wrong value for field number <b>%s</b> (value '<b>%s</b>' is not a value available into field <b>%s</b> of table <b>%s</b> = <b>%s</b>)
+ErrorFieldValueNotIn=Wrong value for field number <b>%s</b> (value '<b>%s</b>' is not a value available into field <b>%s</b> of table <b>%s</b>)
 ErrorFieldRefNotIn=Fel värde för <b>%s</b> fältnummer (värde <b>&quot;%s&quot;</b> är inte ett <b>%s</b> befintlig ref)
 ErrorsOnXLines=Fel på <b>%s</b> källrader
 ErrorFileIsInfectedWithAVirus=Antivirusprogrammet inte har kunnat validera (fil kan vara smittade av ett virus)
@@ -100,7 +98,7 @@ ErrorProdIdAlreadyExist=%s tilldelas ett annat tredje
 ErrorFailedToSendPassword=Misslyckades med att skicka lösenord
 ErrorFailedToLoadRSSFile=Inte få RSS-flöde. Försök att lägga konstant MAIN_SIMPLEXMLLOAD_DEBUG Om felmeddelanden inte ger tillräckligt med information.
 ErrorPasswordDiffers=Lösenord skiljer skriver du in dem igen.
-ErrorForbidden=Åtkomst nekad. <br> Du försöker få tillgång till en sida, område eller funktion utan att en bestyrkt session eller som inte får ditt användarnamn.
+ErrorForbidden=Access denied.<br>You try to access to a page, area or feature of a disabled module or without being in an authenticated session or that is not allowed to your user.
 ErrorForbidden2=Tillstånd för den här inloggningen kan definieras av din Dolibarr administratör från menyn %s-> %s.
 ErrorForbidden3=Det verkar som Dolibarr inte används genom en bestyrkt session. Ta en titt på Dolibarr setup dokumentation för att veta hur man ska hantera verifieringar (htaccess, mod_auth eller andra ...).
 ErrorNoImagickReadimage=Funktion imagick_readimage finns inte i denna PHP. Ingen förhandsgranskning kan vara tillgängliga. Administratörer kan inaktivera den här fliken från menyn Setup - Display.
@@ -170,8 +168,15 @@ ErrorGlobalVariableUpdater4=SOAP client failed with error '%s'
 ErrorGlobalVariableUpdater5=No global variable selected
 ErrorFieldMustBeANumeric=Field <b>%s</b> must be a numeric value
 ErrorFieldMustBeAnInteger=Field <b>%s</b> must be an integer
+ErrorMandatoryParametersNotProvided=Mandatory parameter(s) not provided
+ErrorOppStatusRequiredIfAmount=You set an estimated amount for this opportunity/lead. So you must also enter its status
+ErrorBadDefinitionOfMenuArrayInModuleDescriptor=Bad Definition Of Menu Array In Module Descriptor (bad value for key fk_menu)
+ErrorSavingChanges=An error has ocurred when saving the changes
+ErrorWarehouseRequiredIntoShipmentLine=Warehouse is required on the line to ship
+ErrorFileMustHaveFormat=File must have format %s
 
 # Warnings
+WarningPasswordSetWithNoAccount=A password was set for this member. However, no user account was created. So this password is stored but can't be used to login to Dolibarr. It may be used by an external module/interface but if you don't need to define any login nor password for a member, you can disable option "Manage a login for each member" from Member module setup. If you need to manage a login but don't need any password, you can keep this field empty to avoid this warning. Note: Email can also be used as a login if the member is linked to a user.
 WarningMandatorySetupNotComplete=Obligatoriska inställningsparametrarna har ännu inte definierat
 WarningSafeModeOnCheckExecDir=Varning, PHP alternativ <b>safe_mode</b> är på så kommando måste stoppas in i en katalog som deklarerats av php parameter <b>safe_mode_exec_dir.</b>
 WarningAllowUrlFopenMustBeOn=Parameter <b>allow_url_fopenär</b> måste vara <b>aktiverat</b> i filer <b>php.ini</b> för att ha den här modulen att fungera. Du måste ändra denna fil manuellt.
@@ -189,4 +194,5 @@ WarningClickToDialUserSetupNotComplete=Inställning av ClickToDial informationen
 WarningNotRelevant=Irrelevant operation för denna datamängd
 WarningFeatureDisabledWithDisplayOptimizedForBlindNoJs=Feature inaktiveras när display inställning är optimerad för blinda personer eller textbaserade webbläsare.
 WarningPaymentDateLowerThanInvoiceDate=Betalningsdag (%s) är tidigare än fakturadatum (%s) för faktura %s.
-WarningTooManyDataPleaseUseMoreFilters=För många uppgifter. Använd flera filter
+WarningTooManyDataPleaseUseMoreFilters=Too many data (more than %s lines). Please use more filters or set the constant %s to a higher limit.
+WarningSomeLinesWithNullHourlyRate=Some times were recorded by users when their hourly rate was not defined. A value of 0 was used but this may result in wrong valuation of time spent.

@@ -48,7 +48,7 @@ $commandestatic = new CommandeFournisseur($db);
 $userstatic=new User($db);
 $formfile = new FormFile($db);
 
-print_fiche_titre($langs->trans("SuppliersOrdersArea"));
+print load_fiche_titre($langs->trans("SuppliersOrdersArea"));
 
 print '<table class="notopnoleftnoright" width="100%">';
 print '<tr valign="top"><td class="notopnoleft" width="30%">';
@@ -58,15 +58,13 @@ print '<tr valign="top"><td class="notopnoleft" width="30%">';
  * Search form
  */
 $var=false;
-print '<table class="noborder nohover" width="100%">';
 print '<form method="post" action="list.php">';
 print '<input type="hidden" name="token" value="'.$_SESSION['newtoken'].'">';
-print '<tr class="liste_titre"><td colspan="3">'.$langs->trans("SearchOrder").'</td></tr>';
+print '<table class="noborder nohover" width="100%">';
+print '<tr class="liste_titre"><td colspan="3">'.$langs->trans("Search").'</td></tr>';
 print '<tr '.$bc[$var].'><td>';
-print $langs->trans("Ref").':</td><td><input type="text" class="flat" name="search_ref" size=18></td><td rowspan="2"><input type="submit" value="'.$langs->trans("Search").'" class="button"></td></tr>';
-print '<tr '.$bc[$var].'><td class="nowrap">'.$langs->trans("Other").':</td><td><input type="text" class="flat" name="search_all" size="18"></td>';
-print '</tr>';
-print "</form></table><br>\n";
+print $langs->trans("SupplierOrder").':</td><td><input type="text" class="flat" name="search_all" size="18"></td><td><input type="submit" value="'.$langs->trans("Search").'" class="button"></td></tr>';
+print "</table></form><br>\n";
 
 
 /*
@@ -114,7 +112,7 @@ if ($resql)
     }
     $db->free($resql);
 
-    print '<table class="noborder" width="100%">';
+    print '<table class="noborder nohover" width="100%">';
     print '<tr class="liste_titre"><td colspan="2">'.$langs->trans("Statistics").' - '.$langs->trans("SuppliersOrders").'</td></tr>';
     print "</tr>\n";
     foreach (array(0,1,2,3,4,5,6) as $statut)
@@ -133,7 +131,7 @@ if ($resql)
     {
         print '<tr class="impair"><td align="center" colspan="2">';
         $data=array('series'=>$dataseries);
-        dol_print_graph('stats',300,180,$data,1,'pie',1);
+        dol_print_graph('stats',300,180,$data,1,'pie',1,'',0);
         print '</td></tr>';
     }
     //if ($totalinprocess != $total)
@@ -245,7 +243,7 @@ if (! empty($conf->fournisseur->enabled))
 /*
  * List of users allowed
  */
-$sql = "SELECT u.rowid, u.lastname, u.firstname";
+$sql = "SELECT u.rowid, u.lastname, u.firstname, u.email";
 $sql.= " FROM ".MAIN_DB_PREFIX."user as u,";
 $sql.= " ".MAIN_DB_PREFIX."user_rights as ur";
 $sql.= ", ".MAIN_DB_PREFIX."rights_def as rd";
@@ -278,6 +276,7 @@ if ($resql)
         $userstatic->id=$obj->rowid;
         $userstatic->lastname=$obj->lastname;
         $userstatic->firstname=$obj->firstname;
+        $userstatic->email=$obj->email;
         print $userstatic->getNomUrl(1);
         print '</td>';
         print "</tr>\n";

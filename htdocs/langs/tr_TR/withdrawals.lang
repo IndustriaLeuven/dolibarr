@@ -48,7 +48,6 @@ RefusedReason=Ret nedeni
 RefusedInvoicing=Rettin faturalandırılması
 NoInvoiceRefused=Reddi borç yazmayın
 InvoiceRefused=Fatura reddedildi (Reddedileni müşterinin hesabına yaz)
-Status=Durum
 StatusUnknown=Bilinmeyen
 StatusWaiting=Bekliyor
 StatusTrans=Gönderildi
@@ -84,6 +83,11 @@ WithdrawalFile=Para çekme dosyası
 SetToStatusSent="Dosya Gönderildi" durumuna ayarla
 ThisWillAlsoAddPaymentOnInvoice=Bu aynı zamanda faturalara ödeme oluşturur ve onları "ödendi" olarak sınıflandırır
 StatisticsByLineStatus=Durum satırlarına göre istatistkler
+RUM=RUM
+RUMWillBeGenerated=Banka hesabı bilgisi kaydedildikten sonra RUM sayısı oluşturulacaktır
+WithdrawMode=Para çekme biçimi (FRST ya da RECUR)
+WithdrawRequestAmount=Para çekme isteği tutarı:
+WithdrawRequestErrorNilAmount=Tutar boş olduğu için para çekme işlemi oluşturulamıyor.
 
 ### Notifications
 InfoCreditSubject=Banka tarafından ödenen %s ödeme talimatı

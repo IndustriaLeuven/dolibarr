@@ -74,7 +74,7 @@ class ExportCsv extends ModeleExports
 	/**
 	 * getDriverId
 	 *
-	 * @return int
+	 * @return string
 	 */
 	function getDriverId()
 	{
@@ -252,6 +252,13 @@ class ExportCsv extends ModeleExports
 
 			$newvalue=$this->csv_clean($newvalue,$outputlangs->charset_output);
 
+			if (preg_match('/^Select:/i', $typefield, $reg) && $typefield = substr($typefield, 7))
+			{
+				$array = unserialize($typefield);
+				$array = $array['options'];
+				$newvalue = $array[$newvalue];
+			}
+			
 			fwrite($this->handle,$newvalue.$this->separator);
 			$this->col++;
 		}
